@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 /**
  * Use this class to provide services for query
  */
+@Deprecated
 public class Query {
 
     //list of termId of HPO
@@ -50,6 +51,31 @@ public class Query {
     public Set<TermId> sample(int size) {
         Collections.shuffle(termIdList);
         return termIdList.stream().limit(size).collect(Collectors.toSet());
+    }
+
+    public double[] monto_carlo(int times, int size, Set<TermId> ref, boolean symmetry) {
+        double[] scores = new double[times];
+        Set<TermId> sample = new HashSet<>();
+        for (int i = 0; i < times; i++) {
+            sample.clear();
+            sample.addAll(sample(size));
+            scores[i] = similarity(sample, ref, symmetry);
+        }
+
+        return scores;
+    }
+
+    public double p(double score, double[] scores) {
+        if (scores.length <= 0) {
+            throw new RuntimeException();
+        }
+        int more_extreme = 0;
+        for (int i = 0; i < scores.length; i++) {
+            if (scores[i] >= score) {
+                more_extreme++;
+            }
+        }
+        return (double) more_extreme / scores.length;
     }
 
 

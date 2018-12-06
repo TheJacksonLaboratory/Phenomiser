@@ -41,6 +41,7 @@ import java.util.Arrays;
  *
  * @author Steven Maere, Karel Heymans, and Ethan Cerami
  */
+@Deprecated
 public final class BenjaminiHochbergFDR {
 
     /**

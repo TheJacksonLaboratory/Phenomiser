@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * Use this class to represent a model to save the pairwise similarity scores.
  */
+@Deprecated
 public class TermPairSimilarityMap {
 
     //To find the similarity score between two terms

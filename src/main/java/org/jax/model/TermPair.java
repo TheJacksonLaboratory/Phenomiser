@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * Use this class to represent a pair of terms.
  */
+@Deprecated
 public class TermPair {
 
     private String term1;

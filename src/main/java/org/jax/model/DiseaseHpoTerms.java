@@ -8,7 +8,9 @@ import java.util.Set;
 
 /**
  * Class to represent the disease annotations map.
+ * Use HpoDisease in phenol
  */
+@Deprecated
 public class DiseaseHpoTerms {
 
     private Map<HpoDisease, Set<TermId>> diseaseTermSetMap;
