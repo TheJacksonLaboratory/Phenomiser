@@ -33,6 +33,11 @@ public class OptionsFactory {
                 .desc("specify space separated query terms (with prefix)").build();
 
 
+        Option out = Option.builder("o")
+                .longOpt("out")
+                .hasArg(true)
+                .desc("specify output path").build();
+
         Option exit = Option.builder("exit")
                 .longOpt("exit")
                 .hasArg(false)
@@ -44,6 +49,7 @@ public class OptionsFactory {
                 .addOption(disease_annotation_path)
                 .addOption(disease_database)
                 .addOption(queryTerms)
+                .addOption(out)
                 .addOption(exit);
 
         return options;

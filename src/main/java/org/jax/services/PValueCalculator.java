@@ -19,11 +19,11 @@ public class PValueCalculator implements IPValueCalculation {
 
     private List<TermId> query;
 
-    public PValueCalculator(Map<Integer, ScoreDistribution> scoreDistributions, Map<Integer, Double> similarityScores, Map<Integer, TermId> diseaseIdHashToDisease, List<TermId> query) {
-        this.scoreDistributions = scoreDistributions;
-        this.similarityScores = similarityScores;
-        this.diseaseIdHashToDisease = diseaseIdHashToDisease;
+    public PValueCalculator(List<TermId> query, Map<Integer, Double> similarityScores, AbstractResources resources) {
         this.query = query;
+        this.similarityScores = similarityScores;
+        this.scoreDistributions = resources.getScoreDistributions();
+        this.diseaseIdHashToDisease = resources.getDiseaseIdHashToDisease();
     }
 
     @Override

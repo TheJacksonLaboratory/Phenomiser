@@ -1,47 +1,102 @@
 package org.jax.services;
 
+import com.google.common.collect.Sets;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
+import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.similarity.PrecomputingPairwiseResnikSimilarity;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.io.FileNotFoundException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractResources {
 
-    private HpoParser hpoParser;
+    private static Logger logger = LoggerFactory.getLogger(AbstractResources.class);
 
-    private DiseaseParser diseaseParser;
+    protected HpoParser hpoParser;
 
-    private static HpoOntology hpo;
+    protected DiseaseParser diseaseParser;
 
-    private Map<TermId, HpoDisease> diseaseMap;
+    protected HpoOntology hpo;
 
-    private Map<TermId, Collection<TermId>> diseaseIdToHpoTermIds;
+    protected Map<TermId, HpoDisease> diseaseMap;
 
-    private Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds;
+    protected Map<TermId, Collection<TermId>> diseaseIdToHpoTermIds;
 
-    private Map<TermId, Double> icMap;
+    protected Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds;
 
-    private PrecomputingPairwiseResnikSimilarity precomputingPairwiseResnikSimilarity;
+    protected Map<TermId, Double> icMap;
 
-    private ResnikSimilarity resnikSimilarity;
+    protected PrecomputingPairwiseResnikSimilarity precomputingPairwiseResnikSimilarity;
 
-    private Map<Integer, List<TermId>> diseaseIdHashToHpoTerms;
+    protected ResnikSimilarity resnikSimilarity;
 
-    private Map<Integer, TermId> diseaseIdHashToDisease;
+    protected Map<Integer, List<TermId>> diseaseIdHashToHpoTerms;
 
-    private Map<Integer, ScoreDistribution> scoreDistributions;
+    protected Map<Integer, TermId> diseaseIdHashToDisease;
+
+    protected Map<Integer, ScoreDistribution> scoreDistributions;
 
     public AbstractResources(HpoParser hpoParser, DiseaseParser diseaseParser) {
         this.hpoParser = hpoParser;
         this.diseaseParser = diseaseParser;
+    }
+
+    public void defaultInit() {
+        try {
+            logger.trace("hpo initiation started");
+            hpo = (HpoOntology) this.getHpoParser().parse();
+            logger.trace("hpo initiation success");
+        } catch (FileNotFoundException e) {
+            logger.error("hpo initiation failed");
+            return;
+        } catch (PhenolException e) {
+            logger.error("hpo initiation failed");
+            return;
+        }
+
+        try {
+            logger.trace("disease annotation initiation started");
+            this.getDiseaseParser().parse();
+            logger.trace("disease annotation initiation success");
+        } catch (PhenolException e) {
+            logger.trace("disease annotation initiation failed");
+            return;
+        }
+        diseaseMap = this.getDiseaseParser().getDiseaseMap();
+
+        //init disease maps
+        logger.trace("disease map initiation started");
+        for (TermId diseaseId : diseaseMap.keySet()) {
+            HpoDisease disease = diseaseMap.get(diseaseId);
+            List<TermId> hpoTerms = disease.getPhenotypicAbnormalityTermIdList();
+            diseaseIdToHpoTermIds.putIfAbsent(diseaseId, new HashSet<>());
+
+            // add term anscestors
+            final Set<TermId> inclAncestorTermIds = TermIds.augmentWithAncestors(hpo, Sets.newHashSet(hpoTerms), true);
+
+            for (TermId tid : inclAncestorTermIds) {
+                hpoTermIdToDiseaseIds.putIfAbsent(tid, new HashSet<>());
+                hpoTermIdToDiseaseIds.get(tid).add(diseaseId);
+                diseaseIdToHpoTermIds.get(diseaseId).add(tid);
+            }
+        }
+
+        diseaseIdHashToHpoTerms = diseaseIdToHpoTermIds.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<TermId>(e.getValue())));
+
+        diseaseIdHashToDisease = diseaseIdToHpoTermIds.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> e.getKey()));
+        logger.trace("disease map initiation success");
     }
 
     public abstract void init();
@@ -62,12 +117,12 @@ public abstract class AbstractResources {
         this.diseaseParser = diseaseParser;
     }
 
-    public static HpoOntology getHpo() {
+    public HpoOntology getHpo() {
         return hpo;
     }
 
-    public static void setHpo(HpoOntology hpo) {
-        AbstractResources.hpo = hpo;
+    public void setHpo(HpoOntology hpo) {
+        this.hpo = hpo;
     }
 
     public Map<TermId, HpoDisease> getDiseaseMap() {

@@ -11,8 +11,7 @@ import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
 import org.monarchinitiative.phenol.stats.PValue;
 
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
@@ -69,7 +68,18 @@ public class PhenomiserApp {
 
     }
 
-    public static void query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
+    public static Writer getWriter(String path) {
+        Writer writer;
+        try {
+            writer = new FileWriter(new File(path));
+        } catch (Exception e) {
+            logger.info("cannot write to " + path);
+            writer = new OutputStreamWriter(System.out);
+        }
+        return writer;
+    }
+
+    public static void query(List<TermId> queryTerms, List<DiseaseDB> dbs, Writer writer) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
             return;
@@ -95,7 +105,11 @@ public class PhenomiserApp {
         Map<TermId, PValue> adjusted = bhFDR.adjustPValues(pValueCalculator);
 
         //TODO: write out adjusted
-        System.out.println(adjusted.size());
+        try {
+            writer.write(adjusted.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //done
 
@@ -132,7 +146,7 @@ public class PhenomiserApp {
             }
 
             if (commandLine.hasOption("q")) {
-                query(null, null);
+                query(null, null, getWriter(commandLine.getOptionValue("o")));
                 System.out.println("start querying");
             }
 
@@ -140,7 +154,7 @@ public class PhenomiserApp {
             if (commandLine.hasOption("exit")) {
                 System.out.println("exiting");
             }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         } catch (ParseException e) {
             e.printStackTrace();
