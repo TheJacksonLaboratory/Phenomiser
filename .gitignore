@@ -2,3 +2,5 @@ target
 .idea/
 *.log
 *.iml
+
+src/test/resources/

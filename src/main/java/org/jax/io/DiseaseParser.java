@@ -9,9 +9,12 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ *
+ */
 public class DiseaseParser {
-
 
     private HpoOntology hpo;
 
@@ -23,13 +26,22 @@ public class DiseaseParser {
 
     private Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds; //key is hpo termId; value is a collection of disease ids
 
+    private Map<Integer, List<TermId>> diseaseIndexToHpoTerms;
+
+    private Map<Integer, TermId> diseaseIndexToDisease;
+
+
     public DiseaseParser(String diseaseAnnotation, HpoOntology hpoOntology) {
         this.hpo = hpoOntology;
         this.diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseaseAnnotation, hpoOntology);
     }
 
-    public void parse() throws PhenolException {
+    public void init() throws PhenolException {
         diseaseMap = diseaseAnnotationParser.parse();
+        diseaseIdToHpoTermIds = new HashMap<>();
+        hpoTermIdToDiseaseIds = new HashMap<>();
+        diseaseIndexToDisease = new HashMap<>();
+        diseaseIndexToHpoTerms = new HashMap<>();
 
         for (TermId diseaseId : diseaseMap.keySet()) {
             HpoDisease disease = diseaseMap.get(diseaseId);
@@ -44,6 +56,18 @@ public class DiseaseParser {
                 diseaseIdToHpoTermIds.get(diseaseId).add(tid);
             }
         }
+
+//        int count = 0;
+//        for (Map.Entry<TermId, Collection<TermId>> entry : diseaseIdToHpoTermIds.entrySet()) {
+//            diseaseIndexToHpoTerms.put(count, new ArrayList<TermId>(entry.getValue()));
+//            diseaseIndexToDisease.put(count, entry.getKey());
+//            count++;
+//        }
+                diseaseIndexToHpoTerms = diseaseIdToHpoTermIds.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<TermId>(e.getValue())));
+
+        diseaseIndexToDisease = diseaseIdToHpoTermIds.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> e.getKey()));
     }
 
 
@@ -60,4 +84,11 @@ public class DiseaseParser {
         return hpoTermIdToDiseaseIds;
     }
 
+    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTerms() {
+        return diseaseIndexToHpoTerms;
+    }
+
+    public Map<Integer, TermId> getDiseaseIndexToDisease() {
+        return diseaseIndexToDisease;
+    }
 }

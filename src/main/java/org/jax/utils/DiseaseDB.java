@@ -1,7 +1,7 @@
-package org.jax;
+package org.jax.utils;
 
 public enum DiseaseDB {
     OMIM,
-    OPHANET,
+    ORPHA,
     MONDO
 }

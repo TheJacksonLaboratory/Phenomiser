@@ -9,21 +9,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ */
 public class PValueCalculator implements IPValueCalculation {
 
     private Map<Integer, ScoreDistribution> scoreDistributions;
 
     private Map<Integer, Double> similarityScores;
 
-    private Map<Integer, TermId> diseaseIdHashToDisease;
+    private Map<Integer, TermId> diseaseIndexToDisease;
 
-    private List<TermId> query;
+    private int queryTermCount;
 
-    public PValueCalculator(List<TermId> query, Map<Integer, Double> similarityScores, AbstractResources resources) {
-        this.query = query;
+    public PValueCalculator(int queryTermCount, Map<Integer, Double> similarityScores, AbstractResources resources) {
+        this.queryTermCount = queryTermCount;
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
-        this.diseaseIdHashToDisease = resources.getDiseaseIdHashToDisease();
+        this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
     @Override
@@ -33,12 +36,16 @@ public class PValueCalculator implements IPValueCalculation {
         Map<TermId, PValue> p_values = new HashMap<>();
         similarityScores.entrySet().stream()
                 .forEach(s -> {
-                    double p = scoreDistributions.get(query.size())
-                            .getObjectScoreDistribution(s.getKey())
-                            .estimatePValue(s.getValue());
-                    PValue pValue = new PValue();
-                    pValue.p = p;
-                    p_values.put(diseaseIdHashToDisease.get(s.getKey()), pValue);
+                    if (scoreDistributions.containsKey(queryTermCount) &&
+                            scoreDistributions.get(queryTermCount)
+                                    .getObjectScoreDistribution(s.getKey()) != null) {
+                        double p = scoreDistributions.get(queryTermCount)
+                                .getObjectScoreDistribution(s.getKey())
+                                .estimatePValue(s.getValue());
+                        PValue pValue = new PValue();
+                        pValue.p = p;
+                        p_values.put(diseaseIndexToDisease.get(s.getKey()), pValue);
+                    }
                 });
 
         return p_values;

@@ -1,0 +1,195 @@
+package org.jax;
+
+import org.apache.commons.cli.*;
+import org.apache.commons.lang.StringUtils;
+import org.jax.io.DiseaseParser;
+import org.jax.io.HpoParser;
+import org.jax.services.*;
+import org.jax.utils.DiseaseDB;
+import org.jax.utils.OptionsFactory;
+import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.stats.PValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class App {
+
+    private static Logger logger = LoggerFactory.getLogger(App.class);
+
+    private static AbstractResources resources;
+
+    private static Phenomiser phenomiser;
+
+    public static void main( String[] args ) {
+
+        run(args);
+
+    }
+
+    public static void run(String[] args) {
+        //set up command line options
+        Options options = OptionsFactory.getInstance();
+        HelpFormatter formatter = new HelpFormatter();
+
+        //parse and handle command line arguments
+        CommandLineParser parser = new DefaultParser();
+        CommandLine commandLine;
+
+        //parameters from command line
+        String hpoPath = null;
+        String diseaseAnnotationPath = null;
+        List<DiseaseDB> dbs = Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA); //default
+        List<TermId> queryTerms;
+        String outPath;
+
+        HpoParser hpoParser = null;
+        DiseaseParser diseaseParser = null;
+        final String HOME = System.getProperty("user.home");
+        final String caching_folder = HOME + File.separator + "Phenomiser_data";
+
+        Map<TermId, PValue> result;
+
+        try {
+            commandLine = parser.parse(options, args);
+            if (commandLine.hasOption("h")) {
+                formatter.printHelp("Phenomiser", options);
+            }
+
+            if (commandLine.hasOption("hpo")) {
+                hpoPath = commandLine.getOptionValue("hpo");
+                System.out.println("load hpo");
+            }
+
+            if (commandLine.hasOption("da")) {
+                diseaseAnnotationPath = commandLine.getOptionValue("da");
+
+                System.out.println("load disease annotations");
+            }
+
+            if (commandLine.hasOption("db")) {
+                String dbParam = StringUtils.join(commandLine.getOptionValues("db"), " ");
+                dbs = Arrays.stream(dbParam.split(",")).map(StringUtils::strip)
+                        .map(DiseaseDB::valueOf).collect(Collectors.toList());
+                //System.out.println("db: " + commandLine.getOptionValue("db"));
+            }
+
+            if (commandLine.hasOption("q")) {
+                //init hpo and disease parser
+                if (hpoPath != null && diseaseAnnotationPath != null) {
+                    try {
+                        hpoParser = new HpoParser(hpoPath);
+                        hpoParser.init();
+                        diseaseParser = new DiseaseParser(diseaseAnnotationPath, (HpoOntology) hpoParser.getHpo());
+                        diseaseParser.init();
+                    } catch (Exception e) {
+                        logger.error("resource initialization error");
+                        formatter.printHelp("Phenomiser", options);
+                    }
+                } else {
+                    logger.error("resource initialization error");
+                    formatter.printHelp("Phenomiser", options);
+                }
+
+                //if there is cached scoreDistributions, use it; otherwise, compute from scratch
+                if (Files.exists(Paths.get(caching_folder))) {
+                    resources = new CachedResources(hpoParser, diseaseParser, caching_folder);
+                    resources.init();
+                    logger.trace("using cached data");
+                } else {
+                    resources = new ComputedResources(hpoParser, diseaseParser, null, true);
+                    resources.init();
+                    logger.trace("using computed data");
+                }
+
+                //perform query
+                String queryParam = StringUtils.join(commandLine.getOptionValues("q"), " ");
+                queryTerms = Arrays.asList(queryParam.split(",")).stream()
+                        .map(StringUtils::strip)
+                        .map(e -> {
+                    TermId termId = null;
+                    if (e.split(":").length == 2) {
+                        String[] elements = e.split(":");
+                        termId = TermId.of(elements[0], elements[1]);
+                    }
+                    return termId;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+                logger.debug("query param: " + queryParam);
+                logger.trace("number of query terms: " + queryTerms.size());
+                Phenomiser.setResources(resources);
+                result = Phenomiser.query(queryTerms, dbs);
+
+                //output query result
+                write_query_result(result, commandLine.getOptionValue("o"));
+            }
+
+            //exit if requested
+            if (commandLine.hasOption("exit")) {
+                System.out.println("exiting");
+            }
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Writer getWriter(String path) {
+        Writer writer;
+        try {
+            writer = new FileWriter(new File(path));
+        } catch (Exception e) {
+            logger.info("cannot write to " + path);
+            writer = new OutputStreamWriter(System.out);
+        }
+        return writer;
+    }
+
+    public static void write_query_result(Map<TermId, PValue> adjusted_p_value_sorted, @Nullable String outPath) {
+
+        if (adjusted_p_value_sorted == null) {
+            return;
+        }
+
+        Writer writer = getWriter(outPath);
+
+        adjusted_p_value_sorted.entrySet().stream().forEach(e -> {
+            try {
+                writer.write(e.getKey().getPrefix());
+                writer.write("\t");
+                writer.write(e.getKey().getId());
+                writer.write("\t");
+                writer.write(e.getKey().getValue());
+                writer.write("\t");
+                writer.write(Double.toString(e.getValue().p));
+                writer.write("\t");
+                writer.write(Double.toString(e.getValue().p_adjusted));
+                writer.write("\n");
+            } catch (IOException exception) {
+                logger.error("IO exception during writing out adjusted p values");
+            }
+
+        });
+
+        try {
+            writer.close();
+        } catch (IOException e) {
+            logger.error("IO exception during closing writer");
+        }
+    }
+
+
+
+
+
+}

@@ -1,4 +1,4 @@
-package org.jax;
+package org.jax.utils;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -25,12 +25,12 @@ public class OptionsFactory {
         Option disease_database = Option.builder("db")
                 .longOpt("disease-database")
                 .hasArg(true)
-                .desc("specify OMIM and/or Ophanet").build();
+                .desc("specify comma-separated database [OMIM,ORPHA]").build();
 
         Option queryTerms = Option.builder("q")
                 .longOpt("query-terms")
                 .hasArg(true)
-                .desc("specify space separated query terms (with prefix)").build();
+                .desc("specify comma-separated query terms (e.g. HP:0003074)").build();
 
 
         Option out = Option.builder("o")
