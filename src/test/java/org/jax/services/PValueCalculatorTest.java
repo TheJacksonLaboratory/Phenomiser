@@ -5,6 +5,7 @@ import org.jax.io.DiseaseParser;
 import org.jax.io.DiseaseParserTest;
 import org.jax.io.HpoParser;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class PValueCalculatorTest {
 
     private static AbstractResources resources; // = new CachedResources()

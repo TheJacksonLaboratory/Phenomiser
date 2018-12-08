@@ -49,11 +49,20 @@ public class Phenomiser {
         BenjaminiHochberg bhFDR = new BenjaminiHochberg();
         Map<TermId, PValue> adjusted = bhFDR.adjustPValues(pValueCalculator);
 
-        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+//        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
+//                .sorted(new Comparator<Map.Entry<TermId, PValue>>() {
+//                    @Override
+//                    public int compare(Map.Entry<TermId, PValue> o1, Map.Entry<TermId, PValue> o2) {
+//                        if (o1.getValue().p_adjusted <= o2.getValue().p_adjusted) {
+//                            return -1;
+//                        } else {
+//                            return 1;
+//                        }
+//                    }
+//                })
+//                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
-        return adjusted_sorted;
+        return adjusted;
     }
 
 

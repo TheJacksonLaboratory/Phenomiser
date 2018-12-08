@@ -2,11 +2,13 @@ package org.jax.io;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class HpoParserTest {
     static HpoParser parser;
     @Before

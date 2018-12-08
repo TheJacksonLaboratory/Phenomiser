@@ -5,6 +5,7 @@ import org.jax.io.DiseaseParser;
 import org.jax.io.DiseaseParserTest;
 import org.jax.io.HpoParser;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Ignore
 public class SimilarityScoreCalculatorTest {
     private static AbstractResources resources; // = new CachedResources()
     private static SimilarityScoreCalculator similarityScoreCalculator;

@@ -38,6 +38,18 @@ public class OptionsFactory {
                 .hasArg(true)
                 .desc("specify output path").build();
 
+        Option debug = Option.builder("debug")
+                .longOpt("debug_mode")
+                .hasArg(false)
+                .required(false)
+                .desc("save computation time if this option is used").build();
+
+        Option thread = Option.builder("cpu")
+                .longOpt("cpu")
+                .hasArg(true)
+                .required(false)
+                .desc("specify the number of threads to use (default: 4)").build();
+
         Option exit = Option.builder("exit")
                 .longOpt("exit")
                 .hasArg(false)
@@ -50,6 +62,8 @@ public class OptionsFactory {
                 .addOption(disease_database)
                 .addOption(queryTerms)
                 .addOption(out)
+                .addOption(debug)
+                .addOption(thread)
                 .addOption(exit);
 
         return options;
