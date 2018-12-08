@@ -17,3 +17,4 @@ run the app with the following variables to test the app. Note in debug mode, yo
 ```
 
 It will take a long time to run without "-debug" one a four-core laptop (~ hours). Use "-cpu 10" to request more resources (if available) 
+
