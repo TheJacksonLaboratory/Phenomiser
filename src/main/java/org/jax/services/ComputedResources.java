@@ -75,16 +75,17 @@ public class ComputedResources extends AbstractResources {
         // score distribution
         logger.trace("score distribution computation started");
         ScoreSamplingOptions samplingOption = new ScoreSamplingOptions();
+        samplingOption.setNumThreads(numThreads);
         if (this.debug) {
-            samplingOption.setMinNumTerms(2);
-            samplingOption.setMaxNumTerms(4);
+            samplingOption.setMinNumTerms(3);
+            samplingOption.setMaxNumTerms(3);
         }
 
         SimilarityScoreSampling sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
         if (this.debug) {
 
             Map<Integer, List<TermId>> subset = diseaseIndexToHpoTerms.entrySet().stream()
-                    .limit(10).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .limit(100).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
             scoreDistributions = sampleing.performSampling(subset);
         } else {
             scoreDistributions = sampleing.performSampling(diseaseIndexToHpoTerms);

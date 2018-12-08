@@ -1,6 +1,8 @@
+
 target
 .idea/
 *.log
 *.iml
 
+logs
 src/test/resources/

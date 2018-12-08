@@ -5,6 +5,7 @@ import org.jax.io.DiseaseParserTest;
 import org.jax.io.HpoParser;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 
@@ -12,6 +13,7 @@ import java.io.File;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class CachedResourcesTest {
 
     private static AbstractResources resources; // = new CachedResources()

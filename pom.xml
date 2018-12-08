@@ -5,7 +5,7 @@
   <artifactId>Phenomiser</artifactId>
   <packaging>jar</packaging>
   <version>0.0.1</version>
-  <name>Phenomiser</name>
+  <name>PhenomiserApp</name>
   <url>http://maven.apache.org</url>
   <properties>
       <jdk.version>1.8</jdk.version>
@@ -64,16 +64,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.10.19</version>
@@ -115,6 +105,50 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <configuration>
+                <archive>
+                  <manifest>
+                    <mainClass>org.jax.PhenomiserApp</mainClass>
+                  </manifest>
+                </archive>
+              </configuration>
+            </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <!-- get all project dependencies -->
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+              <!-- MainClass in mainfest make a executable jar -->
+              <archive>
+                <manifest>
+                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                  <addClasspath>true</addClasspath>
+                  <classpathPrefix>lib/</classpathPrefix>
+                  <mainClass>org.jax.PhenomiserApp</mainClass>
+                </manifest>
+              </archive>
+
+            </configuration>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <!-- bind to the packaging phase -->
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
 
     </build>

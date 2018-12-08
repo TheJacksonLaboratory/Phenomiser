@@ -5,6 +5,7 @@ import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class DiseaseParserTest {
 
     private static HpoParser hpoParser;

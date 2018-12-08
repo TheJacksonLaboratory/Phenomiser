@@ -17,15 +17,12 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class App {
+public class PhenomiserApp {
 
-    private static Logger logger = LoggerFactory.getLogger(App.class);
+    private static Logger logger = LoggerFactory.getLogger(PhenomiserApp.class);
 
     private static AbstractResources resources;
 
@@ -52,11 +49,14 @@ public class App {
         List<DiseaseDB> dbs = Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA); //default
         List<TermId> queryTerms;
         String outPath;
+        boolean debugMode = false;
+        String numThreads = "4";
 
         HpoParser hpoParser = null;
         DiseaseParser diseaseParser = null;
         final String HOME = System.getProperty("user.home");
         final String caching_folder = HOME + File.separator + "Phenomiser_data";
+        Properties properties = new Properties();
 
         Map<TermId, PValue> result;
 
@@ -84,6 +84,14 @@ public class App {
                 //System.out.println("db: " + commandLine.getOptionValue("db"));
             }
 
+            if (commandLine.hasOption("debug")) {
+                debugMode = true;
+            }
+
+            if (commandLine.hasOption("cpu")) {
+                numThreads = commandLine.getOptionValue("cpu");
+            }
+
             if (commandLine.hasOption("q")) {
                 //init hpo and disease parser
                 if (hpoPath != null && diseaseAnnotationPath != null) {
@@ -107,7 +115,8 @@ public class App {
                     resources.init();
                     logger.trace("using cached data");
                 } else {
-                    resources = new ComputedResources(hpoParser, diseaseParser, null, true);
+                    properties.setProperty("numThreads", numThreads);
+                    resources = new ComputedResources(hpoParser, diseaseParser, properties, debugMode);
                     resources.init();
                     logger.trace("using computed data");
                 }
@@ -124,13 +133,15 @@ public class App {
                     }
                     return termId;
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-                logger.debug("query param: " + queryParam);
                 logger.trace("number of query terms: " + queryTerms.size());
+                queryTerms.forEach(t -> logger.info(t.toString()));
                 Phenomiser.setResources(resources);
                 result = Phenomiser.query(queryTerms, dbs);
 
                 //output query result
-                write_query_result(result, commandLine.getOptionValue("o"));
+                if (!result.isEmpty()) {
+                    write_query_result(result, commandLine.getOptionValue("o"));
+                }
             }
 
             //exit if requested
@@ -149,26 +160,29 @@ public class App {
         try {
             writer = new FileWriter(new File(path));
         } catch (Exception e) {
-            logger.info("cannot write to " + path);
+            logger.info("out path not found. writing to console: ");
             writer = new OutputStreamWriter(System.out);
         }
         return writer;
     }
 
-    public static void write_query_result(Map<TermId, PValue> adjusted_p_value_sorted, @Nullable String outPath) {
+    public static void write_query_result(Map<TermId, PValue> adjusted_p_value, @Nullable String outPath) {
 
-        if (adjusted_p_value_sorted == null) {
+        if (adjusted_p_value == null) {
             return;
         }
 
         Writer writer = getWriter(outPath);
 
-        adjusted_p_value_sorted.entrySet().stream().forEach(e -> {
+        try {
+            writer.write("diseaseId\tp\tadjust_p\n");
+        } catch (IOException e) {
+            logger.error("io exception during writing header. writing output aborted.");
+            return;
+        }
+
+        adjusted_p_value.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e -> {
             try {
-                writer.write(e.getKey().getPrefix());
-                writer.write("\t");
-                writer.write(e.getKey().getId());
-                writer.write("\t");
                 writer.write(e.getKey().getValue());
                 writer.write("\t");
                 writer.write(Double.toString(e.getValue().p));
