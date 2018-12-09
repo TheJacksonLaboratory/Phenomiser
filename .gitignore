@@ -3,6 +3,6 @@ target
 .idea/
 *.log
 *.iml
-
+*.DS_Store
 logs
 src/test/resources/

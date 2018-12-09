@@ -8,6 +8,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+
+import java.io.File;
 
 import static org.junit.Assert.*;
 
@@ -18,11 +21,17 @@ public class ComputedResourcesTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        HpoParser hpoParser = new HpoParser(DiseaseParserTest.class.getClassLoader().getResource("hp.obo").getPath());
+        final String path = System.getProperty("user.home") + File.separator + "Phenomiser_data";
+        final String hpoPath = DiseaseParserTest.class.getClassLoader().getResource("hp.obo").getPath();
+        final String phenotypeAnnotation = DiseaseParserTest.class.getClassLoader().getResource("phenotype.hpoa").getPath();
+
+        HpoParser hpoParser = new HpoParser(hpoPath);
         hpoParser.init();
-        DiseaseParser diseaseParser = new DiseaseParser(DiseaseParserTest.class.getClassLoader().getResource("phenotype.hpoa").getPath(), (HpoOntology) hpoParser.getHpo());
+        HpoOntology hpo = (HpoOntology) hpoParser.getHpo();
+        HpoDiseaseAnnotationParser hpoDiseaseAnnotationParser = new HpoDiseaseAnnotationParser(phenotypeAnnotation, hpo);
+        DiseaseParser diseaseParser = new DiseaseParser(hpoDiseaseAnnotationParser, hpo);
         diseaseParser.init();
-        resources = new ComputedResources(hpoParser, diseaseParser, null, true);
+        resources = new CachedResources(hpoParser, diseaseParser, path);
         resources.init();
     }
 

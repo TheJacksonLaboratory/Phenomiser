@@ -8,6 +8,7 @@ import org.jax.services.*;
 import org.jax.utils.DiseaseDB;
 import org.jax.utils.OptionsFactory;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.PValue;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class PhenomiserApp {
 
         try {
             commandLine = parser.parse(options, args);
-            if (commandLine.hasOption("h")) {
+            if (commandLine.hasOption("h") || args.length == 0) {
                 formatter.printHelp("Phenomiser", options);
             }
 
@@ -98,7 +99,10 @@ public class PhenomiserApp {
                     try {
                         hpoParser = new HpoParser(hpoPath);
                         hpoParser.init();
-                        diseaseParser = new DiseaseParser(diseaseAnnotationPath, (HpoOntology) hpoParser.getHpo());
+                        diseaseParser = new DiseaseParser(
+                                new HpoDiseaseAnnotationParser(diseaseAnnotationPath,
+                                        (HpoOntology) hpoParser.getHpo()),
+                                (HpoOntology) hpoParser.getHpo());
                         diseaseParser.init();
                     } catch (Exception e) {
                         logger.error("resource initialization error");

@@ -1,20 +1,34 @@
 package org.jax.io;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
+
+import static org.mockito.Mockito.*;
+
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 
 import static org.junit.Assert.*;
 
 @Ignore
+/**
+ * There is no need to test this class. This is just an example to test out the mockito library.
+ */
 public class HpoParserTest {
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+    @Mock
     static HpoParser parser;
+
+    @Mock
+    HpoOntology hpoOntology;
+
     @Before
     public void setUp() throws Exception {
-        parser = new HpoParser(HpoParserTest.class.getClassLoader().getResource("hp.obo").getPath());
-        parser.init();
+        when(parser.getHpo()).thenReturn(hpoOntology);
     }
 
     @After
@@ -23,10 +37,7 @@ public class HpoParserTest {
 
     @Test
     public void testParse() throws Exception {
-        HpoOntology hpoOntology = (HpoOntology) parser.getHpo();
-        assertNotNull(hpoOntology);
-        assertNotNull(parser.termIdMap());
-        assertTrue(parser.termIdMap().size() > 1000);
+        assertEquals(parser.getHpo(), hpoOntology);
     }
 
 }
