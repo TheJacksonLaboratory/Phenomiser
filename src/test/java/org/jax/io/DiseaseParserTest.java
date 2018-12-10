@@ -17,7 +17,6 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class DiseaseParserTest {
 
@@ -27,6 +26,8 @@ public class DiseaseParserTest {
      HpoDiseaseAnnotationParser hpodiseaseAnnotationParser;
 
      Map<TermId, HpoDisease> diseaseMap = new HashMap<>();
+
+    Map<TermId, HpoDisease> diseaseMapSpy = spy(diseaseMap);
     @Mock
      HpoDisease disease1;
     @Mock
