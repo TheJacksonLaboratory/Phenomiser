@@ -31,9 +31,14 @@ public class DiseaseParser {
     private Map<Integer, TermId> diseaseIndexToDisease;
 
 
-    public DiseaseParser(String diseaseAnnotation, HpoOntology hpoOntology) {
+//    public DiseaseParser(String diseaseAnnotation, HpoOntology hpoOntology) {
+//        this.hpo = hpoOntology;
+//        this.diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseaseAnnotation, hpoOntology);
+//    }
+
+    public DiseaseParser(HpoDiseaseAnnotationParser diseaseAnnotationParser, HpoOntology hpoOntology){
+        this.diseaseAnnotationParser = diseaseAnnotationParser;
         this.hpo = hpoOntology;
-        this.diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseaseAnnotation, hpoOntology);
     }
 
     public void init() throws PhenolException {
@@ -63,8 +68,8 @@ public class DiseaseParser {
 //            diseaseIndexToDisease.put(count, entry.getKey());
 //            count++;
 //        }
-                diseaseIndexToHpoTerms = diseaseIdToHpoTermIds.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<TermId>(e.getValue())));
+        diseaseIndexToHpoTerms = diseaseIdToHpoTermIds.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<>(e.getValue())));
 
         diseaseIndexToDisease = diseaseIdToHpoTermIds.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> e.getKey()));
