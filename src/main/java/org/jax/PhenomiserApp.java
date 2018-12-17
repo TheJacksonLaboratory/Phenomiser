@@ -63,36 +63,42 @@ public class PhenomiserApp {
 
         try {
             commandLine = parser.parse(options, args);
+            //print help info
             if (commandLine.hasOption("h") || args.length == 0) {
                 formatter.printHelp("Phenomiser", options);
             }
 
+            //get hpo path from command line args
             if (commandLine.hasOption("hpo")) {
                 hpoPath = commandLine.getOptionValue("hpo");
                 System.out.println("load hpo");
             }
 
+            //get disease annotation path from command line args
             if (commandLine.hasOption("da")) {
                 diseaseAnnotationPath = commandLine.getOptionValue("da");
-
                 System.out.println("load disease annotations");
             }
 
+            //get disease databases from command line args
             if (commandLine.hasOption("db")) {
                 String dbParam = StringUtils.join(commandLine.getOptionValues("db"), " ");
                 dbs = Arrays.stream(dbParam.split(",")).map(StringUtils::strip)
                         .map(DiseaseDB::valueOf).collect(Collectors.toList());
-                //System.out.println("db: " + commandLine.getOptionValue("db"));
+                System.out.println("db: " + commandLine.getOptionValue("db"));
             }
 
+            //check whether to use debug mode
             if (commandLine.hasOption("debug")) {
                 debugMode = true;
             }
 
+            //number of threads for computing similarity score distributions
             if (commandLine.hasOption("cpu")) {
                 numThreads = commandLine.getOptionValue("cpu");
             }
 
+            //the real working request: do query request with terms from command line
             if (commandLine.hasOption("q")) {
                 //init hpo and disease parser
                 if (hpoPath != null && diseaseAnnotationPath != null) {
@@ -125,7 +131,7 @@ public class PhenomiserApp {
                     logger.trace("using computed data");
                 }
 
-                //perform query
+                //get query terms
                 String queryParam = StringUtils.join(commandLine.getOptionValues("q"), " ");
                 queryTerms = Arrays.asList(queryParam.split(",")).stream()
                         .map(StringUtils::strip)
@@ -140,6 +146,7 @@ public class PhenomiserApp {
                 logger.trace("number of query terms: " + queryTerms.size());
                 queryTerms.forEach(t -> logger.info(t.toString()));
                 Phenomiser.setResources(resources);
+                //perform query
                 result = Phenomiser.query(queryTerms, dbs);
 
                 //output query result
