@@ -5,7 +5,8 @@ import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
@@ -25,7 +26,7 @@ public abstract class AbstractResources {
 
     protected DiseaseParser diseaseParser;
 
-    protected HpoOntology hpo;
+    protected Ontology hpo;
 
     protected Map<TermId, HpoDisease> diseaseMap;
 
@@ -52,7 +53,7 @@ public abstract class AbstractResources {
 
     public void defaultInit() {
         logger.trace("hpo initiation started");
-        hpo = (HpoOntology) this.getHpoParser().getHpo();
+        hpo = (Ontology) this.getHpoParser().getHpo();
         logger.trace("hpo initiation success");
 
 
@@ -97,11 +98,11 @@ public abstract class AbstractResources {
         this.diseaseParser = diseaseParser;
     }
 
-    public HpoOntology getHpo() {
+    public Ontology getHpo() {
         return hpo;
     }
 
-    public void setHpo(HpoOntology hpo) {
+    public void setHpo(Ontology hpo) {
         this.hpo = hpo;
     }
 

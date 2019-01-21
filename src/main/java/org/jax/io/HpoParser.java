@@ -1,8 +1,8 @@
 package org.jax.io;
 
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
+
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class HpoParser {
     private String hpoPath;
     //private InputStream hpoStream;
-    private HpoOntology hpoOntology;
+    private Ontology hpoOntology;
 
     public HpoParser(String hpoPath) {
         this.hpoPath = hpoPath;
@@ -23,9 +23,8 @@ public class HpoParser {
 
     //public HpoParser(InputStream hpoStream) { this.hpoStream = hpoStream; }
 
-    public void init() throws FileNotFoundException, PhenolException {
-        HpOboParser parser = new HpOboParser(new File(hpoPath));
-        this.hpoOntology = parser.parse();
+    public void init()  {
+        this.hpoOntology = OntologyLoader.loadOntology(new File(hpoPath));
     }
 
     public Ontology getHpo() {

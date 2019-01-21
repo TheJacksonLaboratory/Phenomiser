@@ -7,8 +7,8 @@ import org.jax.io.HpoParser;
 import org.jax.services.*;
 import org.jax.utils.DiseaseDB;
 import org.jax.utils.OptionsFactory;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.PValue;
 import org.slf4j.Logger;
@@ -107,8 +107,8 @@ public class PhenomiserApp {
                         hpoParser.init();
                         diseaseParser = new DiseaseParser(
                                 new HpoDiseaseAnnotationParser(diseaseAnnotationPath,
-                                        (HpoOntology) hpoParser.getHpo()),
-                                (HpoOntology) hpoParser.getHpo());
+                                        (Ontology) hpoParser.getHpo()),
+                                (Ontology) hpoParser.getHpo());
                         diseaseParser.init();
                     } catch (Exception e) {
                         logger.error("resource initialization error");
@@ -196,9 +196,9 @@ public class PhenomiserApp {
             try {
                 writer.write(e.getKey().getValue());
                 writer.write("\t");
-                writer.write(Double.toString(e.getValue().p));
+                writer.write(Double.toString(e.getValue().getRawPValue()));
                 writer.write("\t");
-                writer.write(Double.toString(e.getValue().p_adjusted));
+                writer.write(Double.toString(e.getValue().getAdjustedPValue()));
                 writer.write("\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");

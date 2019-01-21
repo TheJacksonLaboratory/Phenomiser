@@ -7,8 +7,8 @@ import org.jax.io.HpoParser;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.File;
@@ -30,7 +30,7 @@ public class SimilarityScoreCalculatorTest {
 
         HpoParser hpoParser = new HpoParser(hpoPath);
         hpoParser.init();
-        HpoOntology hpo = (HpoOntology) hpoParser.getHpo();
+        Ontology hpo = (Ontology) hpoParser.getHpo();
         HpoDiseaseAnnotationParser hpoDiseaseAnnotationParser = new HpoDiseaseAnnotationParser(phenotypeAnnotation, hpo);
         DiseaseParser diseaseParser = new DiseaseParser(hpoDiseaseAnnotationParser, hpo);
         diseaseParser.init();

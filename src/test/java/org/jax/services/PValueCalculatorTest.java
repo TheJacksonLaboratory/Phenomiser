@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
@@ -159,7 +159,7 @@ public class PValueCalculatorTest {
 
         HpoParser hpoParser = new HpoParser(hpoPath);
         hpoParser.init();
-        HpoOntology hpo = (HpoOntology) hpoParser.getHpo();
+        Ontology hpo = (Ontology) hpoParser.getHpo();
         HpoDiseaseAnnotationParser hpoDiseaseAnnotationParser = new HpoDiseaseAnnotationParser(phenotypeAnnotation, hpo);
         DiseaseParser diseaseParser = new DiseaseParser(hpoDiseaseAnnotationParser, hpo);
         diseaseParser.init();
@@ -177,7 +177,7 @@ public class PValueCalculatorTest {
         pvalues = pvalueCalculation.calculatePValues();
         assertTrue(pvalues.size() > 1);
         pvalues.entrySet().stream().forEach(e -> {
-            System.out.println(e.getKey().getValue() + "\t" + e.getValue().p);
+            System.out.println(e.getKey().getValue() + "\t" + e.getValue().getRawPValue());
         });
     }
 
@@ -190,7 +190,7 @@ public class PValueCalculatorTest {
         pvalues = benjaminiHochberg.adjustPValues(pvalueCalculation);
         assertTrue(pvalues.size() > 1);
         pvalues.entrySet().stream().forEach(e -> {
-            System.out.println(e.getKey().getValue() + "\t" + e.getValue().p + "\t" + e.getValue().p_adjusted);
+            System.out.println(e.getKey().getValue() + "\t" + e.getValue().getRawPValue() + "\t" + e.getValue().getAdjustedPValue());
         });
     }
 

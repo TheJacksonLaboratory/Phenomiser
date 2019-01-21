@@ -2,7 +2,6 @@ package org.jax.io;
 import com.google.common.collect.Sets;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class DiseaseParser {
 
-    private HpoOntology hpo;
+    private Ontology hpo;
 
     private HpoDiseaseAnnotationParser diseaseAnnotationParser;
 
@@ -36,7 +35,7 @@ public class DiseaseParser {
 //        this.diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseaseAnnotation, hpoOntology);
 //    }
 
-    public DiseaseParser(HpoDiseaseAnnotationParser diseaseAnnotationParser, HpoOntology hpoOntology){
+    public DiseaseParser(HpoDiseaseAnnotationParser diseaseAnnotationParser, Ontology hpoOntology){
         this.diseaseAnnotationParser = diseaseAnnotationParser;
         this.hpo = hpoOntology;
     }

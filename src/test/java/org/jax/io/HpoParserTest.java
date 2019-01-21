@@ -7,7 +7,8 @@ import static org.mockito.Mockito.*;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
+
 
 import static org.junit.Assert.*;
 
@@ -24,7 +25,7 @@ public class HpoParserTest {
     static HpoParser parser;
 
     @Mock
-    HpoOntology hpoOntology;
+    Ontology hpoOntology;
 
     @Before
     public void setUp() throws Exception {

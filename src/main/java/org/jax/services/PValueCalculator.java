@@ -43,7 +43,7 @@ public class PValueCalculator implements IPValueCalculation {
                                 .getObjectScoreDistribution(s.getKey())
                                 .estimatePValue(s.getValue());
                         PValue pValue = new PValue();
-                        pValue.p = p;
+                        pValue.setRawPValue(p);
                         p_values.put(diseaseIndexToDisease.get(s.getKey()), pValue);
                     }
                 });
