@@ -16,14 +16,14 @@ public class OptionsFactory {
 
         Option hpoPath = Option.builder("hpo")
                 .hasArg(true)
-                .required(true)
-                .desc("specify full path to hp.obo").build();
+                //.required(true)
+                .desc("[required]specify full path to hp.obo").build();
 
         Option disease_annotation_path = Option.builder("da")
                 .longOpt("disease-annotations")
                 .hasArg(true)
-                .required(true)
-                .desc("specify full path to disease annotations").build();
+                //.required(true)
+                .desc("[required]specify full path to disease annotations").build();
 
         Option disease_database = Option.builder("db")
                 .longOpt("disease-database")
@@ -34,8 +34,8 @@ public class OptionsFactory {
         Option queryTerms = Option.builder("q")
                 .longOpt("query-terms")
                 .hasArg(true)
-                .required(true)
-                .desc("specify comma-separated query terms (e.g. HP:0003074)").build();
+                //.required(true)
+                .desc("[required]specify comma-separated query terms (e.g. HP:0003074)").build();
 
         Option samplingRange = Option.builder("sampling")
                 .longOpt("sampling")
