@@ -227,7 +227,7 @@ public class PhenomiserApp {
         Writer writer = getWriter(outPath);
 
         try {
-            writer.write("diseaseId\tp\tadjust_p\n");
+            writer.write("diseaseId\tdiseaseName\tp\tadjust_p\n");
         } catch (IOException e) {
             logger.error("io exception during writing header. writing output aborted.");
             return;
@@ -237,6 +237,7 @@ public class PhenomiserApp {
             try {
                 writer.write(e.getKey().getValue());
                 writer.write("\t");
+                writer.write(resources.getDiseaseMap().get(e.getKey()).getName());
                 writer.write(Double.toString(e.getValue().getRawPValue()));
                 writer.write("\t");
                 writer.write(Double.toString(e.getValue().getAdjustedPValue()));
