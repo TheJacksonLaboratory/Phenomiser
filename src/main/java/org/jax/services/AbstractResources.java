@@ -53,7 +53,7 @@ public abstract class AbstractResources {
 
     public void defaultInit() {
         logger.trace("hpo initiation started");
-        hpo = (Ontology) this.getHpoParser().getHpo();
+        hpo = this.getHpoParser().getHpo();
         logger.trace("hpo initiation success");
 
 

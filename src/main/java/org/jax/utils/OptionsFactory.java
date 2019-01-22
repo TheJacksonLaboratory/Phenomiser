@@ -44,6 +44,12 @@ public class OptionsFactory {
                 .required(false)
                 .desc("save computation time if this option is used").build();
 
+        Option recache = Option.builder("f")
+                .longOpt("force_recache")
+                .hasArg(false)
+                .desc("force recompute to get a new cache of resources")
+                .build();
+
         Option thread = Option.builder("cpu")
                 .longOpt("cpu")
                 .hasArg(true)
@@ -63,6 +69,7 @@ public class OptionsFactory {
                 .addOption(queryTerms)
                 .addOption(out)
                 .addOption(debug)
+                .addOption(recache)
                 .addOption(thread)
                 .addOption(exit);
 

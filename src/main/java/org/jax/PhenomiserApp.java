@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,8 +108,8 @@ public class PhenomiserApp {
                         hpoParser.init();
                         diseaseParser = new DiseaseParser(
                                 new HpoDiseaseAnnotationParser(diseaseAnnotationPath,
-                                        (Ontology) hpoParser.getHpo()),
-                                (Ontology) hpoParser.getHpo());
+                                        hpoParser.getHpo()),
+                                hpoParser.getHpo());
                         diseaseParser.init();
                     } catch (Exception e) {
                         logger.error("resource initialization error");
@@ -117,6 +118,22 @@ public class PhenomiserApp {
                 } else {
                     logger.error("resource initialization error");
                     formatter.printHelp("Phenomiser", options);
+                }
+
+
+                //if user wants to force recompute resources, do so.
+                if (Files.exists(Paths.get(caching_folder)) && commandLine
+                        .hasOption("f")) {
+                    try {
+                        Files.walk(Paths.get(caching_folder))
+                                .sorted(Comparator.reverseOrder())
+                                .map(Path::toFile)
+                                .forEach(File::delete);
+                    } catch (IOException e) {
+                        logger.error("failed to delete some or all cached " +
+                                "files");
+                        System.exit(1);
+                    }
                 }
 
                 //if there is cached scoreDistributions, use it; otherwise, compute from scratch
