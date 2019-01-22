@@ -28,11 +28,12 @@ public class ComputedResources extends AbstractResources {
 
     private boolean cache = true; //cache computed score by default. overwrite from properties
 
-    private String cachingPath = System.getProperty("user.home");
-
-    private String folder = "Phenomiser_data";
+    private String cachingPath = System.getProperty("user.home") + File.separator + "Phenomiser_data";
 
     private boolean debug = false;
+
+    private int sampleMin = 1;
+    private int sampleMax = 10;
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
@@ -45,9 +46,15 @@ public class ComputedResources extends AbstractResources {
         super(hpoParser, diseaseParser);
         this.properties = properties;
         try {
-            this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads"));
-            this.cache = Boolean.parseBoolean(this.properties.getProperty("cache"));
-            this.cachingPath = this.properties.getProperty("cachingPath");
+            this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
+            this.cache = Boolean.parseBoolean(this.properties.getProperty("cache", "true"));
+            this.cachingPath = this.properties.getProperty("cachingPath", cachingPath);
+            this.sampleMin = Integer.parseInt(this.properties.getProperty("sampleMin", "1"));
+            this.sampleMax = Integer.parseInt(this.properties.getProperty("sampleMax", "10"));
+            if (this.sampleMin > this.sampleMax) {
+                System.err.print("sampling min > sampling max");
+                System.exit(1);
+            }
         } catch (Exception e) {
             logger.error("not all properties are applied.");
         }
@@ -79,6 +86,9 @@ public class ComputedResources extends AbstractResources {
         if (this.debug) {
             samplingOption.setMinNumTerms(3);
             samplingOption.setMaxNumTerms(3);
+        } else {
+            samplingOption.setMinNumTerms(sampleMin);
+            samplingOption.setMaxNumTerms(sampleMax);
         }
 
         SimilarityScoreSampling sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
@@ -95,18 +105,17 @@ public class ComputedResources extends AbstractResources {
 
         if (cache) {
             logger.trace("caching started");
-            String pathToFolder = cachingPath + File.separator + folder;
-            if (!Files.exists(Paths.get(pathToFolder))){
+            if (!Files.exists(Paths.get(cachingPath))){
                 try {
-                    Files.createDirectory(Paths.get(pathToFolder));
+                    Files.createDirectories(Paths.get(cachingPath));
                 } catch (Exception e) {
                     logger.error("caching failed: folder cannot be created.");
                     return;
                 }
 
             }
-            logger.info("writing to: " + pathToFolder);
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "icMap.binary"))) {
+            logger.info("writing to: " + cachingPath);
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "icMap.binary"))) {
                 out.writeObject(icMap);
                 logger.trace("caching information content success");
             } catch (IOException e) {
@@ -114,7 +123,7 @@ public class ComputedResources extends AbstractResources {
                 logger.error("caching icMap failed");
             }
 
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "resnikSimilarity.binary"))) {
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "resnikSimilarity.binary"))) {
                 out.writeObject(resnikSimilarity);
                 logger.trace("caching resnikSimilarity success");
             } catch (IOException e) {
@@ -122,7 +131,7 @@ public class ComputedResources extends AbstractResources {
                 logger.error("caching resnikSimilarity failed");
             }
 
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "scoreDistributions.binary"))) {
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "scoreDistributions.binary"))) {
                 out.writeObject(scoreDistributions);
                 logger.trace("caching score distributions success");
             } catch (IOException e) {

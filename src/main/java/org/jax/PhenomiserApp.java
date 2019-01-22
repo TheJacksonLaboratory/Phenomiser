@@ -1,5 +1,6 @@
 package org.jax;
 
+import jdk.nashorn.internal.runtime.regexp.joni.MatcherFactory;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
 import org.jax.io.DiseaseParser;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 public class PhenomiserApp {
@@ -57,7 +59,7 @@ public class PhenomiserApp {
         HpoParser hpoParser = null;
         DiseaseParser diseaseParser = null;
         final String HOME = System.getProperty("user.home");
-        final String caching_folder = HOME + File.separator + "Phenomiser_data";
+        String caching_folder = HOME + File.separator + "Phenomiser_data";
         Properties properties = new Properties();
 
         Map<TermId, PValue> result;
@@ -72,13 +74,13 @@ public class PhenomiserApp {
             //get hpo path from command line args
             if (commandLine.hasOption("hpo")) {
                 hpoPath = commandLine.getOptionValue("hpo");
-                System.out.println("load hpo");
+                //System.out.println("load hpo");
             }
 
             //get disease annotation path from command line args
             if (commandLine.hasOption("da")) {
                 diseaseAnnotationPath = commandLine.getOptionValue("da");
-                System.out.println("load disease annotations");
+                //System.out.println("load disease annotations " + diseaseAnnotationPath);
             }
 
             //get disease databases from command line args
@@ -86,7 +88,7 @@ public class PhenomiserApp {
                 String dbParam = StringUtils.join(commandLine.getOptionValues("db"), " ");
                 dbs = Arrays.stream(dbParam.split(",")).map(StringUtils::strip)
                         .map(DiseaseDB::valueOf).collect(Collectors.toList());
-                System.out.println("db: " + commandLine.getOptionValue("db"));
+                //System.out.println("db: " + commandLine.getOptionValue("db"));
             }
 
             //check whether to use debug mode
@@ -97,6 +99,43 @@ public class PhenomiserApp {
             //number of threads for computing similarity score distributions
             if (commandLine.hasOption("cpu")) {
                 numThreads = commandLine.getOptionValue("cpu");
+            }
+
+            //let user overwrite cache folder; use default otherwise
+            if (commandLine.hasOption("cachePath")) {
+                caching_folder = commandLine.getOptionValue("cachePath");
+                //System.out.println("11111cachingPath:" + caching_folder);
+                properties.setProperty("cachingPath", caching_folder);
+            }
+
+            //if user wants to force recompute resources, do so.
+            if (Files.exists(Paths.get(caching_folder)) && commandLine
+                    .hasOption("f")) {
+                try {
+                    Files.walk(Paths.get(caching_folder))
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                } catch (IOException e) {
+                    logger.error("failed to delete some or all cached " +
+                            "files");
+                    System.exit(1);
+                }
+            }
+
+            //if user wants to change the default values for ScoreSamplingOptions
+            if (commandLine.hasOption("sampling")) {
+                String[] range = commandLine.getOptionValue("sampling").split("-");
+                String pattern = "^[0-9]{1,2}";
+                if (range[0].matches(pattern) && range[1].matches(pattern)) {
+                    properties.setProperty("sampleMin", range[0]);
+                    properties.setProperty("sampleMax", range[1]);
+                    logger.trace("sampling range reset to: " + range[0] + "-" + range[1]);
+                } else {
+                    System.err.print("range format error (correct example, 1-10");
+                    System.exit(1);
+                }
+
             }
 
             //the real working request: do query request with terms from command line
@@ -120,22 +159,6 @@ public class PhenomiserApp {
                     formatter.printHelp("Phenomiser", options);
                 }
 
-
-                //if user wants to force recompute resources, do so.
-                if (Files.exists(Paths.get(caching_folder)) && commandLine
-                        .hasOption("f")) {
-                    try {
-                        Files.walk(Paths.get(caching_folder))
-                                .sorted(Comparator.reverseOrder())
-                                .map(Path::toFile)
-                                .forEach(File::delete);
-                    } catch (IOException e) {
-                        logger.error("failed to delete some or all cached " +
-                                "files");
-                        System.exit(1);
-                    }
-                }
-
                 //if there is cached scoreDistributions, use it; otherwise, compute from scratch
                 if (Files.exists(Paths.get(caching_folder))) {
                     resources = new CachedResources(hpoParser, diseaseParser, caching_folder);
@@ -143,6 +166,7 @@ public class PhenomiserApp {
                     logger.trace("using cached data");
                 } else {
                     properties.setProperty("numThreads", numThreads);
+                    properties.setProperty("cache", "true");
                     resources = new ComputedResources(hpoParser, diseaseParser, properties, debugMode);
                     resources.init();
                     logger.trace("using computed data");

@@ -11,31 +11,48 @@ public class OptionsFactory {
         Option help = Option.builder("h")
                 .longOpt("help")
                 .hasArg(false)
+                .required(false)
                 .desc("print usage").build();
 
         Option hpoPath = Option.builder("hpo")
                 .hasArg(true)
+                .required(true)
                 .desc("specify full path to hp.obo").build();
 
         Option disease_annotation_path = Option.builder("da")
                 .longOpt("disease-annotations")
                 .hasArg(true)
+                .required(true)
                 .desc("specify full path to disease annotations").build();
 
         Option disease_database = Option.builder("db")
                 .longOpt("disease-database")
                 .hasArg(true)
+                .required(false)
                 .desc("specify comma-separated database [OMIM,ORPHA]").build();
 
         Option queryTerms = Option.builder("q")
                 .longOpt("query-terms")
                 .hasArg(true)
+                .required(true)
                 .desc("specify comma-separated query terms (e.g. HP:0003074)").build();
 
+        Option samplingRange = Option.builder("sampling")
+                .longOpt("sampling")
+                .hasArg(true)
+                .required(false)
+                .desc("specify sampling range in format \"min-max\" (default 1-10)").build();
+
+        Option cachePath = Option.builder("cachePath")
+                .longOpt("cachePath")
+                .hasArg(true)
+                .required(false)
+                .desc("specify the path to cache folder").build();
 
         Option out = Option.builder("o")
                 .longOpt("out")
                 .hasArg(true)
+                .required(false)
                 .desc("specify output path").build();
 
         Option debug = Option.builder("debug")
@@ -59,6 +76,7 @@ public class OptionsFactory {
         Option exit = Option.builder("exit")
                 .longOpt("exit")
                 .hasArg(false)
+                .required(false)
                 .desc("exit afterward").build();
 
 
@@ -67,6 +85,8 @@ public class OptionsFactory {
                 .addOption(disease_annotation_path)
                 .addOption(disease_database)
                 .addOption(queryTerms)
+                .addOption(cachePath)
+                .addOption(samplingRange)
                 .addOption(out)
                 .addOption(debug)
                 .addOption(recache)

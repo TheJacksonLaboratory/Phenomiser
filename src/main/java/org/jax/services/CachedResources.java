@@ -3,6 +3,7 @@ package org.jax.services;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.similarity.PrecomputingPairwiseResnikSimilarity;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
@@ -33,49 +34,52 @@ public class CachedResources extends AbstractResources{
         String resnikSimilarityPath = cachingPath + File.separator + "resnikSimilarity.binary";
         String scoreDistributionsPath = cachingPath + File.separator + "scoreDistributions.binary";
 
-        //init icMap
-        logger.trace("information content map initiation started");
-        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
-        logger.trace("information content map initiation success");
-
-        //init Resnik similarity precomputation
-        logger.trace("Resnik similarity precomputation started");
-        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
-                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
-
-        resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
-
-        logger.trace("Resnik similarity precomputation success");
+//        //init icMap
+//        logger.trace("information content map initiation started");
+//        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
+//        logger.trace("information content map initiation success");
 //
-//        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(icMapPath))) {
-//            logger.trace("deserialize information content map started");
-//            icMap = (Map<TermId, Double>) in.readObject();
-//            logger.trace("deserialize information content map success");
-//        } catch (FileNotFoundException e) {
-//            logger.trace("deserialize information content map failed");
-//            logger.error("file not found" + icMapPath);
-//        } catch (IOException e) {
-//            logger.trace("deserialize information content map failed");
-//            logger.error("io exception occurred");
-//        } catch (ClassNotFoundException e) {
-//            logger.trace("deserialize information content map failed");
-//            logger.error("class not found");
-//        }
+//        //init Resnik similarity precomputation
+//        logger.trace("Resnik similarity precomputation started");
+//        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
+//                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
 //
-//        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(resnikSimilarityPath))) {
-//            logger.trace("deserialize ResnikSimilarity started");
-//            resnikSimilarity = (ResnikSimilarity) in.readObject();
-//            logger.trace("deserialize ResnikSimilarity success");
-//        } catch (FileNotFoundException e) {
-//            logger.trace("deserialize ResnikSimilarity failed");
-//            logger.error("file not found" + resnikSimilarityPath);
-//        } catch (IOException e) {
-//            logger.trace("deserialize ResnikSimilarity failed");
-//            logger.error("io exception occurred");
-//        } catch (ClassNotFoundException e) {
-//            logger.trace("deserialize ResnikSimilarity failed");
-//            logger.error("class not found");
-//        }
+//        resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
+//
+//        logger.trace("Resnik similarity precomputation success");
+
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(icMapPath))) {
+            logger.trace("deserialize information content map started");
+            icMap = (Map<TermId, Double>) in.readObject();
+            logger.trace("deserialize information content map success");
+        } catch (FileNotFoundException e) {
+            logger.trace("deserialize information content map failed");
+            logger.error("file not found" + icMapPath);
+            logger.trace("information content map initiation started");
+            icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
+            logger.trace("information content map initiation success");
+        } catch (IOException e) {
+            logger.trace("deserialize information content map failed");
+            logger.error("io exception occurred");
+        } catch (ClassNotFoundException e) {
+            logger.trace("deserialize information content map failed");
+            logger.error("class not found");
+        }
+
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(resnikSimilarityPath))) {
+            logger.trace("deserialize ResnikSimilarity started");
+            resnikSimilarity = (ResnikSimilarity) in.readObject();
+            logger.trace("deserialize ResnikSimilarity success");
+        } catch (FileNotFoundException e) {
+            logger.trace("deserialize ResnikSimilarity failed");
+            logger.error("file not found" + resnikSimilarityPath);
+        } catch (IOException e) {
+            logger.trace("deserialize ResnikSimilarity failed");
+            logger.error("io exception occurred");
+        } catch (ClassNotFoundException e) {
+            logger.trace("deserialize ResnikSimilarity failed");
+            logger.error("class not found");
+        }
 
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(scoreDistributionsPath))) {
             logger.trace("deserialize scoreDistributions started");
