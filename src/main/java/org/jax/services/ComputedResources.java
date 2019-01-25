@@ -40,7 +40,7 @@ public class ComputedResources extends AbstractResources {
      * @param hpoParser
      * @param diseaseParser
      * @param properties pass in settings to overwrite default settings
-     * @param debug
+     * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
     public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
         super(hpoParser, diseaseParser);

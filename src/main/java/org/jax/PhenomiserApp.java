@@ -30,8 +30,6 @@ public class PhenomiserApp {
 
     private static AbstractResources resources;
 
-    private static Phenomiser phenomiser;
-
     public static void main( String[] args ) {
 
         run(args);
@@ -66,6 +64,7 @@ public class PhenomiserApp {
 
         try {
             commandLine = parser.parse(options, args);
+
             //print help info
             if (commandLine.hasOption("h") || args.length == 0) {
                 formatter.printHelp("Phenomiser", options);
@@ -157,6 +156,7 @@ public class PhenomiserApp {
                 } else {
                     logger.error("resource initialization error");
                     formatter.printHelp("Phenomiser", options);
+                    System.exit(1);
                 }
 
                 //if there is cached scoreDistributions, use it; otherwise, compute from scratch
@@ -195,13 +195,6 @@ public class PhenomiserApp {
                     write_query_result(result, commandLine.getOptionValue("o"));
                 }
             }
-
-            //exit if requested
-            if (commandLine.hasOption("exit")) {
-                System.out.println("exiting");
-            }
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -254,9 +247,5 @@ public class PhenomiserApp {
             logger.error("IO exception during closing writer");
         }
     }
-
-
-
-
 
 }

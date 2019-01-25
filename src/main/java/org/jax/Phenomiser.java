@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 
 /**
- * Hello world!
- *
+ * Reimplementation of Phenomiser with Java 8.
+ * To use this class, pass in an AbstractResources instance and then call the query method.
  */
 public class Phenomiser {
 

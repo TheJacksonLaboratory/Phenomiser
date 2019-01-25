@@ -73,13 +73,6 @@ public class OptionsFactory {
                 .required(false)
                 .desc("specify the number of threads to use (default: 4)").build();
 
-        Option exit = Option.builder("exit")
-                .longOpt("exit")
-                .hasArg(false)
-                .required(false)
-                .desc("exit afterward").build();
-
-
         options.addOption(help)
                 .addOption(hpoPath)
                 .addOption(disease_annotation_path)
@@ -90,8 +83,7 @@ public class OptionsFactory {
                 .addOption(out)
                 .addOption(debug)
                 .addOption(recache)
-                .addOption(thread)
-                .addOption(exit);
+                .addOption(thread);
 
         return options;
     }
