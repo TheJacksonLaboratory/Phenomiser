@@ -5,12 +5,14 @@ import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
-import org.monarchinitiative.phenol.ontology.similarity.PrecomputingPairwiseResnikSimilarity;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CachedResources extends AbstractResources{
@@ -18,8 +20,6 @@ public class CachedResources extends AbstractResources{
     private static Logger logger = LoggerFactory.getLogger(CachedResources.class);
 
     private String cachingPath;
-
-    private int numThreads = 4;
 
     public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath) {
         super(hpoParser, diseaseParser);
@@ -48,6 +48,7 @@ public class CachedResources extends AbstractResources{
 //
 //        logger.trace("Resnik similarity precomputation success");
 
+        //deserialize ic map
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(icMapPath))) {
             logger.trace("deserialize information content map started");
             icMap = (Map<TermId, Double>) in.readObject();
@@ -66,6 +67,7 @@ public class CachedResources extends AbstractResources{
             logger.error("class not found");
         }
 
+        //deserialize resniksimilarity
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(resnikSimilarityPath))) {
             logger.trace("deserialize ResnikSimilarity started");
             resnikSimilarity = (ResnikSimilarity) in.readObject();
@@ -81,6 +83,7 @@ public class CachedResources extends AbstractResources{
             logger.error("class not found");
         }
 
+        //deserialize similarity score distributions
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(scoreDistributionsPath))) {
             logger.trace("deserialize scoreDistributions started");
             scoreDistributions = (Map<Integer, ScoreDistribution>) in.readObject();
@@ -94,6 +97,28 @@ public class CachedResources extends AbstractResources{
         } catch (ClassNotFoundException e) {
             logger.trace("deserialize scoreDistributions failed");
             logger.error("class not found");
+        }
+
+        //if the above one does not work, meaning we only have individual ScoreDistribution, we read in one by one
+        if (scoreDistributions == null || scoreDistributions.isEmpty()) {
+            scoreDistributions = new HashMap<>();
+            try {
+                Files.list(Paths.get(cachingPath))
+                        .filter(path -> path.getFileName().toString().matches("^[0-9]{1,2}_term.scoreDistribution.binary"))
+                        .forEach(path -> {
+                            int numHPO = Integer.parseInt(path.getFileName().toString().split("_")[0]);
+                            try (ObjectInputStream in =
+                                          new ObjectInputStream(new FileInputStream(path.toFile()))) {
+                        ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
+                        scoreDistributions.put(numHPO, scoreDistribution);
+                    } catch (Exception e) {
+                                e.printStackTrace();
+                        logger.error("error when trying to deserialize " + path.getFileName().toString());
+                    }
+                });
+            } catch (IOException e) {
+                logger.error("io exception when trying to find individual score distributions");
+            }
         }
 
     }

@@ -1,6 +1,5 @@
 package org.jax.services;
 
-import com.google.common.collect.Sets;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.base.PhenolException;
@@ -8,14 +7,12 @@ import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.similarity.PrecomputingPairwiseResnikSimilarity;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.util.*;
 
 public abstract class AbstractResources {

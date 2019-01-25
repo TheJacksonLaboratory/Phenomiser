@@ -9,7 +9,6 @@ import org.monarchinitiative.phenol.stats.PValue;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 

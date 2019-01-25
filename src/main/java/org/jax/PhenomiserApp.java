@@ -1,6 +1,5 @@
 package org.jax;
 
-import jdk.nashorn.internal.runtime.regexp.joni.MatcherFactory;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
 import org.jax.io.DiseaseParser;
@@ -9,7 +8,6 @@ import org.jax.services.*;
 import org.jax.utils.DiseaseDB;
 import org.jax.utils.OptionsFactory;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.PValue;
 import org.slf4j.Logger;
@@ -21,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 public class PhenomiserApp {
