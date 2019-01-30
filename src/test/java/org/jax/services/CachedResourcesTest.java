@@ -3,7 +3,6 @@ package org.jax.services;
 import org.jax.io.DiseaseParser;
 import org.jax.io.DiseaseParserTest;
 import org.jax.io.HpoParser;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;

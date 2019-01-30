@@ -2,8 +2,10 @@ package org.jax.services;
 
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
+import org.jax.utils.ObservableMap;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreSamplingOptions;
 import org.monarchinitiative.phenol.ontology.scoredist.SimilarityScoreSampling;
 import org.monarchinitiative.phenol.ontology.similarity.PrecomputingPairwiseResnikSimilarity;
@@ -16,6 +18,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class ComputedResources extends AbstractResources {
@@ -28,30 +31,63 @@ public class ComputedResources extends AbstractResources {
 
     private boolean cache = true; //cache computed score by default. overwrite from properties
 
-    private String cachingPath = System.getProperty("user.home");
-
-    private String folder = "Phenomiser_data";
+    private String cachingPath = System.getProperty("user.home") + File.separator + "Phenomiser_data";
 
     private boolean debug = false;
+
+    private int sampleMin = 1;
+    private int sampleMax = 10;
+
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
      * @param hpoParser
      * @param diseaseParser
      * @param properties pass in settings to overwrite default settings
-     * @param debug
+     * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
     public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
         super(hpoParser, diseaseParser);
         this.properties = properties;
         try {
-            this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads"));
-            this.cache = Boolean.parseBoolean(this.properties.getProperty("cache"));
-            this.cachingPath = this.properties.getProperty("cachingPath");
+            this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
+            this.cache = Boolean.parseBoolean(this.properties.getProperty("cache", "true"));
+            this.cachingPath = this.properties.getProperty("cachingPath", cachingPath);
+            this.sampleMin = Integer.parseInt(this.properties.getProperty("sampleMin", "1"));
+            this.sampleMax = Integer.parseInt(this.properties.getProperty("sampleMax", "10"));
+            if (this.sampleMin > this.sampleMax) {
+                System.err.print("sampling min > sampling max");
+                System.exit(1);
+            }
         } catch (Exception e) {
             logger.error("not all properties are applied.");
         }
         this.debug = debug;
+
+        super.scoreDistributions = new ObservableMap<>(new BiConsumer<Integer, ScoreDistribution>() {
+            @Override
+            public void accept(Integer numHPO, ScoreDistribution scoreDistribution) {
+                if(!cache) {
+                    return;
+                }
+                try {
+                    createIfNotExists(cachingPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    logger.error("caching failed: folder cannot be created.");
+                    return;
+                }
+                String name = String.format("%d_term.scoreDistribution.binary", numHPO);
+                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + name))) {
+                    out.writeObject(scoreDistribution);
+                    logger.trace("caching score distributions success");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    logger.error("IO exception");
+                    logger.error("caching score distributions failed");
+                }
+            }
+        });
     }
 
     @Override
@@ -79,34 +115,41 @@ public class ComputedResources extends AbstractResources {
         if (this.debug) {
             samplingOption.setMinNumTerms(3);
             samplingOption.setMaxNumTerms(3);
+        } else {
+            samplingOption.setMinNumTerms(sampleMin);
+            samplingOption.setMaxNumTerms(sampleMax);
         }
 
-        SimilarityScoreSampling sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
+        SimilarityScoreSampling sampleing;//
         if (this.debug) {
-
+            sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
             Map<Integer, List<TermId>> subset = diseaseIndexToHpoTerms.entrySet().stream()
                     .limit(100).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-            scoreDistributions = sampleing.performSampling(subset);
+            scoreDistributions.putAll(sampleing.performSampling(subset));
         } else {
-            scoreDistributions = sampleing.performSampling(diseaseIndexToHpoTerms);
+            for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {
+                ScoreSamplingOptions newoption = new ScoreSamplingOptions();
+                newoption.setNumThreads(numThreads);
+                newoption.setMinNumTerms(i);
+                newoption.setMaxNumTerms(i);
+                sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
+                scoreDistributions.putAll(sampleing.performSampling(diseaseIndexToHpoTerms));
+            }
+            //scoreDistributions = sampleing.performSampling(diseaseIndexToHpoTerms);
         }
 
         logger.trace("score distribution computation success");
 
         if (cache) {
             logger.trace("caching started");
-            String pathToFolder = cachingPath + File.separator + folder;
-            if (!Files.exists(Paths.get(pathToFolder))){
-                try {
-                    Files.createDirectory(Paths.get(pathToFolder));
-                } catch (Exception e) {
-                    logger.error("caching failed: folder cannot be created.");
-                    return;
-                }
-
+            try {
+                createIfNotExists(cachingPath);
+            } catch (Exception e) {
+                logger.error("caching failed: folder cannot be created.");
+                return;
             }
-            logger.info("writing to: " + pathToFolder);
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "icMap.binary"))) {
+            logger.info("writing to: " + cachingPath);
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "icMap.binary"))) {
                 out.writeObject(icMap);
                 logger.trace("caching information content success");
             } catch (IOException e) {
@@ -114,7 +157,7 @@ public class ComputedResources extends AbstractResources {
                 logger.error("caching icMap failed");
             }
 
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "resnikSimilarity.binary"))) {
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "resnikSimilarity.binary"))) {
                 out.writeObject(resnikSimilarity);
                 logger.trace("caching resnikSimilarity success");
             } catch (IOException e) {
@@ -122,15 +165,20 @@ public class ComputedResources extends AbstractResources {
                 logger.error("caching resnikSimilarity failed");
             }
 
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pathToFolder + File.separator + "scoreDistributions.binary"))) {
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "scoreDistributions.binary"))) {
                 out.writeObject(scoreDistributions);
                 logger.trace("caching score distributions success");
             } catch (IOException e) {
                 logger.error("IO exception");
+                e.printStackTrace();
                 logger.error("caching score distributions failed");
             }
+        }
+    }
 
-
+    private void createIfNotExists(String path) throws IOException {
+        if (!Files.exists(Paths.get(path))){
+            Files.createDirectories(Paths.get(path));
         }
     }
 }

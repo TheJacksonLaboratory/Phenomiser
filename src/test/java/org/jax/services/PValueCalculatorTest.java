@@ -1,6 +1,5 @@
 package org.jax.services;
 
-import com.google.common.collect.ImmutableMap;
 import org.jax.utils.DiseaseDB;
 import org.jax.io.DiseaseParser;
 import org.jax.io.DiseaseParserTest;
@@ -8,15 +7,9 @@ import org.jax.io.HpoParser;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.IPValueCalculation;
 import org.monarchinitiative.phenol.stats.PValue;
@@ -28,7 +21,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 //@RunWith(MockitoJUnitRunner.class)
 //public class PValueCalculatorTest {

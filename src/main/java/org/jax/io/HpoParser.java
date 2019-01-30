@@ -1,6 +1,5 @@
 package org.jax.io;
 
-import org.monarchinitiative.phenol.base.PhenolException;
 
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -8,8 +7,6 @@ import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Map;
 
 public class HpoParser {
