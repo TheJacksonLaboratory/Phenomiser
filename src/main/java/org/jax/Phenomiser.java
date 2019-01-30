@@ -5,6 +5,7 @@ import org.jax.services.PValueCalculator;
 import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.stats.Item2PValue;
 import org.monarchinitiative.phenol.stats.PValue;
 
 
@@ -29,7 +30,7 @@ public class Phenomiser {
      * @param queryTerms a list of HPO termIds
      * @param dbs a list of disease databases
      */
-    public static Map<TermId, PValue> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
+    public static List<Item2PValue<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
             return null;
@@ -42,11 +43,9 @@ public class Phenomiser {
 
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
+        List<Item2PValue<TermId>> mylist = pValueCalculator.getPvalList();
 
         //p value multi test correction
-
-        BenjaminiHochberg bhFDR = new BenjaminiHochberg();
-        Map<TermId, PValue> adjusted = bhFDR.adjustPValues(pValueCalculator);
 
 //        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
 //                .sorted(new Comparator<Map.Entry<TermId, PValue>>() {
@@ -61,7 +60,7 @@ public class Phenomiser {
 //                })
 //                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
-        return adjusted;
+        return mylist;
     }
 
 

@@ -9,6 +9,7 @@ import org.jax.utils.DiseaseDB;
 import org.jax.utils.OptionsFactory;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.stats.Item2PValue;
 import org.monarchinitiative.phenol.stats.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,8 @@ public class PhenomiserApp {
         String caching_folder = HOME + File.separator + "Phenomiser_data";
         Properties properties = new Properties();
 
-        Map<TermId, PValue> result;
+
+        List<Item2PValue<TermId>> result;
 
         try {
             commandLine = parser.parse(options, args);
@@ -208,11 +210,11 @@ public class PhenomiserApp {
         return writer;
     }
 
-    public static void write_query_result(Map<TermId, PValue> adjusted_p_value, @Nullable String outPath) {
+    public static void write_query_result( List<Item2PValue<TermId>> result, @Nullable String outPath) {
 
-        if (adjusted_p_value == null) {
-            return;
-        }
+//        if (adjusted_p_value == null) {
+//            return;
+//        }
 
         Writer writer = getWriter(outPath);
 
