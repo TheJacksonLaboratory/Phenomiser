@@ -10,7 +10,6 @@ import org.jax.utils.OptionsFactory;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
-import org.monarchinitiative.phenol.stats.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +209,7 @@ public class PhenomiserApp {
         return writer;
     }
 
-    public static void write_query_result( List<Item2PValue<TermId>> result, @Nullable String outPath) {
+    public static void write_query_result(List<Item2PValue<TermId>> result, @Nullable String outPath) {
 
 //        if (adjusted_p_value == null) {
 //            return;
@@ -225,14 +224,16 @@ public class PhenomiserApp {
             return;
         }
 
-        adjusted_p_value.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e -> {
+        Collections.sort(result);
+
+        result.stream().forEach(e -> {
             try {
-                writer.write(e.getKey().getValue());
+                writer.write(e.getItem().getValue());
                 writer.write("\t");
-                writer.write(resources.getDiseaseMap().get(e.getKey()).getName());
-                writer.write(Double.toString(e.getValue().getRawPValue()));
+                writer.write(resources.getDiseaseMap().get(e.getItem()).getName());
+                writer.write(Double.toString(e.getRawPValue()));
                 writer.write("\t");
-                writer.write(Double.toString(e.getValue().getAdjustedPValue()));
+                writer.write(Double.toString(e.getAdjustedPValue()));
                 writer.write("\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");

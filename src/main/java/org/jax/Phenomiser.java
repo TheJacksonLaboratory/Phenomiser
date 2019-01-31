@@ -6,12 +6,9 @@ import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
-import org.monarchinitiative.phenol.stats.PValue;
 
 
 import java.util.*;
-
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 
 /**
  * Reimplementation of Phenomiser with Java 8.

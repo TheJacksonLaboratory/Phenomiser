@@ -8,7 +8,7 @@
   <name>PhenomiserApp</name>
   <url>http://maven.apache.org</url>
   <properties>
-      <jdk.version>1.8</jdk.version>
+    <jdk.version>1.8</jdk.version>
     <phenol.version>1.3.3-SNAPSHOT</phenol.version>
   </properties>
 
