@@ -223,14 +223,15 @@ public class PhenomiserApp {
             logger.error("io exception during writing header. writing output aborted.");
             return;
         }
+        List<Item2PValue<TermId>> newList = new ArrayList<>(result);
+        Collections.sort(newList,Collections.reverseOrder());
 
-        Collections.sort(result);
-
-        result.stream().forEach(e -> {
+        newList.stream().forEach(e -> {
             try {
                 writer.write(e.getItem().getValue());
                 writer.write("\t");
                 writer.write(resources.getDiseaseMap().get(e.getItem()).getName());
+                writer.write("\t");
                 writer.write(Double.toString(e.getRawPValue()));
                 writer.write("\t");
                 writer.write(Double.toString(e.getAdjustedPValue()));

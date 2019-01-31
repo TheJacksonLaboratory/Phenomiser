@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
+import org.monarchinitiative.phenol.stats.Bonferroni;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
 import java.util.HashMap;
@@ -59,9 +60,10 @@ public class PValueCalculator  {
             builder.add(item);
         }
         BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
+        Bonferroni<TermId> bonf = new Bonferroni<>();
         List<Item2PValue<TermId>> mylist = builder.build();
 
-        bh.adjustPvals(mylist);
+        bonf.adjustPvals(mylist);
 
         return mylist;
     }
