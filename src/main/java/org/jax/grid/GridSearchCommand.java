@@ -2,16 +2,6 @@ package org.jax.grid;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.lr2pg.analysis.GridSearch;
-import org.monarchinitiative.lr2pg.configuration.Lr2PgFactory;
-import org.monarchinitiative.lr2pg.exception.Lr2pgException;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-
-import java.util.Map;
 
 /**
  * Run a grid search over number of terms and number of noise terms for

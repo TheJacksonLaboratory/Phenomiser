@@ -2,6 +2,8 @@ package org.jax;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
+import org.jax.grid.GridSearch;
+import org.jax.grid.PhenotypeOnlyHpoCaseSimulator;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.*;
@@ -192,6 +194,46 @@ public class PhenomiserApp {
                 if (!result.isEmpty()) {
                     write_query_result(result, commandLine.getOptionValue("o"));
                 }
+            }
+
+            if (commandLine.hasOption("grid")){
+                //init hpo and disease parser
+                if (hpoPath != null && diseaseAnnotationPath != null) {
+                    try {
+                        hpoParser = new HpoParser(hpoPath);
+                        hpoParser.init();
+                        diseaseParser = new DiseaseParser(
+                                new HpoDiseaseAnnotationParser(diseaseAnnotationPath,
+                                        hpoParser.getHpo()),
+                                hpoParser.getHpo());
+                        diseaseParser.init();
+                    } catch (Exception e) {
+                        logger.error("resource initialization error");
+                        formatter.printHelp("Phenomiser", options);
+                    }
+                } else {
+                    logger.error("resource initialization error");
+                    formatter.printHelp("Phenomiser", options);
+                    System.exit(1);
+                }
+
+                //if there is cached scoreDistributions, use it; otherwise, compute from scratch
+                if (Files.exists(Paths.get(caching_folder))) {
+                    resources = new CachedResources(hpoParser, diseaseParser, caching_folder);
+                    resources.init();
+                    logger.trace("using cached data");
+                } else {
+                    properties.setProperty("numThreads", numThreads);
+                    properties.setProperty("cache", "true");
+                    resources = new ComputedResources(hpoParser, diseaseParser, properties, debugMode);
+                    resources.init();
+                    logger.trace("using computed data");
+                }
+                Phenomiser.setResources(resources);
+                GridSearch gridSearch = new GridSearch(resources, 100, 10, 5, false);
+                double[][] matrix = gridSearch.run();
+                System.out.println(matrix[0][0]);
+
             }
         } catch (ParseException e) {
             e.printStackTrace();
