@@ -266,7 +266,7 @@ public class PhenomiserApp {
             return;
         }
         List<Item2PValue<TermId>> newList = new ArrayList<>(result);
-        Collections.sort(newList,Collections.reverseOrder());
+        Collections.sort(newList);
 
         newList.stream().forEach(e -> {
             try {
