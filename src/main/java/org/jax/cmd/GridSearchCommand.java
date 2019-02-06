@@ -1,4 +1,4 @@
-package org.jax.grid;
+package org.jax.cmd;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -9,7 +9,7 @@ import com.beust.jcommander.Parameters;
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  */
 @Parameters(commandDescription = "Grid search for simulation of phenotype-only cases",hidden = true)
-public class GridSearchCommand  {
+public class GridSearchCommand extends PhenomiserCommand {
    // private static final Logger logger = LogManager.getLogger();
     /** Directory that contains {@code hp.obo} and {@code phenotype.hpoa} files. */
     @Parameter(names={"-d","--data"}, description ="directory to download data" )
@@ -22,6 +22,11 @@ public class GridSearchCommand  {
 
     public GridSearchCommand(){
         super();
+    }
+
+    @Override
+    public void run() {
+
     }
 
   /*  public void run() throws Lr2pgException {

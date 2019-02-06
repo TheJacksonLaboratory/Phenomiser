@@ -1,9 +1,14 @@
 package org.jax;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
+import org.jax.cmd.GridSearchCommand;
+import org.jax.cmd.PhenomiserCommand;
+import org.jax.cmd.PreComputeCommand;
+import org.jax.cmd.QueryCommand;
 import org.jax.grid.GridSearch;
-import org.jax.grid.PhenotypeOnlyHpoCaseSimulator;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.*;
@@ -31,7 +36,51 @@ public class PhenomiserApp {
 
     public static void main( String[] args ) {
 
-        run(args);
+        long startTime = System.currentTimeMillis();
+
+        PhenomiserApp phenomiserApp = new PhenomiserApp();
+        PreComputeCommand preComputeCommand = new PreComputeCommand();
+        QueryCommand queryCommand = new QueryCommand();
+        GridSearchCommand gridSearchCommand = new GridSearchCommand();
+        JCommander jc = JCommander.newBuilder()
+                .addObject(phenomiserApp)
+                .addCommand("precompute", preComputeCommand)
+                .addCommand("query", queryCommand)
+                .addCommand("grid", gridSearchCommand)
+                .build();
+        jc.setProgramName("java -jar PhenomiserApp.jar");
+        try {
+            jc.parse(args);
+        } catch (ParameterException e) {
+            jc.usage();
+            System.exit(1);
+        }
+
+        String command = jc.getParsedCommand();
+        PhenomiserCommand phenomiserCommand=null;
+        switch (command) {
+            case "precompute":
+                phenomiserCommand = preComputeCommand;
+                break;
+            case "query":
+                phenomiserCommand = queryCommand;
+                break;
+            case "grid":
+                phenomiserCommand = gridSearchCommand;
+                break;
+            default:
+                System.err.println(String.format("[ERROR] command \"%s\" not recognized",command));
+                jc.usage();
+                System.exit(1);
+
+        }
+
+        phenomiserCommand.run();
+
+        long stopTime = System.currentTimeMillis();
+        System.out.println("LRPG: Elapsed time was " + (stopTime - startTime)*(1.0)/1000 + " seconds.");
+
+        //run(args);
 
     }
 
