@@ -23,9 +23,10 @@ public class PreComputeCommand extends PhenomiserCommand {
     private String hpoPath;
     @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file .hpoa")
     private String diseasePath;
-    @Parameter(names = {"-db", "--diseaseDB"},
-            description = "choose disease database [OMIM,ORPHA]")
-    private String diseaseDB = "OMIM";
+    //TODO: allow user choose OMIM or ORPHA
+//    @Parameter(names = {"-db", "--diseaseDB"},
+//            description = "choose disease database [OMIM,ORPHA]")
+//    private String diseaseDB = "OMIM";
     @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
     private String cachePath;
     @Parameter(names = {"-numThreads"}, description = "specify the number of threads")

@@ -1,6 +1,7 @@
 package org.jax.grid;
 
 import org.jax.services.AbstractResources;
+import org.jax.utils.DiseaseDB;
 
 import java.io.Writer;
 import java.util.*;
@@ -16,6 +17,7 @@ public class GridSearch {
     /** SHould we exchange the terms with their parents to simulate "imprecise" data entry? */
     private final boolean useImprecision;
 
+    private List<DiseaseDB> diseaseDB;
     /** Number of HPO terms to use for each simulated case. */
     private  int n_terms_per_case;
     /** Number of "noise" (unrelated) HPO terms to use for each simulated case. */
@@ -33,8 +35,9 @@ public class GridSearch {
      * @param n_cases Number of cases to simulate
      * @param imprecision if true, use "imprecision" to change HPO terms to a parent term
      */
-    public GridSearch(AbstractResources resources, int n_cases, int n_diseaseTerm, int n_noiseTerm, boolean imprecision) {
+    public GridSearch(AbstractResources resources, List<DiseaseDB> diseaseDB, int n_cases, int n_diseaseTerm, int n_noiseTerm, boolean imprecision) {
         this.resources = resources;
+        this.diseaseDB = diseaseDB;
         this.n_cases_to_simulate=n_cases;
         this.n_terms_per_case = n_diseaseTerm;
         this.n_noise_terms = n_noiseTerm;
@@ -46,7 +49,7 @@ public class GridSearch {
         double[][] rankmatrix = new double[n_terms_per_case][n_noise_terms];
         for (int i = 0; i < n_terms_per_case; i++) {
             for (int j = 0; j < n_noise_terms; j++) {
-                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, n_cases_to_simulate, i + 1, j, useImprecision);
+                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i + 1, j, useImprecision);
                 simulator.simulateCases();
                 rankmatrix[i][j] = simulator.getProportionAtRank1();
             }

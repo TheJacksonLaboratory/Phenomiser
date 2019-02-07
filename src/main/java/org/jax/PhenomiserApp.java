@@ -287,7 +287,7 @@ public class PhenomiserApp {
                     logger.trace("using computed data");
                 }
                 Phenomiser.setResources(resources);
-                GridSearch gridSearch = new GridSearch(resources, 100, 10, 5, false);
+                GridSearch gridSearch = new GridSearch(resources, Arrays.asList(DiseaseDB.OMIM), 100, 10, 5, false);
                 double[][] matrix = gridSearch.run();
                 System.out.println(matrix[0][0]);
 

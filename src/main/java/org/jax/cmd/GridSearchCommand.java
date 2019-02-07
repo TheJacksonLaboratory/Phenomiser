@@ -8,6 +8,7 @@ import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
+import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.slf4j.Logger;
@@ -16,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Run a grid search over number of terms and number of noise terms for
@@ -70,7 +74,9 @@ public class GridSearchCommand extends PhenomiserCommand {
         resources.init();
         Phenomiser.setResources(resources);
 
-        GridSearch gridSearch = new GridSearch(resources, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype);
+        List<DiseaseDB> targetDb = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
+
+        GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype);
 
         double [][] m = gridSearch.run();
 
