@@ -54,8 +54,6 @@ public class GridSearch {
                 rankmatrix[i][j] = simulator.getProportionAtRank1();
             }
         }
-        System.out.println("matrix size: " + rankmatrix.length + "\t" + rankmatrix[0].length);
-        System.out.println("matrix[0][0]: " + rankmatrix[0][0]);
         return rankmatrix;
     }
 
