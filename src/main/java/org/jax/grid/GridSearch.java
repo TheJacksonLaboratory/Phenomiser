@@ -51,10 +51,13 @@ public class GridSearch {
                 rankmatrix[i][j] = simulator.getProportionAtRank1();
             }
         }
+        System.out.println("matrix size: " + rankmatrix.length + "\t" + rankmatrix[0].length);
+        System.out.println("matrix[0][0]: " + rankmatrix[0][0]);
         return rankmatrix;
     }
 
-    public void write(double[][] rankmatrix, Writer writer) throws Exception{
+    //TODO: format output
+    public static void write(double[][] rankmatrix, Writer writer) throws Exception{
         for (int i = 0; i < rankmatrix.length; i++){
             for (int j = 0; j < rankmatrix[i].length; j++){
                 writer.write(Double.toString(rankmatrix[i][j]));

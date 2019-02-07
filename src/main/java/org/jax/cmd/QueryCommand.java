@@ -1,13 +1,14 @@
 package org.jax.cmd;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
-import org.jax.PhenomiserApp;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
+import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
@@ -16,25 +17,29 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Parameters(commandDescription = "Query with a list of HPO terms and rank diseases based on similarity score")
 public class QueryCommand extends PhenomiserCommand {
     private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
+    final String HOME = System.getProperty("user.home");
+
     @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
     private String hpoPath;
     @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file")
     private String diseasePath;
     @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
-    private String cachePath;
+    private String cachePath = HOME + File.separator + "Phenomiser_data";
     @Parameter(names = {"-db", "--diseaseDB"},
             description = "choose disease database [OMIM,ORPHA]")
-    private String diseaseDB;
-    @Parameter(names = {"-q", "--query-terms"}, description = "specify HPO terms to query")
+    private String diseaseDB = "OMIM";
+    @Parameter(names = {"-query", "--query-terms"}, description = "specify HPO terms to query")
     private String query;
 
     @Parameter(names = {"-o", "--output"}, description = "specify output path")
@@ -49,6 +54,18 @@ public class QueryCommand extends PhenomiserCommand {
         hpoParser.init();
         HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
         DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        try {
+            diseaseParser.init();
+        } catch (PhenolException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        if (!Files.exists(Paths.get(cachePath))){
+            System.err.print("Cannot find caching data at " + cachePath);
+            System.exit(1);
+        }
+
         resources = new CachedResources(hpoParser, diseaseParser, cachePath);
         resources.init();
         Phenomiser.setResources(resources);

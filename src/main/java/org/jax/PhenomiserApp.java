@@ -52,12 +52,20 @@ public class PhenomiserApp {
         try {
             jc.parse(args);
         } catch (ParameterException e) {
+            e.printStackTrace();
             jc.usage();
             System.exit(1);
         }
 
         String command = jc.getParsedCommand();
+
+        if (command == null) {
+            jc.usage();
+            System.exit(1);
+        }
+
         PhenomiserCommand phenomiserCommand=null;
+
         switch (command) {
             case "precompute":
                 phenomiserCommand = preComputeCommand;
