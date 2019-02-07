@@ -2,6 +2,8 @@ package org.jax;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
+import org.jax.grid.GridSearch;
+import org.jax.grid.PhenotypeOnlyHpoCaseSimulator;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.*;
@@ -9,7 +11,7 @@ import org.jax.utils.DiseaseDB;
 import org.jax.utils.OptionsFactory;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.PValue;
+import org.monarchinitiative.phenol.stats.Item2PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +59,8 @@ public class PhenomiserApp {
         String caching_folder = HOME + File.separator + "Phenomiser_data";
         Properties properties = new Properties();
 
-        Map<TermId, PValue> result;
+
+        List<Item2PValue<TermId>> result;
 
         try {
             commandLine = parser.parse(options, args);
@@ -192,6 +195,46 @@ public class PhenomiserApp {
                     write_query_result(result, commandLine.getOptionValue("o"));
                 }
             }
+
+            if (commandLine.hasOption("grid")){
+                //init hpo and disease parser
+                if (hpoPath != null && diseaseAnnotationPath != null) {
+                    try {
+                        hpoParser = new HpoParser(hpoPath);
+                        hpoParser.init();
+                        diseaseParser = new DiseaseParser(
+                                new HpoDiseaseAnnotationParser(diseaseAnnotationPath,
+                                        hpoParser.getHpo()),
+                                hpoParser.getHpo());
+                        diseaseParser.init();
+                    } catch (Exception e) {
+                        logger.error("resource initialization error");
+                        formatter.printHelp("Phenomiser", options);
+                    }
+                } else {
+                    logger.error("resource initialization error");
+                    formatter.printHelp("Phenomiser", options);
+                    System.exit(1);
+                }
+
+                //if there is cached scoreDistributions, use it; otherwise, compute from scratch
+                if (Files.exists(Paths.get(caching_folder))) {
+                    resources = new CachedResources(hpoParser, diseaseParser, caching_folder);
+                    resources.init();
+                    logger.trace("using cached data");
+                } else {
+                    properties.setProperty("numThreads", numThreads);
+                    properties.setProperty("cache", "true");
+                    resources = new ComputedResources(hpoParser, diseaseParser, properties, debugMode);
+                    resources.init();
+                    logger.trace("using computed data");
+                }
+                Phenomiser.setResources(resources);
+                GridSearch gridSearch = new GridSearch(resources, 100, 10, 5, false);
+                double[][] matrix = gridSearch.run();
+                System.out.println(matrix[0][0]);
+
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -208,11 +251,11 @@ public class PhenomiserApp {
         return writer;
     }
 
-    public static void write_query_result(Map<TermId, PValue> adjusted_p_value, @Nullable String outPath) {
+    public static void write_query_result(List<Item2PValue<TermId>> result, @Nullable String outPath) {
 
-        if (adjusted_p_value == null) {
-            return;
-        }
+//        if (adjusted_p_value == null) {
+//            return;
+//        }
 
         Writer writer = getWriter(outPath);
 
@@ -222,15 +265,18 @@ public class PhenomiserApp {
             logger.error("io exception during writing header. writing output aborted.");
             return;
         }
+        List<Item2PValue<TermId>> newList = new ArrayList<>(result);
+        Collections.sort(newList);
 
-        adjusted_p_value.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e -> {
+        newList.stream().forEach(e -> {
             try {
-                writer.write(e.getKey().getValue());
+                writer.write(e.getItem().getValue());
                 writer.write("\t");
-                writer.write(resources.getDiseaseMap().get(e.getKey()).getName());
-                writer.write(Double.toString(e.getValue().getRawPValue()));
+                writer.write(resources.getDiseaseMap().get(e.getItem()).getName());
                 writer.write("\t");
-                writer.write(Double.toString(e.getValue().getAdjustedPValue()));
+                writer.write(Double.toString(e.getRawPValue()));
+                writer.write("\t");
+                writer.write(Double.toString(e.getAdjustedPValue()));
                 writer.write("\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");

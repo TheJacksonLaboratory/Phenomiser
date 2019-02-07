@@ -3,6 +3,8 @@ package org.jax.utils;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import java.util.Optional;
+
 public class OptionsFactory {
 
     public static Options getInstance() {
@@ -73,6 +75,12 @@ public class OptionsFactory {
                 .required(false)
                 .desc("specify the number of threads to use (default: 4)").build();
 
+        Option gridSearch = Option.builder("grid")
+                .longOpt("gridsearch")
+                .hasArg(false)
+                .required(false)
+                .desc("grid search with 1-10 disease terms and 0-4 noise terms").build();
+
         options.addOption(help)
                 .addOption(hpoPath)
                 .addOption(disease_annotation_path)
@@ -83,7 +91,8 @@ public class OptionsFactory {
                 .addOption(out)
                 .addOption(debug)
                 .addOption(recache)
-                .addOption(thread);
+                .addOption(thread)
+                .addOption(gridSearch);
 
         return options;
     }
