@@ -25,7 +25,7 @@ public class PValueCalculator  {
     private int queryTermCount;
 
     public PValueCalculator(int queryTermCount, Map<Integer, Double> similarityScores, AbstractResources resources) {
-        this.queryTermCount = queryTermCount;
+        this.queryTermCount = Math.min(10, queryTermCount);
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
         this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();

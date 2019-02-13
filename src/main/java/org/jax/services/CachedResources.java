@@ -105,6 +105,10 @@ public class CachedResources extends AbstractResources{
             try {
                 Files.list(Paths.get(cachingPath))
                         .filter(path -> path.getFileName().toString().matches("^[0-9]{1,2}_term.scoreDistribution.binary"))
+                        .filter(path -> {
+                            int numHPO = Integer.parseInt(path.getFileName().toString().split("_")[0]);
+                            return (numHPO <= 10);
+                        })
                         .forEach(path -> {
                             int numHPO = Integer.parseInt(path.getFileName().toString().split("_")[0]);
                             try (ObjectInputStream in =
