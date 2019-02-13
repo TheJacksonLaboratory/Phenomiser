@@ -58,6 +58,9 @@ public class PhenomiserApp {
         final String HOME = System.getProperty("user.home");
         String caching_folder = HOME + File.separator + "Phenomiser_data";
         Properties properties = new Properties();
+        /*int numb_disease_terms;
+        int num_random_terms;
+        int number_cases;*/
 
 
         List<Item2PValue<TermId>> result;
@@ -197,7 +200,6 @@ public class PhenomiserApp {
             }
 
             if (commandLine.hasOption("grid")){
-                //init hpo and disease parser
                 if (hpoPath != null && diseaseAnnotationPath != null) {
                     try {
                         hpoParser = new HpoParser(hpoPath);
@@ -229,10 +231,36 @@ public class PhenomiserApp {
                     resources.init();
                     logger.trace("using computed data");
                 }
+
+                //get the number of cases to simulate, number of real disease terms and number of noise terms
+                /*if(commandLine.hasOption("c")) {
+                    number_cases = ?;
+                }
+                else{
+                    number_cases = 100;//default number of casese
+                }
+                if(commandLine.hasOption("r")) {
+                      numb_disease_terms = ?;
+                }
+                    else{
+                      numb_disease_terms = 10;//default number of HPO disease terms
+                }
+
+                if(commandLine.hasOption("n")) {
+                    numb_disease_terms = ?;
+                }
+                else{
+                    numb_disease_terms = 4;//default number of random noise terms
+                }*/
+
+
+
                 Phenomiser.setResources(resources);
-                GridSearch gridSearch = new GridSearch(resources, 100, 10, 5, false);
+                GridSearch gridSearch = new GridSearch(resources, 5, 3, 0, false);
+                //GridSearch gridSearch = new GridSearch(resources, number_cases, numb_disease_terms, num_disease_terms, false);
+
                 double[][] matrix = gridSearch.run();
-                System.out.println(matrix[0][0]);
+                //System.out.println(matrix[0][0]);
 
             }
         } catch (ParseException e) {

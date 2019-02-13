@@ -113,6 +113,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
                         disease.getDiseaseDatabaseId()));
                 continue;
             }
+            System.out.println(disease);
             int rank = simulateCase(disease);
             if (verbose) {
                 System.err.println(String.format("%s: rank=%d", disease.getName(), rank));
@@ -123,8 +124,14 @@ public class PhenotypeOnlyHpoCaseSimulator {
                 break; // finished!
             }
         }
-        if (ranks.containsKey(1)) {
+        /*if (ranks.containsKey(1)) {
             proportionAtRank1 = ranks.get(1) / (double) n_cases_to_simulate;
+        } else {
+            proportionAtRank1 = 0.0;
+        }*/
+
+        if (ranks.containsKey(0)) {
+            proportionAtRank1 = ranks.get(0) / (double) n_cases_to_simulate;
         } else {
             proportionAtRank1 = 0.0;
         }
@@ -147,7 +154,10 @@ public class PhenotypeOnlyHpoCaseSimulator {
         System.out.println(String.format("Simulation of %d cases with %d HPO terms, %d noise terms. Imprecision: %s",
                 n_cases_to_simulate,n_terms_per_case,n_noise_terms,addTermImprecision));
         for (int r:ranks.keySet()) {
-            if (r==1) {
+           /* if (r==1) {
+                proportionAtRank1=ranks.get(r) / (double)N;
+            }*/
+            if (r==0) {
                 proportionAtRank1=ranks.get(r) / (double)N;
             }
             if (r<11) {
@@ -204,8 +214,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
      */
     private List<TermId> getRandomTermsFromDisease(HpoDisease disease) {
         int n_terms=Math.min(disease.getNumberOfPhenotypeAnnotations(),n_terms_per_case);
-        int n_random=Math.min(n_terms, n_noise_terms);// do not take more random than real terms.
-        logger.trace("Creating simulated case with n_terms="+n_terms + ", n_random="+n_random);
+        //int n_random=Math.min(n_terms, n_noise_terms);// do not take more random than real terms.
+        logger.trace("Creating simulated case with n_terms="+n_terms + ", n_random="+n_noise_terms);
         // the creation of a new ArrayList is needed because disease returns an immutable list.
         List<HpoAnnotation> abnormalities = new ArrayList<>(disease.getPhenotypicAbnormalities());
         ImmutableList.Builder<TermId> termIdBuilder = new ImmutableList.Builder<>();
@@ -213,7 +223,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         // take the first n_random terms of the randomized list
         abnormalities.stream().limit(n_terms).forEach(a-> termIdBuilder.add(a.getTermId()));
         // now add n_random "noise" terms to the list of abnormalities of our case.
-        for(int i=0;i<n_random;i++){
+        for(int i=0;i<n_noise_terms;i++){
             TermId t = getRandomPhenotypeTerm();
             if (addTermImprecision) {
                 t = getRandomParentTerm(t);
@@ -221,19 +231,23 @@ public class PhenotypeOnlyHpoCaseSimulator {
             termIdBuilder.add(t);
         }
         return termIdBuilder.build();
+
     }
 
 
     public int simulateCase(HpoDisease disease) {
-
-        List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, Arrays.asList(DiseaseDB.OMIM));
-        //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
         int rank = -1;
-        for (int i = 0; i < result.size(); i++) {
-            if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {
-                rank = i;
-                break;
+        List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
+        if (randomizedTerms.size() > 0 ) {
+            randomizedTerms.forEach(System.out::println);
+            List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, Arrays.asList(DiseaseDB.OMIM));
+            //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
+
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {
+                    rank = i;
+                    break;
+                }
             }
         }
         return rank;
