@@ -23,7 +23,6 @@ public class PreComputeCommand extends PhenomiserCommand {
     private String hpoPath;
     @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file .hpoa")
     private String diseasePath;
-    //TODO: allow user choose OMIM or ORPHA
 //    @Parameter(names = {"-db", "--diseaseDB"},
 //            description = "choose disease database [OMIM,ORPHA]")
 //    private String diseaseDB = "OMIM";
@@ -61,6 +60,9 @@ public class PreComputeCommand extends PhenomiserCommand {
         if (sampling.get(0) > sampling.get(1)) {
             System.exit(1);
         }
+
+
+//        properties.setProperty("diseaseDB", diseaseDB);
         properties.setProperty("sampleMin", Integer.toString(sampling.get(0)));
         properties.setProperty("sampleMax", Integer.toString(sampling.get(1)));
 

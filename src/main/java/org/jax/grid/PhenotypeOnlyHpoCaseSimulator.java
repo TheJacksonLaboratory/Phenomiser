@@ -65,9 +65,17 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.n_terms_per_case=terms_per_case;
         this.n_noise_terms=noise_terms;
         this.ontology=resources.getHpo();
+        //filter diseaseMap to target database
         String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
+        //filter diseaseMap to diseases with scoreDistributions
+        System.out.println("count of diseases having scoreDistributions: " + resources.getScoreDistributions().size());
+        Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(1).getObjectIds()
+                .stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
+        diseasesHavingScoreDistributions.forEach(System.out::println);
         this.diseaseMap=resources.getDiseaseMap()
-                .entrySet().stream().filter(e -> e.getKey().getPrefix().matches(filter))
+                .entrySet().stream()
+                .filter(e -> e.getKey().getPrefix().matches(filter))
+                .filter(e -> diseasesHavingScoreDistributions.contains(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Set<TermId> descendents=getDescendents(ontology,PHENOTYPIC_ABNORMALITY);
         ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
@@ -240,7 +248,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         int rank = -1;
         for (int i = 0; i < result.size(); i++) {
             if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {
-                rank = i;
+                rank = i + 1;
                 break;
             }
         }

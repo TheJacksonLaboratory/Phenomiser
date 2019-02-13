@@ -25,7 +25,8 @@ public class PValueCalculator  {
     private int queryTermCount;
 
     public PValueCalculator(int queryTermCount, Map<Integer, Double> similarityScores, AbstractResources resources) {
-        this.queryTermCount = queryTermCount;
+        //Above 10, score distributions are identical to 10
+        this.queryTermCount = Math.min(queryTermCount, 10);
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
         this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
@@ -33,21 +34,17 @@ public class PValueCalculator  {
 
     public Map<TermId, Double> calculatePValues() {
 
-        //Map<Integer, Double> p_values = new HashMap<>();
         Map<TermId, Double> p_values = new HashMap<>();
-        similarityScores.entrySet().stream()
-                .forEach(s -> {
-                    if (scoreDistributions.containsKey(queryTermCount) &&
-                            scoreDistributions.get(queryTermCount)
-                                    .getObjectScoreDistribution(s.getKey()) != null) {
-                        double p = scoreDistributions.get(queryTermCount)
-                                .getObjectScoreDistribution(s.getKey())
-                                .estimatePValue(s.getValue());
-                        //PValue pValue = new PValue();
-                        //pValue.setRawPValue(p);
-                        p_values.put(diseaseIndexToDisease.get(s.getKey()), p);
-                    }
-                });
+        similarityScores.forEach((key, value) -> {
+            if (scoreDistributions.containsKey(queryTermCount) &&
+                    scoreDistributions.get(queryTermCount)
+                            .getObjectScoreDistribution(key) != null) {
+                double p = scoreDistributions.get(queryTermCount)
+                        .getObjectScoreDistribution(key)
+                        .estimatePValue(value);
+                p_values.put(diseaseIndexToDisease.get(key), p);
+            }
+        });
 
         return p_values;
     }
@@ -60,10 +57,10 @@ public class PValueCalculator  {
             builder.add(item);
         }
         BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
-        Bonferroni<TermId> bonf = new Bonferroni<>();
+        //Bonferroni<TermId> bonf = new Bonferroni<>();
         List<Item2PValue<TermId>> mylist = builder.build();
 
-        bonf.adjustPvals(mylist);
+        bh.adjustPvals(mylist);
 
         return mylist;
     }

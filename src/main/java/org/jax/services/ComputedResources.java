@@ -113,7 +113,7 @@ public class ComputedResources extends AbstractResources {
         ScoreSamplingOptions samplingOption = new ScoreSamplingOptions();
         samplingOption.setNumThreads(numThreads);
         if (this.debug) {
-            samplingOption.setMinNumTerms(3);
+            samplingOption.setMinNumTerms(1);
             samplingOption.setMaxNumTerms(3);
         } else {
             samplingOption.setMinNumTerms(sampleMin);
@@ -124,7 +124,7 @@ public class ComputedResources extends AbstractResources {
         if (this.debug) {
             sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
             Map<Integer, List<TermId>> subset = diseaseIndexToHpoTerms.entrySet().stream()
-                    .limit(100).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .limit(50).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
             scoreDistributions.putAll(sampleing.performSampling(subset));
         } else {
             for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {

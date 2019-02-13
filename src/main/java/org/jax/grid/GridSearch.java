@@ -46,10 +46,10 @@ public class GridSearch {
     }
 
     public double[][] run() {
-        double[][] rankmatrix = new double[n_terms_per_case][n_noise_terms];
-        for (int i = 0; i < n_terms_per_case; i++) {
-            for (int j = 0; j < n_noise_terms; j++) {
-                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i + 1, j, useImprecision);
+        double[][] rankmatrix = new double[n_terms_per_case + 1][n_noise_terms + 1];
+        for (int i = 1; i <= n_terms_per_case; i++) {
+            for (int j = 0; j <= n_noise_terms; j++) {
+                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
                 simulator.simulateCases();
                 rankmatrix[i][j] = simulator.getProportionAtRank1();
             }
