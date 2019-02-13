@@ -13,6 +13,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDescendents;
 import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getParentTerms;
@@ -30,6 +31,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     private final ImmutableList<TermId> phenotypeterms;
     /** Key: diseaseID, e.g., OMIM:600321; value: Corresponding HPO disease object. */
     private final Map<TermId,HpoDisease> diseaseMap;
+    private Map<TermId, HpoDisease> diseaseMapWithScoreDistributions;
     /** Number of HPO terms to use for each simulated case. */
     private final int n_terms_per_case;
     /** Number of "noise" (unrelated) HPO terms to use for each simulated case. */
@@ -61,13 +63,17 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.n_noise_terms=noise_terms;
         this.ontology=resources.getHpo();
         this.diseaseMap=resources.getDiseaseMap();
+
+        Set<TermId> targetDiseases = resources.getScoreDistributions().keySet().stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
+        this.diseaseMapWithScoreDistributions = this.diseaseMap.entrySet().stream().filter(e -> targetDiseases.contains(e.getKey())).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+
         Set<TermId> descendents=getDescendents(ontology,PHENOTYPIC_ABNORMALITY);
         ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
         for (TermId t: descendents) {
             builder.add(t);
         }
         this.phenotypeterms=builder.build();
-        this.termIndices=diseaseMap.keySet().toArray(new TermId[0]);
+        this.termIndices=diseaseMapWithScoreDistributions.keySet().toArray(new TermId[0]);
         this.addTermImprecision = imprecise;
     }
 
@@ -79,13 +85,13 @@ public class PhenotypeOnlyHpoCaseSimulator {
     }
 
     public TermId getNextRandomDisease(Random r) {
-        int i = r.nextInt(diseaseMap.size());
+        int i = r.nextInt(diseaseMapWithScoreDistributions.size());
         TermId tid = termIndices[i];
-        HpoDisease disease = diseaseMap.get(tid);
+        HpoDisease disease = diseaseMapWithScoreDistributions.get(tid);
         while (disease.getPhenotypicAbnormalities().size() < this.n_terms_per_case) {
-            i = r.nextInt(diseaseMap.size());
+            i = r.nextInt(diseaseMapWithScoreDistributions.size());
             tid = termIndices[i];
-            disease = diseaseMap.get(tid);
+            disease = diseaseMapWithScoreDistributions.get(tid);
         }
         return tid;
     }
