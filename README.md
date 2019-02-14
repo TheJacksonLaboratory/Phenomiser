@@ -38,7 +38,7 @@ grid
 -noise 1
 ```
 
-The output is a matrix whether the rows are the number of i and columns the number of j. The value is the percentage (range 0 to 1) of simulations where Phenomiser corrected ranked the disease of target number 1. 
+The output is a matrix where the rows are the number of i and columns the number of j. The value is the percentage (range 0 to 1) of simulations where Phenomiser corrected ranked the disease of target number 1. 
 
 ##Usuage in details
 
