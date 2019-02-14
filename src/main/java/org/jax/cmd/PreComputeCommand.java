@@ -31,9 +31,9 @@ public class PreComputeCommand extends PhenomiserCommand {
     @Parameter(names = {"-numThreads"}, description = "specify the number of threads")
     private Integer numThreads = 4;
     @Parameter(names = {"-sampling", "--sampling-range"},
-            description = "range of HPO terms to create similarity distributions for",
+            description = "range of HPO terms to create similarity distributions for. Max 10",
             arity = 2)
-    private List<Integer> sampling = Arrays.asList(1, 15);
+    private List<Integer> sampling = Arrays.asList(1, 10);
     @Parameter(names = {"-debug"}, description = "use debug mode")
     private boolean debug = false;
 

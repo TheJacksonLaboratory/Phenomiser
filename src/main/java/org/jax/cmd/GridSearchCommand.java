@@ -17,14 +17,13 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Run a grid search over number of terms and number of noise terms for
- * phenotype-only LR2PG. Can be run with or with imprecision.
+ * Run a grid search over number of terms and number of noise terms. Can be run with or with imprecision.
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
+ * @author <a href="mailto:aaron.zhang@jax.org">Aaron Zhang</a>
  */
 @Parameters(commandDescription = "Grid search for simulation of phenotype-only cases")
 public class GridSearchCommand extends PhenomiserCommand {
@@ -50,11 +49,16 @@ public class GridSearchCommand extends PhenomiserCommand {
     private boolean imprecise_phenotype = false;
     @Parameter(names = {"-o", "--output"}, description = "Output path")
     private String outPath;
+    @Parameter(names = {"-seed", "--set.seed"}, description = "Set random number generator seed for simulation")
+    private Integer seed = null;
 
     private AbstractResources resources;
 
     @Override
     public void run() {
+
+        checkSignal();
+
         HpoParser hpoParser = new HpoParser(hpoPath);
         hpoParser.init();
         HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
@@ -76,7 +80,13 @@ public class GridSearchCommand extends PhenomiserCommand {
 
         List<DiseaseDB> targetDb = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
 
-        GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype);
+        Random random = null;
+        if (seed != null) {
+            random = new Random(seed);
+        }
+
+        checkScoreDistributionsArePrecomputed();
+        GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype, random);
 
         double [][] m = gridSearch.run();
 
@@ -105,6 +115,32 @@ public class GridSearchCommand extends PhenomiserCommand {
             writer = new OutputStreamWriter(System.out);
         }
         return writer;
+    }
+
+    private void checkSignal() {
+        if (n_diseaseTerm <= 0) {
+            System.err.print("Signal needs to be at least 1");
+            System.exit(1);
+        }
+    }
+
+    private void checkScoreDistributionsArePrecomputed() {
+        Optional<Integer> max = resources.getScoreDistributions().keySet().stream().max(Comparator.comparingInt(Integer::intValue));
+        if (max.isPresent()) {
+            int maxScoreDistribution = max.get();
+            int maxSimulate = this.n_diseaseTerm + this.n_noiseTerm;
+            if (maxSimulate > maxScoreDistribution) {
+                if (maxScoreDistribution == 10) {
+                    //this is okay, as >10 are treated as 10
+                } else {
+                    //this is not okay, as score distributions between (max, maxSimulate)
+                    //will not be found
+                    System.err.print("You do not have all score distributions for the simulation. " +
+                            "ReRun precompute.");
+                    System.exit(1);
+                }
+            }
+        }
     }
 
 }

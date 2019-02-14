@@ -7,9 +7,11 @@ import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.Bonferroni;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -49,17 +51,12 @@ public class PValueCalculator  {
         return p_values;
     }
 
-    public List<Item2PValue<TermId>> getPvalList() {
-        ImmutableList.Builder<Item2PValue<TermId>> builder = new ImmutableList.Builder<>();
-        Map<TermId, Double> mymap = calculatePValues();
-        for (TermId diseaseId : mymap.keySet() ) {
-            Item2PValue<TermId> item = new Item2PValue<>(diseaseId,mymap.get(diseaseId));
-            builder.add(item);
-        }
-        BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
-        //Bonferroni<TermId> bonf = new Bonferroni<>();
-        List<Item2PValue<TermId>> mylist = builder.build();
+    public List<Item2PValue<TermId>> adjustPvals() {
 
+        Map<TermId, Double> mymap = calculatePValues();
+        List<Item2PValue<TermId>> mylist = mymap.entrySet().stream().map(e -> new Item2PValue<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+
+        BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
         bh.adjustPvals(mylist);
 
         return mylist;

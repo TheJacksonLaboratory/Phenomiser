@@ -1,6 +1,7 @@
 package org.jax;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
@@ -32,6 +33,9 @@ public class PhenomiserApp {
 
     private static Logger logger = LoggerFactory.getLogger(PhenomiserApp.class);
 
+    @Parameter(names = {"-h", "--help"}, help = true, arity = 0,description = "display this help message")
+    private boolean helpInforRequested;
+
     private static AbstractResources resources;
 
     public static void main( String[] args ) {
@@ -52,12 +56,23 @@ public class PhenomiserApp {
         try {
             jc.parse(args);
         } catch (ParameterException e) {
+            for (String arg : args) {
+                if (arg.contains("h")) {
+                    jc.usage();
+                    System.exit(0);
+                }
+            }
             e.printStackTrace();
             jc.usage();
             System.exit(1);
         }
 
         String command = jc.getParsedCommand();
+
+        if (phenomiserApp.helpInforRequested) {
+            jc.usage();
+            System.exit(0);
+        }
 
         if (command == null) {
             jc.usage();
@@ -86,7 +101,7 @@ public class PhenomiserApp {
         phenomiserCommand.run();
 
         long stopTime = System.currentTimeMillis();
-        System.out.println("LRPG: Elapsed time was " + (stopTime - startTime)*(1.0)/1000 + " seconds.");
+        System.out.println("Phenomiser: Elapsed time was " + (stopTime - startTime)*(1.0)/1000 + " seconds.");
 
         //run(args);
 
@@ -287,7 +302,7 @@ public class PhenomiserApp {
                     logger.trace("using computed data");
                 }
                 Phenomiser.setResources(resources);
-                GridSearch gridSearch = new GridSearch(resources, Arrays.asList(DiseaseDB.OMIM), 100, 10, 5, false);
+                GridSearch gridSearch = new GridSearch(resources, Arrays.asList(DiseaseDB.OMIM), 100, 10, 5, false, null);
                 double[][] matrix = gridSearch.run();
                 System.out.println(matrix[0][0]);
 

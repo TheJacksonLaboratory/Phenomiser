@@ -44,6 +44,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
      * the root of the phenotype ontology.*/
     private boolean addTermImprecision = false;
     /** The proportion of cases at rank 1 in the current simulation */
+    private List<DiseaseDB> db;
+
     private double proportionAtRank1=0.0;
     /** Case currently being simulated/analyzed. */
     //private HpoCase currentCase;
@@ -65,6 +67,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.n_terms_per_case=terms_per_case;
         this.n_noise_terms=noise_terms;
         this.ontology=resources.getHpo();
+        this.db = db;
         //filter diseaseMap to target database
         String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
         //filter diseaseMap to diseases with scoreDistributions
@@ -203,7 +206,6 @@ public class PhenotypeOnlyHpoCaseSimulator {
     private TermId getRandomParentTerm(TermId tid) {
         Set<TermId> parents = getParentTerms(ontology,tid,false);
         int r = (int)Math.floor(parents.size()*Math.random());
-        int i=0;
         return (TermId)parents.toArray()[r];
     }
 
@@ -243,7 +245,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     public int simulateCase(HpoDisease disease) {
 
         List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, Arrays.asList(DiseaseDB.OMIM));
+        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, this.db);
         //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
         int rank = -1;
         for (int i = 0; i < result.size(); i++) {
