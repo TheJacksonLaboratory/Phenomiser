@@ -5,104 +5,130 @@ This is new implementation of the Phenomiser algorithm published in https://www.
 You can make a query programmatically using the Phenomiser class. Alternatively, you can build a jar file with all dependencies and run from the command line.
 
 
-**Quick start**
+##Quick start
 
-1. Test the app with the following variables. 
-Note in the debug mode, which saves computatation time, you can only query with three HPO terms for their matching with 100 diseases. 
+1. Precompute 
+Phenomiser need to simulate query with sets of HPO terms to compute an empirical similarity score distributions for each disease. We use **-debug** mode to compute score distributions for querying with 1, 2 or 3 HPO terms for 50 random diseases. You should omit this argument if you want to precompute data for all diseases. Be aware: it will take a long time complete. Read below for details. 
 
 ```
+precompute
 -hpo ${path to}hp.obo
 -da ${path to}phenotype.hpoa
--db OMIM
--q HP:0003074,HP:0010645,HP:0001943
 -debug
 ```
-You should be able to see a list of diseases and associated P values printed out in your console. 
 
-2. Remove "-debug" to find similarities of query terms to all diseases. 
-Note we used "-f" to force the app not using cached data that was computed for debug mode in the last step, and that we used "-sampling 3-3" to save computing time (see below for details).
-Also note that this step will take 2~4 hours on a personal computer.
+You should be able to find a **Phenomiser_data** created for you under your home directory. The folder contains precomputed data that will be used in the following steps.
+
+2. Query with HPO terms. This allows you to rank diseases based on their similarities with the query terms that you provided. Note that you have to limit your query terms to 1, 2, or 3 if you used **-debug** in the last step.
 
 ```
+query
 -hpo ${path to}hp.obo
 -da ${path to}phenotype.hpoa
--db OMIM
--q HP:0003074,HP:0010645,HP:0001943
--sampling 3-3
--f
+-query HP:0003074,HP:0010645,HP:0001943
 ```
 
-3. Make more queries with new sets of HPO terms (Must be three HPO terms).
-Note that we do not use "-f" because we can (and want to) used cached data from last step.
+3. Grid search. This command allows you to simulate queries with a i signal (HPO terms belonging to a certain disease) and j noise (random HPO terms not belonging to the same disease), where i and j can be specified by setting the **-signal** (max of i) and **-noise** (max of j).
 
 ```
+grid
 -hpo ${path to}hp.obo
 -da ${path to}phenotype.hpoa
--db OMIM
--q ${HP term1},${HP term2},${HP term3}
+-signal 2
+-noise 1
 ```
 
-4. Make a formal query with the following code. Note we used "-f" to force the app to recompute data because the cached 
-data from last step only works if we query with three HPO terms. This will take a LONG time on a personal computer.
+##Usuage in details
 
-```
--hpo ${path to}hp.obo
--da ${path to}phenotype.hpoa
--db OMIM
--q ${HP term1},${HP term2},${HP term3}
--f
-```
-
-5. Make following calls with cached data. This should take only minutes or less as we can used cached data.
-```
--hpo ${path to}hp.obo
--da ${path to}phenotype.hpoa
--db OMIM
--q {1-10 HPO terms separated by ","}
-```
-
-
-**Usuage in details**
+### Help infor
 
 Run the app with "-h" to print out a list of all arguments:
 
 ```
-usage: Phenomiser
- -cachePath,--cachePath <arg>      specify the path to cache folder
- -cpu,--cpu <arg>                  specify the number of threads to use
-                                   (default: 4)
- -da,--disease-annotations <arg>   [required]specify full path to disease
-                                   annotations
- -db,--disease-database <arg>      specify comma-separated database
-                                   [OMIM,ORPHA]
- -debug,--debug_mode               save computation time if this option is
-                                   used
- -exit,--exit                      exit afterward
- -f,--force_recache                force recompute to get a new cache of
-                                   resources
- -h,--help                         print usage
- -hpo <arg>                        [required]specify full path to hp.obo
- -o,--out <arg>                    specify output path
- -q,--query-terms <arg>            [required]specify comma-separated query
-                                   terms (e.g. HP:0003074)
- -sampling,--sampling <arg>        specify sampling range in format
-                                   "min-max" (default 1-10)
+Usage: java -jar PhenomiserApp.jar [options] [command] [command options]
+  Options:
+    -h, --help
+      display this help message
+  Commands:
+    precompute      Precompute similarity score distributions
+      Usage: precompute [options]
+        Options:
+          -cachePath, --cachePath
+            specify the path to save precomputed data
+          -da, --disease_annotation
+            specify the path to disease annotation file .hpoa
+          -hpo, --hpo_path
+            specify the path to hp.obo
+          -sampling, --sampling-range
+            range of HPO terms to create similarity distributions for. Max 10
+            Default: [1, 10]
+          -debug
+            use debug mode
+            Default: false
+          -numThreads
+            specify the number of threads
+            Default: 4
+
+    query      Query with a list of HPO terms and rank diseases based on 
+            similarity score
+      Usage: query [options]
+        Options:
+          -cachePath, --cachePath
+            specify the path to save precomputed data
+            Default: /Users/zhangx/Phenomiser_data
+          -db, --diseaseDB
+            choose disease database [OMIM,ORPHA]
+            Default: OMIM
+          -da, --disease_annotation
+            specify the path to disease annotation file
+          -hpo, --hpo_path
+            specify the path to hp.obo
+          -o, --output
+            specify output path
+          -query, --query-terms
+            specify HPO terms to query
+
+    grid      Grid search for simulation of phenotype-only cases
+      Usage: grid [options]
+        Options:
+          -cachePath, --cachePath
+            specify the path to save precomputed data
+            Default: /Users/zhangx/Phenomiser_data
+          -db, --diseaseDB
+            choose disease database [OMIM,ORPHA]
+            Default: OMIM
+          -da, --disease_annotation
+            specify the path to disease annotation file
+          -hpo, --hpo_path
+            specify the path to hp.obo
+          -i, --imprecision
+            Use imprecision?
+            Default: false
+          -signal, --n-diseaseTerm
+            Number of disease terms
+            Default: 10
+          -c, --n_cases
+            Number of cases to simulate
+            Default: 100
+          -noise, --noise
+            Number of noise terms
+            Default: 5
+          -o, --output
+            Output path
+          -seed, --set.seed
+            Set random number generator seed for simulation
 ```
 
-Important notes:
+### How to set precompute parameters 
 
-- The first run will take a LONG time on a personal computer as the app needs to sample HPO terms to compute similarity 
-score distributions for all diseases. Therefore, we suggest using -debug mode if you just want to try it out. However, 
-you can only query with three HPO terms under debug mode. Also, the app only analyze the similarities to a randomly 
-selected subset of 100 diseases. As a result, the top ranked diseases (smalled p values) are probably not the ones that 
-you would hope to see.  
+We recommend running this command on a cluster, and download the cached folder to your personal computer for query (you still need a large RAM to read in the serialized data).
 
-- We strongly suggest running the app on a cluster with multiple CPUs, and then download the cached data to use on 
-personal computers. 
+Two parameters are critical: 
 
-- use "-cpu" to inform the app the number of available CPUs. 
+**numThreads** Increase the number if you can request more CPU. We tested 40 CPU and can finish the job in about 20 hours.
 
-- Default caching data is under HOME/Phenomiser.data. Use "-cachePath" if you want to overwrite the default setting.
+**sampling** We recommend using the default value of 1 - 10. There is no need to increase the max value above 10, as the score distributions will not change much above 10. If you change the numbers, you have to make sure that the number of query terms fall within the range.
 
-- Since the app tries to use cached data when they are present, pay attention whether cached data is correct for a query.
-Use "-f" to force the app to recompute and overwrite old caching data.
+### How to access cached data
+
+Default caching data is under HOME/Phenomiser_data. You can use "-cachePath" if you want to overwrite the default setting.

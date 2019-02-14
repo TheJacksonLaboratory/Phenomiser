@@ -29,7 +29,7 @@ public class ComputedResourcesTest {
 
         HpoParser hpoParser = new HpoParser(hpoPath);
         hpoParser.init();
-        Ontology hpo = (Ontology) hpoParser.getHpo();
+        Ontology hpo = hpoParser.getHpo();
         HpoDiseaseAnnotationParser hpoDiseaseAnnotationParser = new HpoDiseaseAnnotationParser(phenotypeAnnotation, hpo);
         DiseaseParser diseaseParser = new DiseaseParser(hpoDiseaseAnnotationParser, hpo);
         diseaseParser.init();

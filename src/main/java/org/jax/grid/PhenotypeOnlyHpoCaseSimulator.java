@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jax.Phenomiser;
+import org.jax.io.DiseaseParser;
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.formats.hpo.HpoAnnotation;
@@ -12,7 +13,9 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDescendents;
 import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getParentTerms;
@@ -21,6 +24,7 @@ import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getPa
  * A simulator that simulates cases from the {@link HpoDisease} objects by choosing a subset of terms
  * and adding noise terms.
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
+ * @author <a href="mailto:aaron.zhang@jax.org">Aaron Zhang</a>
  */
 public class PhenotypeOnlyHpoCaseSimulator {
     private static final Logger logger = LogManager.getLogger(PhenotypeOnlyHpoCaseSimulator.class);
@@ -40,6 +44,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
      * the root of the phenotype ontology.*/
     private boolean addTermImprecision = false;
     /** The proportion of cases at rank 1 in the current simulation */
+    private List<DiseaseDB> db;
+
     private double proportionAtRank1=0.0;
     /** Case currently being simulated/analyzed. */
     //private HpoCase currentCase;
@@ -52,6 +58,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     private final static TermId PHENOTYPIC_ABNORMALITY = TermId.of("HP:0000118");
 
     public PhenotypeOnlyHpoCaseSimulator(AbstractResources resources,
+                                         @NotNull List<DiseaseDB> db,
                                          int cases_to_simulate,
                                          int terms_per_case,
                                          int noise_terms,
@@ -60,7 +67,19 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.n_terms_per_case=terms_per_case;
         this.n_noise_terms=noise_terms;
         this.ontology=resources.getHpo();
-        this.diseaseMap=resources.getDiseaseMap();
+        this.db = db;
+        //filter diseaseMap to target database
+        String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
+        //filter diseaseMap to diseases with scoreDistributions
+        System.out.println("count of diseases having scoreDistributions: " + resources.getScoreDistributions().size());
+        Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(1).getObjectIds()
+                .stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
+        diseasesHavingScoreDistributions.forEach(System.out::println);
+        this.diseaseMap=resources.getDiseaseMap()
+                .entrySet().stream()
+                .filter(e -> e.getKey().getPrefix().matches(filter))
+                .filter(e -> diseasesHavingScoreDistributions.contains(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Set<TermId> descendents=getDescendents(ontology,PHENOTYPIC_ABNORMALITY);
         ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
         for (TermId t: descendents) {
@@ -187,7 +206,6 @@ public class PhenotypeOnlyHpoCaseSimulator {
     private TermId getRandomParentTerm(TermId tid) {
         Set<TermId> parents = getParentTerms(ontology,tid,false);
         int r = (int)Math.floor(parents.size()*Math.random());
-        int i=0;
         return (TermId)parents.toArray()[r];
     }
 
@@ -227,12 +245,12 @@ public class PhenotypeOnlyHpoCaseSimulator {
     public int simulateCase(HpoDisease disease) {
 
         List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, Arrays.asList(DiseaseDB.OMIM));
+        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, this.db);
         //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
         int rank = -1;
         for (int i = 0; i < result.size(); i++) {
             if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {
-                rank = i;
+                rank = i + 1;
                 break;
             }
         }
