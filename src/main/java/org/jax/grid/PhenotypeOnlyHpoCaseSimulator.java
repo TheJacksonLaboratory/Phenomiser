@@ -181,6 +181,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
                 rank101_up+=ranks.get(r);
             }
         }
+        System.out.println(String.format("Rank=1:  (%.1f%%)", 100 * proportionAtRank1));
         System.out.println(String.format("Rank=11-20: count:%d (%.1f%%)", rank11_20, (double) 100* rank11_20 / N));
         System.out.println(String.format("Rank=21-30: count:%d (%.1f%%)", rank21_30, (double) 100 * rank21_30 / N));
         System.out.println(String.format("Rank=31-100: count:%d (%.1f%%)", rank31_100, (double) 100 * rank31_100 / N));
@@ -222,8 +223,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
      */
     private List<TermId> getRandomTermsFromDisease(HpoDisease disease) {
         int n_terms=Math.min(disease.getNumberOfPhenotypeAnnotations(),n_terms_per_case);
-        int n_random=Math.min(n_terms, n_noise_terms);// do not take more random than real terms.
-        logger.trace("Creating simulated case with n_terms="+n_terms + ", n_random="+n_random);
+       // int n_random=Math.min(n_terms, n_noise_terms);// do not take more random than real terms.
+        logger.trace("Creating simulated case with n_terms="+n_terms + ", n_random="+n_noise_terms);
         // the creation of a new ArrayList is needed because disease returns an immutable list.
         List<HpoAnnotation> abnormalities = new ArrayList<>(disease.getPhenotypicAbnormalities());
         ImmutableList.Builder<TermId> termIdBuilder = new ImmutableList.Builder<>();
@@ -231,7 +232,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         // take the first n_random terms of the randomized list
         abnormalities.stream().limit(n_terms).forEach(a-> termIdBuilder.add(a.getTermId()));
         // now add n_random "noise" terms to the list of abnormalities of our case.
-        for(int i=0;i<n_random;i++){
+        for(int i=0;i<n_noise_terms;i++){
             TermId t = getRandomPhenotypeTerm();
             if (addTermImprecision) {
                 t = getRandomParentTerm(t);

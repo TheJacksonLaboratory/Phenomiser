@@ -2,6 +2,7 @@ package org.jax.grid;
 
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import java.io.Writer;
@@ -53,12 +54,12 @@ public class GridSearch {
     }
 
     public double[][] run() {
-        double[][] rankmatrix = new double[n_terms_per_case + 1][n_noise_terms + 1];
+        double[][] rankmatrix = new double[n_terms_per_case][n_noise_terms + 1];
         for (int i = 1; i <= n_terms_per_case; i++) {
             for (int j = 0; j <= n_noise_terms; j++) {
                 PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
                 simulator.simulateCases();
-                rankmatrix[i][j] = simulator.getProportionAtRank1();
+                rankmatrix[i-1][j] = simulator.getProportionAtRank1();
             }
         }
         return rankmatrix;
@@ -71,10 +72,10 @@ public class GridSearch {
             writer.write(i + "\t");
         }
         writer.write("\n");
-        for (int i = 1; i < rankmatrix.length; i++){
+        for (int i = 1; i <= rankmatrix.length; i++){
             writer.write(i + "\t");
-            for (int j = 0; j < rankmatrix[i].length; j++){
-                writer.write(Double.toString(rankmatrix[i][j]));
+            for (int j = 0; j < rankmatrix[i-1].length; j++){
+                writer.write(Double.toString(rankmatrix[i-1][j]));
                 writer.write("\t");
             }
             writer.write("\n");
@@ -84,21 +85,21 @@ public class GridSearch {
     public static void writeRscript(double[][] rankmatrix, Writer writer) throws Exception {
         throw new UnsupportedOperationException("not supported yet. Implement this method before you call it");
         //TODO: format output to an R script
-        //        writer.write("library(plot3D)\n");
-//        writer.write("mat <- matrix(\n");
-//
-//        List<Double> values=new ArrayList<>();
-//        for (int j = 0; j < randomtermnumber.length; j++) {
-//            for (int i = 0; i < termnumber.length; i++) {
-//                values.add(Z[i][j]);
-//            }
-//        }
-//        String valuestring=values.stream().map(String::valueOf).collect(Collectors.joining(","));
-//        writer.write("c(" + valuestring +"),\n");
-//        writer.write("nrow=5,\nncol=10,\nbyrow=TRUE)\n");
-//        writer.write("hist3D(z = mat, scale = FALSE, expand = 0.5, bty = \"g\", phi = 20,\n" +
-//                "      col = \"#0072B2\", border = \"black\", shade = 0.2, ltheta = 99,\n" +
-//                "      space = 0.3, ticktype = \"detailed\", d = 2)");
+        /*writer.write("library(plot3D)\n");
+        writer.write("mat <- matrix(\n");
+
+        List<Double> values=new ArrayList<>();
+        for (int j = 0; j < rankmatrix[0].length ; j++) {
+            for (int i = 0; i < rankmatrix.length; i++) {
+                values.add(rankmatrix[i][j]);
+           }
+        }
+        String valuestring=values.stream().map(String::valueOf).collect(Collectors.joining(","));
+        writer.write("c(" + valuestring +"),\n");
+        writer.write("nrow=5,\nncol=10,\nbyrow=TRUE)\n");
+        writer.write("hist3D(z = mat, scale = FALSE, expand = 0.5, bty = \"g\", phi = 20,\n" +
+                "      col = \"#0072B2\", border = \"black\", shade = 0.2, ltheta = 99,\n" +
+                "      space = 0.3, ticktype = \"detailed\", d = 2)");*/
     }
 
 }
