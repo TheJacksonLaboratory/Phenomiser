@@ -54,12 +54,12 @@ public class GridSearch {
     }
 
     public double[][] run() {
-        double[][] rankmatrix = new double[n_terms_per_case][n_noise_terms + 1];
+        double[][] rankmatrix = new double[n_terms_per_case][n_noise_terms + 1];//correcting number of rows, number of terms per case starts from 1
         for (int i = 1; i <= n_terms_per_case; i++) {
             for (int j = 0; j <= n_noise_terms; j++) {
                 PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
                 simulator.simulateCases();
-                rankmatrix[i-1][j] = simulator.getProportionAtRank1();
+                rankmatrix[i-1][j] = simulator.getProportionAtRank1();//index of rows should start from 0.
             }
         }
         return rankmatrix;
