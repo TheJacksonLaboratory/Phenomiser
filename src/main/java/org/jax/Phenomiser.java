@@ -6,9 +6,12 @@ import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Reimplementation of Phenomiser with Java 8.
@@ -16,7 +19,10 @@ import java.util.*;
  */
 public class Phenomiser {
 
+    private static final Logger logger = LoggerFactory.getLogger(Phenomiser.class);
+
     private static AbstractResources resources;
+    private static Set<TermId> noAnnotationDisease;
 
     public static void setResources(AbstractResources resources) {
         Phenomiser.resources = resources;
@@ -37,6 +43,7 @@ public class Phenomiser {
         //for each disease, calculate the similarity score with query terms
         SimilarityScoreCalculator similarityScoreCalculator = new SimilarityScoreCalculator(resources);
         Map<Integer, Double> similarityScores = similarityScoreCalculator.compute(queryTerms, dbs);
+        similarityScores = filterOutNoAnnotationDisease(similarityScores);
 
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
@@ -58,6 +65,29 @@ public class Phenomiser {
 //                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
         return mylist;
+    }
+
+    //Remove diseases having no annotations
+    private static Map<Integer, Double> filterOutNoAnnotationDisease(Map<Integer, Double> similarityScores) {
+        if (noAnnotationDisease == null) {
+            noAnnotationDisease = resources.getDiseaseIdToHpoTermIds().entrySet().stream()
+                    .filter(e -> e.getValue().size()==0).map(e -> e.getKey())
+                    .collect(Collectors.toSet());
+        }
+
+        if (!noAnnotationDisease.isEmpty()) {
+            logger.warn("Diseases having no annotations are found! About to remove them...");
+
+            for (Integer integer : similarityScores.keySet()) {
+                TermId termId = resources.getDiseaseIndexToDisease().get(integer);
+                if (noAnnotationDisease.contains(termId)) {
+                    logger.warn("remove " + termId.getValue());
+                    similarityScores.remove(integer);
+                }
+            }
+        }
+
+        return similarityScores;
     }
 
 
