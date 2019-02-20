@@ -6,6 +6,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SimilarityScoreCalculator {
 
@@ -19,7 +20,7 @@ public class SimilarityScoreCalculator {
 
         String filter = dbs.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
 
-        Map<Integer, Double> similarityScores = new HashMap<>();
+        Map<Integer, Double> similarityScores = new ConcurrentHashMap<>();
         resources.getDiseaseIndexToHpoTerms().entrySet().stream()
                 .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter))
                 .forEach(e -> similarityScores.put(e.getKey(),
