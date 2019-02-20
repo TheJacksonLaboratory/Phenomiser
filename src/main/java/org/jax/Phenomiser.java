@@ -43,55 +43,14 @@ public class Phenomiser {
         //for each disease, calculate the similarity score with query terms
         SimilarityScoreCalculator similarityScoreCalculator = new SimilarityScoreCalculator(resources);
         Map<Integer, Double> similarityScores = similarityScoreCalculator.compute(queryTerms, dbs);
-        similarityScores = filterOutNoAnnotationDisease(similarityScores);
 
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
-        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
         //p value multi test correction
-
-//        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
-//                .sorted(new Comparator<Map.Entry<TermId, PValue>>() {
-//                    @Override
-//                    public int compare(Map.Entry<TermId, PValue> o1, Map.Entry<TermId, PValue> o2) {
-//                        if (o1.getValue().p_adjusted <= o2.getValue().p_adjusted) {
-//                            return -1;
-//                        } else {
-//                            return 1;
-//                        }
-//                    }
-//                })
-//                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
         return mylist;
     }
-
-    //Remove diseases having no annotations
-    private static Map<Integer, Double> filterOutNoAnnotationDisease(Map<Integer, Double> similarityScores) {
-        if (noAnnotationDisease == null) {
-            noAnnotationDisease = resources.getDiseaseIdToHpoTermIds().entrySet().stream()
-                    .filter(e -> e.getValue().size()==0).map(e -> e.getKey())
-                    .collect(Collectors.toSet());
-        }
-
-        if (!noAnnotationDisease.isEmpty()) {
-            logger.warn("Diseases having no annotations are found! About to remove them...");
-
-            for (TermId termId : noAnnotationDisease) {
-                Integer hashcode = termId.hashCode();
-                if (similarityScores.containsKey(hashcode)) {
-                    similarityScores.remove(hashcode);
-                    logger.warn("Remove: " + termId.getValue() + "\t" + resources.getDiseaseMap().
-                            get(termId).getName());
-                }
-            }
-        }
-
-        return similarityScores;
-    }
-
-
-
 
 }
