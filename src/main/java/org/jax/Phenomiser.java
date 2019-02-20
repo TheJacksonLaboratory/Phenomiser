@@ -78,11 +78,12 @@ public class Phenomiser {
         if (!noAnnotationDisease.isEmpty()) {
             logger.warn("Diseases having no annotations are found! About to remove them...");
 
-            for (Integer integer : similarityScores.keySet()) {
-                TermId termId = resources.getDiseaseIndexToDisease().get(integer);
-                if (noAnnotationDisease.contains(termId)) {
-                    logger.warn("remove " + termId.getValue());
-                    similarityScores.remove(integer);
+            for (TermId termId : noAnnotationDisease) {
+                Integer hashcode = termId.hashCode();
+                if (similarityScores.containsKey(hashcode)) {
+                    similarityScores.remove(hashcode);
+                    logger.warn("Remove: " + termId.getValue() + "\t" + resources.getDiseaseMap().
+                            get(termId).getName());
                 }
             }
         }
