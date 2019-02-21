@@ -65,12 +65,12 @@ public class QueryCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath,queryList.size());
         resources.init();
         Phenomiser.setResources(resources);
 
-        List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
+
         List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
         List<Item2PValue<TermId>> result = Phenomiser.query(queryList, db);
 
