@@ -1,20 +1,25 @@
 package org.jax.io;
 import com.google.common.collect.Sets;
+import org.jax.Phenomiser;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
  */
 public class DiseaseParser {
 
+    private static final Logger logger = LoggerFactory.getLogger(DiseaseParser.class);
     private Ontology hpo;
 
     private HpoDiseaseAnnotationParser diseaseAnnotationParser;
@@ -42,6 +47,17 @@ public class DiseaseParser {
 
     public void init() throws PhenolException {
         diseaseMap = diseaseAnnotationParser.parse();
+        //remove diseases with no annotation as they mess up downstream analysis
+        if(diseaseMap.values().stream().anyMatch(d -> d.getPhenotypicAbnormalities().isEmpty())) {
+            logger.warn("Diseases with no annotations are found and to be removed...");
+            Set<Map.Entry<TermId, HpoDisease>> noAnnotationDiseases = diseaseMap.entrySet().stream()
+                    .filter(e -> e.getValue().getPhenotypicAbnormalities().isEmpty()).collect(Collectors.toSet());
+            noAnnotationDiseases.forEach(e -> {
+                diseaseMap.remove(e.getKey());
+                logger.warn("Remove: " + e.getKey().getValue() + "\t" + e.getValue().getName());
+            });
+        }
+
         diseaseIdToHpoTermIds = new HashMap<>();
         hpoTermIdToDiseaseIds = new HashMap<>();
         diseaseIndexToDisease = new HashMap<>();

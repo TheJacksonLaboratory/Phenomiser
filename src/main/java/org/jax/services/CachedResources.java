@@ -21,9 +21,26 @@ public class CachedResources extends AbstractResources{
 
     private String cachingPath;
 
+    private final Integer n_terms_in_query;
+
+    /**
+     * Use this constructor if we know we are analyzing a query with a specific number of query terms.
+     * Then there is no need to load all of the cached score distribution files.
+     * @param hpoParser
+     * @param diseaseParser
+     * @param cachePath
+     * @param n_terms
+     */
+    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath, int n_terms) {
+        super(hpoParser, diseaseParser);
+        this.cachingPath = cachePath;
+        this.n_terms_in_query = n_terms;
+    }
+
     public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath) {
         super(hpoParser, diseaseParser);
         this.cachingPath = cachePath;
+        this.n_terms_in_query = null;
     }
 
     @Override
@@ -33,20 +50,6 @@ public class CachedResources extends AbstractResources{
         String icMapPath = cachingPath + File.separator + "icMap.binary";
         String resnikSimilarityPath = cachingPath + File.separator + "resnikSimilarity.binary";
         String scoreDistributionsPath = cachingPath + File.separator + "scoreDistributions.binary";
-
-//        //init icMap
-//        logger.trace("information content map initiation started");
-//        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
-//        logger.trace("information content map initiation success");
-//
-//        //init Resnik similarity precomputation
-//        logger.trace("Resnik similarity precomputation started");
-//        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
-//                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
-//
-//        resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
-//
-//        logger.trace("Resnik similarity precomputation success");
 
         //deserialize ic map
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(icMapPath))) {
@@ -102,23 +105,38 @@ public class CachedResources extends AbstractResources{
         //if the above one does not work, meaning we only have individual ScoreDistribution, we read in one by one
         if (scoreDistributions == null || scoreDistributions.isEmpty()) {
             scoreDistributions = new HashMap<>();
-            try {
-                Files.list(Paths.get(cachingPath))
-                        .filter(path -> path.getFileName().toString().matches("^[0-9]{1,2}_term.scoreDistribution.binary"))
-                        .forEach(path -> {
-                            int numHPO = Integer.parseInt(path.getFileName().toString().split("_")[0]);
-                            try (ObjectInputStream in =
-                                          new ObjectInputStream(new FileInputStream(path.toFile()))) {
-                        ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
-                        scoreDistributions.put(numHPO, scoreDistribution);
-                    } catch (Exception e) {
-                                e.printStackTrace();
-                        logger.error("error when trying to deserialize " + path.getFileName().toString());
-                    }
-                });
-            } catch (IOException e) {
+            if (n_terms_in_query!=null) {
+                logger.trace("Running query with {} terms", n_terms_in_query);
+                String cachep = String.format("%s%s%d_term.scoreDistribution.binary", cachingPath , File.separator,n_terms_in_query);
+                try (ObjectInputStream in =
+                             new ObjectInputStream(new FileInputStream(cachep))) {
+                    ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
+                    scoreDistributions.put(n_terms_in_query, scoreDistribution);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error("error when trying to deserialize " + cachep);
+                }
+                logger.trace("Done deserializing {}", cachep);
+            } else {
+                try {
+                    Files.list(Paths.get(cachingPath))
+                            .filter(path -> path.getFileName().toString().matches("^[0-9]{1,2}_term.scoreDistribution.binary"))
+                            .forEach(path -> {
+                                int numHPO = Integer.parseInt(path.getFileName().toString().split("_")[0]);
+                                try (ObjectInputStream in =
+                                             new ObjectInputStream(new FileInputStream(path.toFile()))) {
+                                    ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
+                                    scoreDistributions.put(numHPO, scoreDistribution);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    logger.error("error when trying to deserialize " + path.getFileName().toString());
+                                }
+                            });
+                } catch (IOException e) {
                 logger.error("io exception when trying to find individual score distributions");
             }
+            }
+
         }
 
     }

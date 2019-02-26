@@ -5,12 +5,12 @@ import org.jax.services.PValueCalculator;
 import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.PValue;
+import org.monarchinitiative.phenol.stats.Item2PValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
-
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 
 /**
  * Reimplementation of Phenomiser with Java 8.
@@ -18,7 +18,10 @@ import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
  */
 public class Phenomiser {
 
+    private static final Logger logger = LoggerFactory.getLogger(Phenomiser.class);
+
     private static AbstractResources resources;
+    private static Set<TermId> noAnnotationDisease;
 
     public static void setResources(AbstractResources resources) {
         Phenomiser.resources = resources;
@@ -29,7 +32,7 @@ public class Phenomiser {
      * @param queryTerms a list of HPO termIds
      * @param dbs a list of disease databases
      */
-    public static Map<TermId, PValue> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
+    public static List<Item2PValue<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
             return null;
@@ -44,27 +47,9 @@ public class Phenomiser {
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
 
         //p value multi test correction
+        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
-        BenjaminiHochberg bhFDR = new BenjaminiHochberg();
-        Map<TermId, PValue> adjusted = bhFDR.adjustPValues(pValueCalculator);
-
-//        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
-//                .sorted(new Comparator<Map.Entry<TermId, PValue>>() {
-//                    @Override
-//                    public int compare(Map.Entry<TermId, PValue> o1, Map.Entry<TermId, PValue> o2) {
-//                        if (o1.getValue().p_adjusted <= o2.getValue().p_adjusted) {
-//                            return -1;
-//                        } else {
-//                            return 1;
-//                        }
-//                    }
-//                })
-//                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-
-        return adjusted;
+        return mylist;
     }
-
-
-
 
 }

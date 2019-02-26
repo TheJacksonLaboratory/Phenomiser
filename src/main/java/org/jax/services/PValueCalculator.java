@@ -1,17 +1,22 @@
 package org.jax.services;
 
+import com.google.common.collect.ImmutableList;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
-import org.monarchinitiative.phenol.stats.IPValueCalculation;
-import org.monarchinitiative.phenol.stats.PValue;
+import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
+import org.monarchinitiative.phenol.stats.Bonferroni;
+import org.monarchinitiative.phenol.stats.Item2PValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
  */
-public class PValueCalculator implements IPValueCalculation {
+public class PValueCalculator  {
 
     private Map<Integer, ScoreDistribution> scoreDistributions;
 
@@ -22,31 +27,46 @@ public class PValueCalculator implements IPValueCalculation {
     private int queryTermCount;
 
     public PValueCalculator(int queryTermCount, Map<Integer, Double> similarityScores, AbstractResources resources) {
-        this.queryTermCount = queryTermCount;
+        //Above 10, score distributions are identical to 10
+        this.queryTermCount = Math.min(queryTermCount, 10);
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
         this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
-    @Override
-    public Map<TermId, PValue> calculatePValues() {
+    public Map<TermId, Double> calculatePValues() {
 
-        //Map<Integer, Double> p_values = new HashMap<>();
-        Map<TermId, PValue> p_values = new HashMap<>();
-        similarityScores.entrySet().stream()
-                .forEach(s -> {
-                    if (scoreDistributions.containsKey(queryTermCount) &&
-                            scoreDistributions.get(queryTermCount)
-                                    .getObjectScoreDistribution(s.getKey()) != null) {
-                        double p = scoreDistributions.get(queryTermCount)
-                                .getObjectScoreDistribution(s.getKey())
-                                .estimatePValue(s.getValue());
-                        PValue pValue = new PValue();
-                        pValue.setRawPValue(p);
-                        p_values.put(diseaseIndexToDisease.get(s.getKey()), pValue);
-                    }
-                });
+        Map<TermId, Double> p_values = new HashMap<>();
+        similarityScores.forEach((key, value) -> {
+            if (scoreDistributions.containsKey(queryTermCount) &&
+                    scoreDistributions.get(queryTermCount)
+                            .getObjectScoreDistribution(key) != null) {
+                double p = scoreDistributions.get(queryTermCount)
+                        .getObjectScoreDistribution(key)
+                        .estimatePValue(value);
+                if(diseaseIndexToDisease.get(key).getValue().equals("OMIM:612642")) {
+                    System.err.println("SCORE=" + scoreDistributions.get(queryTermCount)
+                            .getObjectScoreDistribution(key));
+                }
+
+
+                p_values.put(diseaseIndexToDisease.get(key), p);
+            }
+        });
 
         return p_values;
     }
+
+    public List<Item2PValue<TermId>> adjustPvals() {
+
+        Map<TermId, Double> mymap = calculatePValues();
+        List<Item2PValue<TermId>> mylist = mymap.entrySet().stream().map(e -> new Item2PValue<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+
+        BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
+        bh.adjustPvals(mylist);
+
+        return mylist;
+    }
+
+
 }
