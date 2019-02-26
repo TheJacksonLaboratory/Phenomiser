@@ -44,6 +44,12 @@ public class PValueCalculator  {
                 double p = scoreDistributions.get(queryTermCount)
                         .getObjectScoreDistribution(key)
                         .estimatePValue(value);
+                if(diseaseIndexToDisease.get(key).getValue().equals("OMIM:612642")) {
+                    System.err.println("SCORE=" + scoreDistributions.get(queryTermCount)
+                            .getObjectScoreDistribution(key));
+                }
+
+
                 p_values.put(diseaseIndexToDisease.get(key), p);
             }
         });

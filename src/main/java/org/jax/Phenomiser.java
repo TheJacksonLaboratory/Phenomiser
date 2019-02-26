@@ -6,9 +6,12 @@ import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.Item2PValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Reimplementation of Phenomiser with Java 8.
@@ -16,7 +19,10 @@ import java.util.*;
  */
 public class Phenomiser {
 
+    private static final Logger logger = LoggerFactory.getLogger(Phenomiser.class);
+
     private static AbstractResources resources;
+    private static Set<TermId> noAnnotationDisease;
 
     public static void setResources(AbstractResources resources) {
         Phenomiser.resources = resources;
@@ -40,27 +46,11 @@ public class Phenomiser {
 
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
-        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
         //p value multi test correction
-
-//        Map<TermId, PValue> adjusted_sorted = adjusted.entrySet().stream()
-//                .sorted(new Comparator<Map.Entry<TermId, PValue>>() {
-//                    @Override
-//                    public int compare(Map.Entry<TermId, PValue> o1, Map.Entry<TermId, PValue> o2) {
-//                        if (o1.getValue().p_adjusted <= o2.getValue().p_adjusted) {
-//                            return -1;
-//                        } else {
-//                            return 1;
-//                        }
-//                    }
-//                })
-//                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
         return mylist;
     }
-
-
-
 
 }
