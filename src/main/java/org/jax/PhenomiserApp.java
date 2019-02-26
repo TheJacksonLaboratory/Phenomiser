@@ -302,7 +302,7 @@ public class PhenomiserApp {
                     logger.trace("using computed data");
                 }
                 Phenomiser.setResources(resources);
-                GridSearch gridSearch = new GridSearch(resources, Arrays.asList(DiseaseDB.OMIM), 100, 10, 4, false, null);
+                GridSearch gridSearch = new GridSearch(resources, Arrays.asList(DiseaseDB.OMIM), 100, 10, 5, false, null);
                 double[][] matrix = gridSearch.run();
                 System.out.println(matrix[0][0]);
 
