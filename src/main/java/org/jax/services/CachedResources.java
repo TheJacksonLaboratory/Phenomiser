@@ -51,20 +51,6 @@ public class CachedResources extends AbstractResources{
         String resnikSimilarityPath = cachingPath + File.separator + "resnikSimilarity.binary";
         String scoreDistributionsPath = cachingPath + File.separator + "scoreDistributions.binary";
 
-//        //init icMap
-//        logger.trace("information content map initiation started");
-//        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
-//        logger.trace("information content map initiation success");
-//
-//        //init Resnik similarity precomputation
-//        logger.trace("Resnik similarity precomputation started");
-//        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
-//                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
-//
-//        resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
-//
-//        logger.trace("Resnik similarity precomputation success");
-
         //deserialize ic map
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(icMapPath))) {
             logger.trace("deserialize information content map started");

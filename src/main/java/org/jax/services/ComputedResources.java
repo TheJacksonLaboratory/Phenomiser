@@ -135,7 +135,6 @@ public class ComputedResources extends AbstractResources {
                 sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
                 scoreDistributions.putAll(sampleing.performSampling(diseaseIndexToHpoTerms));
             }
-            //scoreDistributions = sampleing.performSampling(diseaseIndexToHpoTerms);
         }
 
         logger.trace("score distribution computation success");
