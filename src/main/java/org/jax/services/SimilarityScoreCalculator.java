@@ -34,14 +34,14 @@ public class SimilarityScoreCalculator {
                 .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter))
                 .forEach(e -> similarityScores.put(e.getKey(),
                         resources.getResnikSimilarity().computeScore(query, e.getValue())));
-
+/*
        for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTerms().entrySet()) {
            if (resources.getDiseaseIndexToDisease().get(mentry.getKey()).getPrefix().matches(filter) ) {
                TermId diseaseId = resources.getDiseaseIndexToDisease().get(mentry.getKey());
                double sim = resources.getResnikSimilarity().computeScore(query, mentry.getValue());
-               if (diseaseId.getValue().equals("OMIM:612642")) {
-                   System.err.println("OMIM:612642 sim="+sim );
-               }
+//               if (diseaseId.getValue().equals("OMIM:612642")) {
+//                   System.err.println("OMIM:612642 sim="+sim );
+//               }
            }
         }
         sortedSimilarityScores = similarityScores
@@ -60,7 +60,83 @@ public class SimilarityScoreCalculator {
 
 //        List<TermId> diseases=resources.getDiseaseIndexToHpoTerms().entrySet().stream()
 //                .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter)).collect(Collectors.toList());
+*/
+
+        int QUERY_COUNT=5;
+
+        int N = similarityScores.size();
+        for (Integer i : similarityScores.keySet()) {
+            TermId diseaseId = resources.getDiseaseIndexToDisease().get(i);
+            double semsim = similarityScores.get(i);
+            double p =  resources.scoreDistributions.get(QUERY_COUNT).getObjectScoreDistribution(i).estimatePValue(semsim);
+            double pval_adj = Math.max(1.0,N*p); // Bonferroni
+            SearchResult sresult = new SearchResult(diseaseId,pval_adj,semsim);
+        }
+
+
+
         return similarityScores;
     }
+
+
+    public List<SearchResult> compute2(List<TermId> query, List<DiseaseDB> dbs) {
+
+        String filter = dbs.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
+
+        Map<Integer, Double> similarityScores = new HashMap<>();
+        Map<Integer, Double> sortedSimilarityScores = new HashMap<>();
+
+        resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+                .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter))
+                .forEach(e -> similarityScores.put(e.getKey(),
+                        resources.getResnikSimilarity().computeScore(query, e.getValue())));
+/*
+       for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTerms().entrySet()) {
+           if (resources.getDiseaseIndexToDisease().get(mentry.getKey()).getPrefix().matches(filter) ) {
+               TermId diseaseId = resources.getDiseaseIndexToDisease().get(mentry.getKey());
+               double sim = resources.getResnikSimilarity().computeScore(query, mentry.getValue());
+//               if (diseaseId.getValue().equals("OMIM:612642")) {
+//                   System.err.println("OMIM:612642 sim="+sim );
+//               }
+           }
+        }
+        sortedSimilarityScores = similarityScores
+                .entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .collect(
+                        toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2,
+                                LinkedHashMap::new));
+
+        System.out.println("map after sorting by values in descending order: "
+                + sortedSimilarityScores);
+
+        System.out.println("map before sorting: "
+                + similarityScores);
+
+//        List<TermId> diseases=resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+//                .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter)).collect(Collectors.toList());
+*/
+
+        int QUERY_COUNT=5;
+        List<SearchResult> resultlist = new ArrayList<>();
+
+        int N = similarityScores.size();
+        for (Integer i : similarityScores.keySet()) {
+            TermId diseaseId = resources.getDiseaseIndexToDisease().get(i);
+            double semsim = similarityScores.get(i);
+            double p =  resources.scoreDistributions.get(QUERY_COUNT).getObjectScoreDistribution(i).estimatePValue(semsim);
+            double pval_adj = Math.max(1.0,N*p); // Bonferroni
+            SearchResult sresult = new SearchResult(diseaseId,pval_adj,semsim);
+            resultlist.add(sresult);
+        }
+
+        Collections.sort(resultlist,Collections.reverseOrder());
+
+        return resultlist;
+    }
+
+
+
 
 }
