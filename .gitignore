@@ -1,8 +1,9 @@
 
-target
+*/target
 .idea/
-*.log
+*logs
 *.iml
 *.DS_Store
-logs
-src/test/resources/
+*/logs
+*/src/test/resources/
+*/dependency-reduced-pom.xml
