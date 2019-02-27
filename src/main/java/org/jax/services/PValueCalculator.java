@@ -1,13 +1,10 @@
 package org.jax.services;
 
-import com.google.common.collect.ImmutableList;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
-import org.monarchinitiative.phenol.stats.Bonferroni;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

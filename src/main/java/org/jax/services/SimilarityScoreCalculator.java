@@ -1,20 +1,14 @@
 package org.jax.services;
 
 import org.jax.utils.DiseaseDB;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.util.stream.Collectors.*;
-import static java.util.Map.Entry.*;
+
 public class SimilarityScoreCalculator {
 
     private AbstractResources resources;
