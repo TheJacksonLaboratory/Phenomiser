@@ -80,16 +80,16 @@ public class DiseaseParserTest {
 
     @Test
     public void getDiseaseIdToHpoTermIds() throws Exception {
-        assertNotNull(diseaseParser.getDiseaseIdToHpoTermIds());
-        assertTrue(! diseaseParser.getDiseaseIdToHpoTermIds().isEmpty());
-        assertEquals(diseaseParser.getDiseaseIdToHpoTermIds().size(), 2);
+        assertNotNull(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion());
+        assertTrue(! diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().isEmpty());
+        assertEquals(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().size(), 2);
     }
 
     @Test
     public void getHpoTermIdToDiseaseIds() throws Exception {
-        assertNotNull(diseaseParser.getHpoTermIdToDiseaseIds());
-        assertTrue(! diseaseParser.getHpoTermIdToDiseaseIds().isEmpty());
-        assertEquals(diseaseParser.getHpoTermIdToDiseaseIds().size(), 2);
+        assertNotNull(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion());
+        assertTrue(! diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().isEmpty());
+        assertEquals(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().size(), 2);
     }
 
     @Test
@@ -101,9 +101,9 @@ public class DiseaseParserTest {
 
     @Test
     public void getDiseaseIndexToHpoTerm() throws Exception {
-        assertNotNull(diseaseParser.getDiseaseIndexToHpoTerms());
-        assertTrue(! diseaseParser.getDiseaseIndexToHpoTerms().isEmpty());
-        assertEquals(diseaseParser.getDiseaseIndexToHpoTerms().size(), 2);
+        assertNotNull(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion());
+        assertTrue(! diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().isEmpty());
+        assertEquals(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().size(), 2);
     }
 
 }

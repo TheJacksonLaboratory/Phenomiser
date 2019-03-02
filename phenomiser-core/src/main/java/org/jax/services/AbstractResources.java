@@ -27,9 +27,11 @@ public abstract class AbstractResources {
 
     protected Map<TermId, HpoDisease> diseaseMap;
 
-    protected Map<TermId, Collection<TermId>> diseaseIdToHpoTermIds;
+    protected Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsWithExpansion;
+    protected Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsNoExpansion;
 
-    protected Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds;
+    protected Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsWithExpansion;
+    protected Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsNoExpansion;
 
     protected Map<TermId, Double> icMap;
 
@@ -37,11 +39,14 @@ public abstract class AbstractResources {
 
     protected ResnikSimilarity resnikSimilarity;
 
-    protected Map<Integer, List<TermId>> diseaseIndexToHpoTerms;
+    protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion;
+    protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion;
 
     protected Map<Integer, TermId> diseaseIndexToDisease;
 
     protected Map<Integer, ScoreDistribution> scoreDistributions;
+
+
 
     public AbstractResources(HpoParser hpoParser, DiseaseParser diseaseParser) {
         this.hpoParser = hpoParser;
@@ -69,10 +74,16 @@ public abstract class AbstractResources {
 
         logger.trace("disease map initiation started");
         diseaseMap = this.diseaseParser.getDiseaseMap();
-        diseaseIdToHpoTermIds = this.diseaseParser.getDiseaseIdToHpoTermIds();
-        hpoTermIdToDiseaseIds = this.diseaseParser.getHpoTermIdToDiseaseIds();
+        diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion();
+        diseaseIdToHpoTermIdsNoExpansion = this.diseaseParser
+                .getDiseaseIdToHpoTermIdsNoExpansion();
+        hpoTermIdToDiseaseIdsWithExpansion = this.diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion();
+        hpoTermIdToDiseaseIdsNoExpansion = this.diseaseParser
+                .getHpoTermIdToDiseaseIdsNoExpansion();
         diseaseIndexToDisease = this.diseaseParser.getDiseaseIndexToDisease();
-        diseaseIndexToHpoTerms = this.diseaseParser.getDiseaseIndexToHpoTerms();
+        diseaseIndexToHpoTermsWithExpansion = this.diseaseParser.getDiseaseIndexToHpoTermsWithExpansion();
+        diseaseIndexToHpoTermsNoExpansion = this.diseaseParser
+                .getDiseaseIndexToHpoTermsNoExpansion();
         logger.trace("disease map initiation success");
 
     }
@@ -111,20 +122,20 @@ public abstract class AbstractResources {
         this.diseaseMap = diseaseMap;
     }
 
-    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIds() {
-        return diseaseIdToHpoTermIds;
+    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIdsWithExpansion() {
+        return diseaseIdToHpoTermIdsWithExpansion;
     }
 
-    public void setDiseaseIdToHpoTermIds(Map<TermId, Collection<TermId>> diseaseIdToHpoTermIds) {
-        this.diseaseIdToHpoTermIds = diseaseIdToHpoTermIds;
+    public void setDiseaseIdToHpoTermIdsWithExpansion(Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsWithExpansion) {
+        this.diseaseIdToHpoTermIdsWithExpansion = diseaseIdToHpoTermIdsWithExpansion;
     }
 
-    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIds() {
-        return hpoTermIdToDiseaseIds;
+    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIdsWithExpansion() {
+        return hpoTermIdToDiseaseIdsWithExpansion;
     }
 
-    public void setHpoTermIdToDiseaseIds(Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds) {
-        this.hpoTermIdToDiseaseIds = hpoTermIdToDiseaseIds;
+    public void setHpoTermIdToDiseaseIdsWithExpansion(Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsWithExpansion) {
+        this.hpoTermIdToDiseaseIdsWithExpansion = hpoTermIdToDiseaseIdsWithExpansion;
     }
 
     public Map<TermId, Double> getIcMap() {
@@ -151,12 +162,12 @@ public abstract class AbstractResources {
         this.resnikSimilarity = resnikSimilarity;
     }
 
-    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTerms() {
-        return diseaseIndexToHpoTerms;
+    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsWithExpansion() {
+        return diseaseIndexToHpoTermsWithExpansion;
     }
 
-    public void setDiseaseIndexToHpoTerms(Map<Integer, List<TermId>> diseaseIndexToHpoTerms) {
-        this.diseaseIndexToHpoTerms = diseaseIndexToHpoTerms;
+    public void setDiseaseIndexToHpoTermsWithExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion) {
+        this.diseaseIndexToHpoTermsWithExpansion = diseaseIndexToHpoTermsWithExpansion;
     }
 
     public Map<Integer, TermId> getDiseaseIndexToDisease() {
@@ -173,5 +184,29 @@ public abstract class AbstractResources {
 
     public void setScoreDistributions(Map<Integer, ScoreDistribution> scoreDistributions) {
         this.scoreDistributions = scoreDistributions;
+    }
+
+    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIdsNoExpansion() {
+        return diseaseIdToHpoTermIdsNoExpansion;
+    }
+
+    public void setDiseaseIdToHpoTermIdsNoExpansion(Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsNoExpansion) {
+        this.diseaseIdToHpoTermIdsNoExpansion = diseaseIdToHpoTermIdsNoExpansion;
+    }
+
+    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIdsNoExpansion() {
+        return hpoTermIdToDiseaseIdsNoExpansion;
+    }
+
+    public void setHpoTermIdToDiseaseIdsNoExpansion(Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsNoExpansion) {
+        this.hpoTermIdToDiseaseIdsNoExpansion = hpoTermIdToDiseaseIdsNoExpansion;
+    }
+
+    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsNoExpansion() {
+        return diseaseIndexToHpoTermsNoExpansion;
+    }
+
+    public void setDiseaseIndexToHpoTermsNoExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion) {
+        this.diseaseIndexToHpoTermsNoExpansion = diseaseIndexToHpoTermsNoExpansion;
     }
 }

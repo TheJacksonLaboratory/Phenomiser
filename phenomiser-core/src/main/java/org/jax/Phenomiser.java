@@ -46,9 +46,7 @@ public class Phenomiser {
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
 
-      //  Map<Integer, Double> pvals = pValueCalculator.calculatePValues();
-
-        //p value multi test correction
+        //calculate p value and multi test correction
         List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
 
         return mylist;

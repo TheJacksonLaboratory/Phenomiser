@@ -64,7 +64,7 @@ public class ComputedResourcesTest {
 
     @Test
     public void getNoAnnotationDiseases() {
-        Set<TermId> noAnnotationDiseases = resources.getDiseaseIdToHpoTermIds().entrySet().stream().filter(e -> e.getValue().size() == 0).map(e -> e.getKey()).collect(Collectors.toSet());
+        Set<TermId> noAnnotationDiseases = resources.getDiseaseIdToHpoTermIdsWithExpansion().entrySet().stream().filter(e -> e.getValue().size() == 0).map(e -> e.getKey()).collect(Collectors.toSet());
         //System.out.println(noAnnotationDiseases.size());
         noAnnotationDiseases.forEach(t -> System.out.println(t.getValue()));
     }

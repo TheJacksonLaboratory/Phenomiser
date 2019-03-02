@@ -41,7 +41,7 @@ public class SimilarityScoreCalculatorTest {
 
     @Test
     public void compute() throws Exception {
-        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIds().keySet().stream().limit(3).collect(Collectors.toList());
+        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIdsWithExpansion().keySet().stream().limit(3).collect(Collectors.toList());
         Map<Integer, Double> scores = similarityScoreCalculator.compute(randomTermList, Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA));
         System.out.println(scores.size());
         //scores.entrySet().stream().forEach(e -> System.out.println(e.getKey() + "\t" + e.getValue()));

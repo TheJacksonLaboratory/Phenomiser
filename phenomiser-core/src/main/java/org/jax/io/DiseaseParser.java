@@ -1,6 +1,5 @@
 package org.jax.io;
 import com.google.common.collect.Sets;
-import org.jax.Phenomiser;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *
@@ -26,11 +24,18 @@ public class DiseaseParser {
 
     private Map<TermId, HpoDisease> diseaseMap; //key is disease termID, value is disease model (has phenotype list)
 
-    private Map<TermId, Collection<TermId>> diseaseIdToHpoTermIds; //key is disease id; value is a collection of hpo termIds
+    private Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsWithExpansion; //key is disease id; value is a collection of hpo termIds
 
-    private Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIds; //key is hpo termId; value is a collection of disease ids
+    private Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsWithExpansion; //key is hpo termId; value is a collection of disease ids
 
-    private Map<Integer, List<TermId>> diseaseIndexToHpoTerms;
+    private Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion;
+
+    private Map<TermId, Collection<TermId>> diseaseIdToHpoTermIdsNoExpansion;
+
+    private Map<TermId, Collection<TermId>> hpoTermIdToDiseaseIdsNoExpansion;
+
+    private Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion;
+
 
     private Map<Integer, TermId> diseaseIndexToDisease;
 
@@ -58,36 +63,54 @@ public class DiseaseParser {
             });
         }
 
-        diseaseIdToHpoTermIds = new HashMap<>();
-        hpoTermIdToDiseaseIds = new HashMap<>();
+        diseaseIdToHpoTermIdsWithExpansion = new HashMap<>();
+        hpoTermIdToDiseaseIdsWithExpansion = new HashMap<>();
         diseaseIndexToDisease = new HashMap<>();
-        diseaseIndexToHpoTerms = new HashMap<>();
+        diseaseIndexToHpoTermsWithExpansion = new HashMap<>();
+
+        diseaseIdToHpoTermIdsNoExpansion = new HashMap<>();
+        hpoTermIdToDiseaseIdsNoExpansion = new HashMap<>();
+        diseaseIndexToHpoTermsNoExpansion = new HashMap<>();
 
         for (TermId diseaseId : diseaseMap.keySet()) {
             HpoDisease disease = diseaseMap.get(diseaseId);
             List<TermId> hpoTerms = disease.getPhenotypicAbnormalityTermIdList();
-            diseaseIdToHpoTermIds.putIfAbsent(diseaseId, new HashSet<>());
+            diseaseIdToHpoTermIdsWithExpansion.putIfAbsent(diseaseId, new HashSet<>());
+            diseaseIdToHpoTermIdsNoExpansion.putIfAbsent(diseaseId, hpoTerms);
+
+            // prepare no term ancestor maps
+            for (TermId hpoTerm : hpoTerms) {
+                hpoTermIdToDiseaseIdsNoExpansion.putIfAbsent(hpoTerm, new
+                        HashSet<>());
+                hpoTermIdToDiseaseIdsNoExpansion.get(hpoTerm).add(diseaseId);
+            }
+
+
             // add term anscestors
             final Set<TermId> inclAncestorTermIds = TermIds.augmentWithAncestors(hpo, Sets.newHashSet(hpoTerms), true);
 
             for (TermId tid : inclAncestorTermIds) {
-                hpoTermIdToDiseaseIds.putIfAbsent(tid, new HashSet<>());
-                hpoTermIdToDiseaseIds.get(tid).add(diseaseId);
-                diseaseIdToHpoTermIds.get(diseaseId).add(tid);
+                hpoTermIdToDiseaseIdsWithExpansion.putIfAbsent(tid, new HashSet<>());
+                hpoTermIdToDiseaseIdsWithExpansion.get(tid).add(diseaseId);
+                diseaseIdToHpoTermIdsWithExpansion.get(diseaseId).add(tid);
             }
         }
 
 //        int count = 0;
-//        for (Map.Entry<TermId, Collection<TermId>> entry : diseaseIdToHpoTermIds.entrySet()) {
-//            diseaseIndexToHpoTerms.put(count, new ArrayList<TermId>(entry.getValue()));
+//        for (Map.Entry<TermId, Collection<TermId>> entry : diseaseIdToHpoTermIdsWithExpansion.entrySet()) {
+//            diseaseIndexToHpoTermsWithExpansion.put(count, new ArrayList<TermId>(entry.getValue()));
 //            diseaseIndexToDisease.put(count, entry.getKey());
 //            count++;
 //        }
-        diseaseIndexToHpoTerms = diseaseIdToHpoTermIds.entrySet().stream()
+        diseaseIndexToHpoTermsWithExpansion = diseaseIdToHpoTermIdsWithExpansion.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<>(e.getValue())));
 
-        diseaseIndexToDisease = diseaseIdToHpoTermIds.entrySet().stream()
+        diseaseIndexToDisease = diseaseIdToHpoTermIdsWithExpansion.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> e.getKey()));
+
+        diseaseIndexToHpoTermsNoExpansion = diseaseIdToHpoTermIdsNoExpansion
+                .entrySet().stream().collect(Collectors.toMap(e -> e.getKey()
+                        .hashCode(), e -> new ArrayList<>(e.getValue())));
     }
 
 
@@ -95,20 +118,33 @@ public class DiseaseParser {
         return diseaseMap;
     }
 
-    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIds() {
+    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIdsWithExpansion() {
 
-        return diseaseIdToHpoTermIds;
+        return diseaseIdToHpoTermIdsWithExpansion;
     }
 
-    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIds() {
-        return hpoTermIdToDiseaseIds;
+    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIdsWithExpansion() {
+        return hpoTermIdToDiseaseIdsWithExpansion;
     }
 
-    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTerms() {
-        return diseaseIndexToHpoTerms;
+    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsWithExpansion() {
+        return diseaseIndexToHpoTermsWithExpansion;
     }
 
     public Map<Integer, TermId> getDiseaseIndexToDisease() {
         return diseaseIndexToDisease;
+    }
+
+    public Map<TermId, Collection<TermId>> getDiseaseIdToHpoTermIdsNoExpansion() {
+        return diseaseIdToHpoTermIdsNoExpansion;
+    }
+
+
+    public Map<TermId, Collection<TermId>> getHpoTermIdToDiseaseIdsNoExpansion() {
+        return hpoTermIdToDiseaseIdsNoExpansion;
+    }
+
+    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsNoExpansion() {
+        return diseaseIndexToHpoTermsNoExpansion;
     }
 }

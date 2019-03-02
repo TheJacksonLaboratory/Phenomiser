@@ -75,7 +75,7 @@ import static org.junit.Assert.*;
 //
 //    @Test
 //    public void calculatePValues() throws Exception {
-////        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIds().keySet().stream().limit(3).collect(Collectors.toList());
+////        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIdsWithExpansion().keySet().stream().limit(3).collect(Collectors.toList());
 ////        Map<Integer, Double> scores = similarityScoreCalculator.compute(randomTermList, Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA));
 ////        pvalueCalculation = new PValueCalculator(3, scores, resources);
 ////        pvalues = pvalueCalculation.calculatePValues();
@@ -120,7 +120,7 @@ import static org.junit.Assert.*;
 //    @Test
 //    @Ignore
 //    public void adjustPValues() {
-//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIds().keySet().stream().limit(3).collect(Collectors.toList());
+//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIdsWithExpansion().keySet().stream().limit(3).collect(Collectors.toList());
 //        Map<Integer, Double> scores = similarityScoreCalculator.compute(randomTermList, Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA));
 //        pvalueCalculation = new PValueCalculator(3, scores, resources);
 //        BenjaminiHochberg benjaminiHochberg = new BenjaminiHochberg();
@@ -162,7 +162,7 @@ public class PValueCalculatorTest {
 //
 //    @Test
 //    public void calculatePValues() throws Exception {
-//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIds().keySet().stream().limit(3).collect(Collectors.toList());
+//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIdsWithExpansion().keySet().stream().limit(3).collect(Collectors.toList());
 //        Map<Integer, Double> scores = similarityScoreCalculator.compute(randomTermList, Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA));
 //        pvalueCalculation = new PValueCalculator(3, scores, resources);
 //        pvalues = pvalueCalculation.calculatePValues();
@@ -174,7 +174,7 @@ public class PValueCalculatorTest {
 //
 //    @Test
 //    public void adjustPValues() {
-//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIds().keySet().stream().limit(3).collect(Collectors.toList());
+//        List<TermId> randomTermList = resources.getHpoTermIdToDiseaseIdsWithExpansion().keySet().stream().limit(3).collect(Collectors.toList());
 //        Map<Integer, Double> scores = similarityScoreCalculator.compute(randomTermList, Arrays.asList(DiseaseDB.OMIM, DiseaseDB.ORPHA));
 //        pvalueCalculation = new PValueCalculator(3, scores, resources);
 //        BenjaminiHochberg benjaminiHochberg = new BenjaminiHochberg();

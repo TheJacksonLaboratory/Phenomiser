@@ -24,12 +24,12 @@ public class SimilarityScoreCalculator {
         Map<Integer, Double> similarityScores = new HashMap<>();
         Map<Integer, Double> sortedSimilarityScores = new HashMap<>();
 
-        resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+        resources.getDiseaseIndexToHpoTermsNoExpansion().entrySet().stream()
                 .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter))
                 .forEach(e -> similarityScores.put(e.getKey(),
                         resources.getResnikSimilarity().computeScore(query, e.getValue())));
 /*
-       for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTerms().entrySet()) {
+       for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTermsWithExpansion().entrySet()) {
            if (resources.getDiseaseIndexToDisease().get(mentry.getKey()).getPrefix().matches(filter) ) {
                TermId diseaseId = resources.getDiseaseIndexToDisease().get(mentry.getKey());
                double sim = resources.getResnikSimilarity().computeScore(query, mentry.getValue());
@@ -52,7 +52,7 @@ public class SimilarityScoreCalculator {
         System.out.println("map before sorting: "
                 + similarityScores);
 
-//        List<TermId> diseases=resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+//        List<TermId> diseases=resources.getDiseaseIndexToHpoTermsWithExpansion().entrySet().stream()
 //                .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter)).collect(Collectors.toList());
 */
 
@@ -80,12 +80,12 @@ public class SimilarityScoreCalculator {
         Map<Integer, Double> similarityScores = new HashMap<>();
         Map<Integer, Double> sortedSimilarityScores = new HashMap<>();
 
-        resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+        resources.getDiseaseIndexToHpoTermsWithExpansion().entrySet().stream()
                 .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter))
                 .forEach(e -> similarityScores.put(e.getKey(),
                         resources.getResnikSimilarity().computeScore(query, e.getValue())));
 /*
-       for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTerms().entrySet()) {
+       for (Map.Entry<Integer,List<TermId>> mentry : resources.getDiseaseIndexToHpoTermsWithExpansion().entrySet()) {
            if (resources.getDiseaseIndexToDisease().get(mentry.getKey()).getPrefix().matches(filter) ) {
                TermId diseaseId = resources.getDiseaseIndexToDisease().get(mentry.getKey());
                double sim = resources.getResnikSimilarity().computeScore(query, mentry.getValue());
@@ -108,7 +108,7 @@ public class SimilarityScoreCalculator {
         System.out.println("map before sorting: "
                 + similarityScores);
 
-//        List<TermId> diseases=resources.getDiseaseIndexToHpoTerms().entrySet().stream()
+//        List<TermId> diseases=resources.getDiseaseIndexToHpoTermsWithExpansion().entrySet().stream()
 //                .filter(e -> resources.getDiseaseIndexToDisease().get(e.getKey()).getPrefix().matches(filter)).collect(Collectors.toList());
 */
 
