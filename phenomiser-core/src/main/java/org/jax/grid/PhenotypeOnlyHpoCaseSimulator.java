@@ -5,6 +5,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
+import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.formats.hpo.HpoAnnotation;
@@ -246,8 +247,13 @@ public class PhenotypeOnlyHpoCaseSimulator {
     public int simulateCase(HpoDisease disease) {
 
         List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValue<TermId>> result = Phenomiser.query(randomizedTerms, this.db);
+        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(randomizedTerms,
+                this.db);
         //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
+        //@TODO: to allow shared ranks when pval and similarity scores are
+        // both identical. Item2PValueAndSimilarity has both value to
+        // calculate this
+
         int rank = -1;
         for (int i = 0; i < result.size(); i++) {
             if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {

@@ -1,14 +1,17 @@
 package org.jax.services;
 
+import org.jax.model.Item2PValueAndSimilarity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.Item2PValue;
+import org.monarchinitiative.phenol.stats.MultipleTestingCorrection;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 /**
  *
@@ -31,9 +34,10 @@ public class PValueCalculator  {
         this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
-    public Map<TermId, Double> calculatePValues() {
+    public Map<TermId, Item2PValueAndSimilarity<TermId>> calculatePValues() {
 
-        Map<TermId, Double> p_values = new HashMap<>();
+        Map<TermId, Item2PValueAndSimilarity<TermId>> p_values = new
+                HashMap<>();
         similarityScores.forEach((key, value) -> {
             if (scoreDistributions.containsKey(queryTermCount) &&
                     scoreDistributions.get(queryTermCount)
@@ -46,22 +50,46 @@ public class PValueCalculator  {
                             .getObjectScoreDistribution(key));
                 }
 
+                TermId diseaseId = diseaseIndexToDisease.get(key);
 
-                p_values.put(diseaseIndexToDisease.get(key), p);
+                p_values.put(diseaseId, new Item2PValueAndSimilarity<>
+                        (diseaseId, p, value));
             }
         });
 
         return p_values;
     }
 
-    public List<Item2PValue<TermId>> adjustPvals() {
+    //default to Benjamini Hochberg
+    public List<Item2PValueAndSimilarity<TermId>> adjustPvals() {
 
-        Map<TermId, Double> mymap = calculatePValues();
-        List<Item2PValue<TermId>> mylist = mymap.entrySet().stream().map(e -> new Item2PValue<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
+        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
+                .values());
 
         BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
         bh.adjustPvals(mylist);
 
+        return mylist;
+    }
+
+    //pass in a method to do MTC correction
+    public List<Item2PValueAndSimilarity<TermId>> adjustPvals
+            (Consumer<List<? extends Item2PValue>> mtcMethod) {
+        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
+        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
+                .values());
+        mtcMethod.accept(mylist);
+        return mylist;
+    }
+
+    //pass in MTC correction class defined in phenol
+    public List<Item2PValueAndSimilarity<TermId>> adjustPvals
+            (MultipleTestingCorrection<TermId> mtcMethod) {
+        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
+        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
+                .values());
+        mtcMethod.adjustPvals(mylist);
         return mylist;
     }
 

@@ -1,7 +1,8 @@
-package org.jax.services;
+package org.jax.model;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+@Deprecated
 public class SearchResult implements Comparable<SearchResult> {
     private final TermId tid;
     private final double pval;
