@@ -1,5 +1,6 @@
-
-*/target
+*hp.obo
+*.hpoa
+*target
 .idea/
 *logs
 *.iml

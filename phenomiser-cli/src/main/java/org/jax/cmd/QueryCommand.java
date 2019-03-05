@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
+import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
@@ -72,7 +73,7 @@ public class QueryCommand extends PhenomiserCommand {
 
 
         List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
-        List<Item2PValue<TermId>> result = Phenomiser.query(queryList, db);
+        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
 
         //output query result
         if (!result.isEmpty()) {
@@ -91,7 +92,8 @@ public class QueryCommand extends PhenomiserCommand {
         return writer;
     }
 
-    public void write_query_result(List<Item2PValue<TermId>> result, @Nullable String outPath) {
+    public void write_query_result(List<Item2PValueAndSimilarity<TermId>> result, @Nullable String
+            outPath) {
 
 //        if (adjusted_p_value == null) {
 //            return;
@@ -100,12 +102,14 @@ public class QueryCommand extends PhenomiserCommand {
         Writer writer = getWriter(outPath);
 
         try {
-            writer.write("diseaseId\tdiseaseName\tp\tadjust_p\n");
+            writer.write("diseaseId\tdiseaseName\tp\tadjust_p" +
+                    "\tsimilarityScore" +
+                    "\n");
         } catch (IOException e) {
             logger.error("io exception during writing header. writing output aborted.");
             return;
         }
-        List<Item2PValue<TermId>> newList = new ArrayList<>(result);
+        List<Item2PValueAndSimilarity<TermId>> newList = new ArrayList<>(result);
         Collections.sort(newList);
 
         newList.stream().forEach(e -> {
@@ -117,6 +121,8 @@ public class QueryCommand extends PhenomiserCommand {
                 writer.write(Double.toString(e.getRawPValue()));
                 writer.write("\t");
                 writer.write(Double.toString(e.getAdjustedPValue()));
+                writer.write("\t");
+                writer.write(Double.toString(e.getSimilarityScore()));
                 writer.write("\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");

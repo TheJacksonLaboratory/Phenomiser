@@ -60,7 +60,7 @@ public class CachedResources extends AbstractResources{
             logger.trace("deserialize information content map failed");
             logger.error("file not found" + icMapPath);
             logger.trace("information content map initiation started");
-            icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
+            icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIdsWithExpansion);
             logger.trace("information content map initiation success");
         } catch (IOException e) {
             logger.trace("deserialize information content map failed");

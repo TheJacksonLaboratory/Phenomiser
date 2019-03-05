@@ -1,10 +1,12 @@
 package org.jax;
 
+import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.PValueCalculator;
 import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,7 @@ public class Phenomiser {
      * @param queryTerms a list of HPO termIds
      * @param dbs a list of disease databases
      */
-    public static List<Item2PValue<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
+    public static List<Item2PValueAndSimilarity<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
             return null;
@@ -46,12 +48,19 @@ public class Phenomiser {
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
 
-      //  Map<Integer, Double> pvals = pValueCalculator.calculatePValues();
+        //No need to call this method since the following call calls it anyway
+//        Map<TermId, Item2PValueAndSimilarity<TermId>> pvalues =
+//                pValueCalculator.calculatePValues();
 
-        //p value multi test correction
-        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
+        //multi test correction
+        //call Benjamini Hochberg method
+        List<Item2PValueAndSimilarity<TermId>> adjusted = pValueCalculator
+                .adjustPvals(new BenjaminiHochberg<>());
 
-        return mylist;
+//        //calculate p value and multi test correction
+//        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
+
+        return adjusted;
     }
 
 }

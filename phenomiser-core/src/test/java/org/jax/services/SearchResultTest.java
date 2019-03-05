@@ -1,5 +1,6 @@
 package org.jax.services;
 
+import org.jax.model.SearchResult;
 import org.junit.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 

@@ -96,7 +96,7 @@ public class ComputedResources extends AbstractResources {
 
         //init icMap
         logger.trace("information content map initiation started");
-        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIds);
+        icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIdsWithExpansion);
         logger.trace("information content map initiation success");
 
         //init Resnik similarity precomputation
@@ -123,7 +123,8 @@ public class ComputedResources extends AbstractResources {
         SimilarityScoreSampling sampleing;//
         if (this.debug) {
             sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
-            Map<Integer, List<TermId>> subset = diseaseIndexToHpoTerms.entrySet().stream()
+            Map<Integer, List<TermId>> subset =
+                    diseaseIndexToHpoTermsNoExpansion.entrySet().stream()
                     .limit(50).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
             scoreDistributions.putAll(sampleing.performSampling(subset));
         } else {
@@ -133,7 +134,8 @@ public class ComputedResources extends AbstractResources {
                 newoption.setMinNumTerms(i);
                 newoption.setMaxNumTerms(i);
                 sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
-                scoreDistributions.putAll(sampleing.performSampling(diseaseIndexToHpoTerms));
+                scoreDistributions.putAll(sampleing.performSampling
+                        (diseaseIndexToHpoTermsNoExpansion));
             }
         }
 
