@@ -65,12 +65,11 @@ public class GridSearch {
 //        }
 
         for (int t = 1; t <= n_terms_per_case + n_noise_terms; t++){
-            //load required score distribution
+            //load required score distribution.
             ((CachedResources) resources).cleanAndLoadScoreDistribution(t);
             for (int i = 1; i <= n_terms_per_case; i++){ //signal
                 int j = t - i;
                 if ((j >= 0) && (j <= n_noise_terms)){
-  System.out.println(String.format("i= %d; j = %d", i, j));
                     PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
                     simulator.simulateCases();
                     rankmatrix[i][j] = simulator.getProportionAtRank1();

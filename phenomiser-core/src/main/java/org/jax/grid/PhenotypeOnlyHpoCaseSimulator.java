@@ -73,7 +73,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
         String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
         //filter diseaseMap to diseases with scoreDistributions
         //System.out.println("count of diseases having scoreDistributions: " + resources.getScoreDistributions().size());
-        Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(1).getObjectIds()
+        int intScoreDistribution = this.n_terms_per_case + this.n_noise_terms;
+        Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(intScoreDistribution).getObjectIds()
                 .stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
         //diseasesHavingScoreDistributions.forEach(System.out::println);
         this.diseaseMap=resources.getDiseaseMap()
@@ -253,7 +254,6 @@ public class PhenotypeOnlyHpoCaseSimulator {
         //@TODO: to allow shared ranks when pval and similarity scores are
         // both identical. Item2PValueAndSimilarity has both value to
         // calculate this
-
         int rank = -1;
         for (int i = 0; i < result.size(); i++) {
             if (result.get(i).getItem().equals(disease.getDiseaseDatabaseId())) {

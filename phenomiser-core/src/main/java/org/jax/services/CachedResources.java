@@ -45,6 +45,8 @@ public class CachedResources extends AbstractResources{
     }
 
     public void cleanAndLoadScoreDistribution(int i){
+        // treat any number above 10 as 10 because we only compute score distributions for <=10 terms
+        i = Math.min(i, 10);
         //if desired score distribution already exist, return
         if (this.scoreDistributions.containsKey(i)) {
             return;
@@ -58,7 +60,7 @@ public class CachedResources extends AbstractResources{
         try (ObjectInputStream in =
                      new ObjectInputStream(new FileInputStream(cachep))) {
             ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
-            scoreDistributions.put(n_terms_in_query, scoreDistribution);
+            scoreDistributions.put(i, scoreDistribution);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("error when trying to deserialize " + cachep);
