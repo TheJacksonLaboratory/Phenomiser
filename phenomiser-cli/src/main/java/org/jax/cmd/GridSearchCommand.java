@@ -75,7 +75,8 @@ public class GridSearchCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath,
+                1);
         resources.init();
         Phenomiser.setResources(resources);
 
@@ -86,7 +87,7 @@ public class GridSearchCommand extends PhenomiserCommand {
             random = new Random(seed);
         }
 
-        checkScoreDistributionsArePrecomputed();
+        //checkScoreDistributionsArePrecomputed();
         GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype, random);
 
         double [][] m = gridSearch.run();
