@@ -43,7 +43,7 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
         Item2PValueAndSimilarity other = (Item2PValueAndSimilarity) o;
         final double DELTA = 0.0001;
 
-        if (this.getRawPValue() == o.getRawPValue()) {
+        if (DoubleMath.fuzzyEquals(this.getRawPValue(), other.getRawPValue(), DELTA)) {
             return DoubleMath.fuzzyCompare(this.similarityScore, other
                     .similarityScore, DELTA);
         } else {
