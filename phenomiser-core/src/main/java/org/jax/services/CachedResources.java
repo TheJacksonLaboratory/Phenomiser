@@ -31,7 +31,8 @@ public class CachedResources extends AbstractResources{
      * @param cachePath
      * @param n_terms
      */
-    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath, int n_terms) {
+    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser,
+                           String cachePath, Integer n_terms) {
         super(hpoParser, diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = n_terms;
@@ -41,6 +42,30 @@ public class CachedResources extends AbstractResources{
         super(hpoParser, diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = null;
+    }
+
+    public void cleanAndLoadScoreDistribution(int i){
+        // treat any number above 10 as 10 because we only compute score distributions for <=10 terms
+        i = Math.min(i, 10);
+        //if desired score distribution already exist, return
+        if (this.scoreDistributions.containsKey(i)) {
+            return;
+        }
+        //!!!important!!!
+        //empty current score distribution to reduce memory requirement.
+        this.scoreDistributions.clear();
+
+        String cachep = String.format("%s%s%d_term.scoreDistribution.binary",
+                cachingPath , File.separator, i);
+        try (ObjectInputStream in =
+                     new ObjectInputStream(new FileInputStream(cachep))) {
+            ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
+            scoreDistributions.put(i, scoreDistribution);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("error when trying to deserialize " + cachep);
+        }
+        logger.trace("Done deserializing {}", cachep);
     }
 
     @Override
@@ -113,8 +138,12 @@ public class CachedResources extends AbstractResources{
                     ScoreDistribution scoreDistribution = (ScoreDistribution) in.readObject();
                     scoreDistributions.put(n_terms_in_query, scoreDistribution);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    logger.error("error when trying to deserialize " + cachep);
+                    //We warn user but do not fail so that reader can call
+                    // cleanAndLoadScoreDistribution method to control
+                    // deserialization
+                    //e.printStackTrace();
+                    logger.warn("error when trying to deserialize " +
+                            cachep);
                 }
                 logger.trace("Done deserializing {}", cachep);
             } else {
@@ -136,8 +165,6 @@ public class CachedResources extends AbstractResources{
                 logger.error("io exception when trying to find individual score distributions");
             }
             }
-
         }
-
     }
 }

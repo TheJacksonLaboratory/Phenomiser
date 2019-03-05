@@ -1,6 +1,8 @@
 package org.jax.grid;
 
+import org.jax.Phenomiser;
 import org.jax.services.AbstractResources;
+import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 
 import javax.annotation.Nullable;
@@ -54,11 +56,24 @@ public class GridSearch {
 
     public double[][] run() {
         double[][] rankmatrix = new double[n_terms_per_case + 1][n_noise_terms + 1];
-        for (int i = 1; i <= n_terms_per_case; i++) {
-            for (int j = 0; j <= n_noise_terms; j++) {
-                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
-                simulator.simulateCases();
-                rankmatrix[i][j] = simulator.getProportionAtRank1();
+//        for (int i = 1; i <= n_terms_per_case; i++) {
+//            for (int j = 0; j <= n_noise_terms; j++) {
+//                PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
+//                simulator.simulateCases();
+//                rankmatrix[i][j] = simulator.getProportionAtRank1();
+//            }
+//        }
+
+        for (int t = 1; t <= n_terms_per_case + n_noise_terms; t++){
+            //load required score distribution.
+            ((CachedResources) resources).cleanAndLoadScoreDistribution(t);
+            for (int i = 1; i <= n_terms_per_case; i++){ //signal
+                int j = t - i;
+                if ((j >= 0) && (j <= n_noise_terms)){
+                    PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
+                    simulator.simulateCases();
+                    rankmatrix[i][j] = simulator.getProportionAtRank1();
+                }
             }
         }
         return rankmatrix;
