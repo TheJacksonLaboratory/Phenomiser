@@ -43,8 +43,8 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
         final double DELTA = 0.0001;
 
         if (Double.compare(this.getRawPValue(), other.getRawPValue()) == 0) {
-            return Double.compare(this.similarityScore, other
-                    .similarityScore);
+            return Double.compare(other
+                    .similarityScore, this.similarityScore);
         } else {
             return Double.compare(this.getRawPValue(), other.getRawPValue());
         }
