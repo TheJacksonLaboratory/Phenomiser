@@ -55,7 +55,7 @@ public class Phenomiser {
         //multi test correction
         //call Benjamini Hochberg method
         List<Item2PValueAndSimilarity<TermId>> adjusted = pValueCalculator
-                .adjustPvals(new BenjaminiHochberg<>());
+                .adjustPvals();
 
 //        //calculate p value and multi test correction
 //        List<Item2PValue<TermId>> mylist = pValueCalculator.adjustPvals();
