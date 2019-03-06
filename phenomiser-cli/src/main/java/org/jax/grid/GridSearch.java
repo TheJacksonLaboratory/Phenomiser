@@ -51,6 +51,7 @@ public class GridSearch {
         this.n_terms_per_case = n_diseaseTerm;
         this.n_noise_terms = n_noiseTerm;
         this.useImprecision=imprecision;
+ System.out.println("a non null random is passed" + (random != null));
         this.r = (random == null) ? new Random() : random;
     }
 
@@ -70,7 +71,10 @@ public class GridSearch {
             for (int i = 1; i <= n_terms_per_case; i++){ //signal
                 int j = t - i;
                 if ((j >= 0) && (j <= n_noise_terms)){
-                    PhenotypeOnlyHpoCaseSimulator simulator = new PhenotypeOnlyHpoCaseSimulator(resources, diseaseDB, n_cases_to_simulate, i, j, useImprecision);
+                    PhenotypeOnlyHpoCaseSimulator simulator = new
+                            PhenotypeOnlyHpoCaseSimulator(resources,
+                            diseaseDB, n_cases_to_simulate, i, j,
+                            useImprecision, this.r);
                     simulator.simulateCases();
                     rankmatrix[i][j] = simulator.getProportionAtRank1();
                 }

@@ -83,10 +83,11 @@ public class GridSearchCommand extends PhenomiserCommand {
         List<DiseaseDB> targetDb = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
 
         Random random = null;
+System.out.println("random seed: " + seed);
         if (seed != null) {
             random = new Random(seed);
         }
-
+System.out.println("random set: " + (random != null));
         //checkScoreDistributionsArePrecomputed();
         GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype, random);
 

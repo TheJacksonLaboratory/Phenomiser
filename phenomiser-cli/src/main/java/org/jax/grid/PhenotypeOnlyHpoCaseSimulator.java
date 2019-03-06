@@ -58,12 +58,15 @@ public class PhenotypeOnlyHpoCaseSimulator {
     /** Root term id in the phenotypic abnormality subontology. */
     private final static TermId PHENOTYPIC_ABNORMALITY = TermId.of("HP:0000118");
 
+    private Random random;
+
     public PhenotypeOnlyHpoCaseSimulator(AbstractResources resources,
                                          @NotNull List<DiseaseDB> db,
                                          int cases_to_simulate,
                                          int terms_per_case,
                                          int noise_terms,
-                                         boolean imprecise) {
+                                         boolean imprecise,
+                                         Random random) {
         this.n_cases_to_simulate=cases_to_simulate;
         this.n_terms_per_case=terms_per_case;
         this.n_noise_terms=noise_terms;
@@ -91,6 +94,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.phenotypeterms=builder.build();
         this.termIndices=diseaseMap.keySet().toArray(new TermId[0]);
         this.addTermImprecision = imprecise;
+        this.random = random;
     }
 
     public void setVerbosity(boolean v) { this.verbose=v;}
@@ -123,10 +127,9 @@ public class PhenotypeOnlyHpoCaseSimulator {
         logger.trace(String.format("Simulating n=%d HPO cases with %d random terms and %d noise terms per case.",n_cases_to_simulate,n_terms_per_case,n_noise_terms));
         int size = diseaseMap.size();
 
-        Random r = new Random();
-
         for (int i=0;i<n_cases_to_simulate;++i) {
-            TermId diseaseToSimulate = getNextRandomDisease(r);//termIndices[randomIndices[i]];
+            TermId diseaseToSimulate = getNextRandomDisease(this.random);
+            //termIndices[randomIndices[i]];
             HpoDisease disease = diseaseMap.get(diseaseToSimulate);
 
             if (disease.getNumberOfPhenotypeAnnotations() <this.n_terms_per_case) {
@@ -201,14 +204,14 @@ public class PhenotypeOnlyHpoCaseSimulator {
      */
     private TermId getRandomPhenotypeTerm() {
         int n=phenotypeterms.size();
-        int r = (int)Math.floor(n*Math.random());
+        int r = (int)Math.floor(n*this.random.nextDouble());
         return phenotypeterms.get(r);
     }
 
     /** @return a random parent of term tid. */
     private TermId getRandomParentTerm(TermId tid) {
         Set<TermId> parents = getParentTerms(ontology,tid,false);
-        int r = (int)Math.floor(parents.size()*Math.random());
+        int r = (int)Math.floor(parents.size()*this.random.nextDouble());
         return (TermId)parents.toArray()[r];
     }
 
