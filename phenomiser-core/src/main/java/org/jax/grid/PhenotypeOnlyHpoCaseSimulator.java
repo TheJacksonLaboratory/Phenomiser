@@ -73,7 +73,8 @@ public class PhenotypeOnlyHpoCaseSimulator {
         String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
         //filter diseaseMap to diseases with scoreDistributions
         //System.out.println("count of diseases having scoreDistributions: " + resources.getScoreDistributions().size());
-        int intScoreDistribution = this.n_terms_per_case + this.n_noise_terms;
+        int intScoreDistribution = Math.min(this.n_terms_per_case + this
+                .n_noise_terms, 10);
         Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(intScoreDistribution).getObjectIds()
                 .stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
         //diseasesHavingScoreDistributions.forEach(System.out::println);
