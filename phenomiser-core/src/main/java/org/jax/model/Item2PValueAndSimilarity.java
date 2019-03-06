@@ -10,7 +10,7 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
     /**
      * This constructor takes an Item for which a pvalue was calculated. It assigned both {@link #p_raw} (the
      * raw pavel) and {@link #p_adjusted} to this value (i.e., by default there is no multiple testing
-     * correction. The class is designed to be used with other classes such as {@link Bonferroni} to
+     * correction. The class is designed to be used with other classes such as  Bonferroni to
      * adjust the raw pvalues that are stored in {@link #p_adjusted}.
      *
      * @param item
@@ -20,8 +20,7 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
         super(item, p);
     }
 
-    public Item2PValueAndSimilarity(T item, double p, double
-            similarityScore) {
+    public Item2PValueAndSimilarity(T item, double p, double similarityScore) {
         super(item, p);
         this.similarityScore = similarityScore;
     }
@@ -43,12 +42,11 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
         Item2PValueAndSimilarity other = (Item2PValueAndSimilarity) o;
         final double DELTA = 0.0001;
 
-        if (DoubleMath.fuzzyEquals(this.getRawPValue(), other.getRawPValue(), DELTA)) {
-            return DoubleMath.fuzzyCompare(this.similarityScore, other
-                    .similarityScore, DELTA);
+        if (Double.compare(this.getRawPValue(), other.getRawPValue()) == 0) {
+            return Double.compare(this.similarityScore, other
+                    .similarityScore);
         } else {
-            return DoubleMath.fuzzyCompare(this.getRawPValue(), other.getRawPValue(),
-                    DELTA);
+            return Double.compare(this.getRawPValue(), other.getRawPValue());
         }
     }
 

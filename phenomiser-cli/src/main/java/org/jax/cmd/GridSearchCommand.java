@@ -45,9 +45,9 @@ public class GridSearchCommand extends PhenomiserCommand {
     @Parameter(names = { "-signal", "--n-diseaseTerm"}, description = "Number of disease terms")
     private int n_diseaseTerm = 10;
     @Parameter(names = {"-noise", "--noise"}, description = "Number of noise terms")
-    private int n_noiseTerm = 5;
+    private int n_noiseTerm = 4;
     @Parameter(names={"-i","--imprecision"}, description="Use imprecision?")
-    private boolean imprecise_phenotype = false;
+    private boolean imprecise_phenotype = true;
     @Parameter(names = {"-o", "--output"}, description = "Output path")
     private String outPath;
     @Parameter(names = {"-seed", "--set.seed"}, description = "Set random number generator seed for simulation")

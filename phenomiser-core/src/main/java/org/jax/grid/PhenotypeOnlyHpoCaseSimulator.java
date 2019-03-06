@@ -43,7 +43,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     private final int n_cases_to_simulate;
     /** If true, we exchange each of the non-noise terms with a direct parent except if that would mean going to
      * the root of the phenotype ontology.*/
-    private boolean addTermImprecision = false;
+    private boolean addTermImprecision = true;
     /** The proportion of cases at rank 1 in the current simulation */
     private List<DiseaseDB> db;
 
