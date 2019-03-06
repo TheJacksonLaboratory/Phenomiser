@@ -95,7 +95,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.termIndices=diseaseMap.keySet().toArray(new TermId[0]);
         this.addTermImprecision = imprecise;
         this.random = random;
-        qc();
+        //qc();
     }
 
     public void setVerbosity(boolean v) { this.verbose=v;}
