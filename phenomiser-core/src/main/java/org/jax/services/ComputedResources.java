@@ -112,13 +112,9 @@ public class ComputedResources extends AbstractResources {
         logger.trace("score distribution computation started");
         ScoreSamplingOptions samplingOption = new ScoreSamplingOptions();
         samplingOption.setNumThreads(numThreads);
-        if (this.debug) {
-            samplingOption.setMinNumTerms(1);
-            samplingOption.setMaxNumTerms(3);
-        } else {
-            samplingOption.setMinNumTerms(sampleMin);
-            samplingOption.setMaxNumTerms(sampleMax);
-        }
+        samplingOption.setMinNumTerms(sampleMin);
+        samplingOption.setMaxNumTerms(sampleMax);
+
 
         SimilarityScoreSampling sampleing;//
         if (this.debug) {
