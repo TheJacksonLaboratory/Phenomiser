@@ -60,38 +60,4 @@ public class PValueCalculator  {
         return p_values;
     }
 
-    //default to Benjamini Hochberg
-    public List<Item2PValueAndSimilarity<TermId>> adjustPvals() {
-
-        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
-        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
-                .values());
-
-        BenjaminiHochberg<TermId> bh = new BenjaminiHochberg<>();
-        bh.adjustPvals(mylist);
-
-        return mylist;
-    }
-
-    //pass in a method to do MTC correction
-    public List<Item2PValueAndSimilarity<TermId>> adjustPvals
-            (Consumer<List<? extends Item2PValue>> mtcMethod) {
-        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
-        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
-                .values());
-        mtcMethod.accept(mylist);
-        return mylist;
-    }
-
-    //pass in MTC correction class defined in phenol
-    public List<Item2PValueAndSimilarity<TermId>> adjustPvals
-            (MultipleTestingCorrection<TermId> mtcMethod) {
-        Map<TermId, Item2PValueAndSimilarity<TermId>> mymap = calculatePValues();
-        List<Item2PValueAndSimilarity<TermId>> mylist = new ArrayList<>(mymap
-                .values());
-        mtcMethod.adjustPvals(mylist);
-        return mylist;
-    }
-
-
 }

@@ -47,7 +47,7 @@ public class GridSearchCommand extends PhenomiserCommand {
     @Parameter(names = {"-noise", "--noise"}, description = "Number of noise terms")
     private int n_noiseTerm = 4;
     @Parameter(names={"-i","--imprecision"}, description="Use imprecision?")
-    private boolean imprecise_phenotype = true;
+    private boolean imprecise_phenotype = false;
     @Parameter(names = {"-o", "--output"}, description = "Output path")
     private String outPath;
     @Parameter(names = {"-seed", "--set.seed"}, description = "Set random number generator seed for simulation")
@@ -83,11 +83,9 @@ public class GridSearchCommand extends PhenomiserCommand {
         List<DiseaseDB> targetDb = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
 
         Random random = null;
-System.out.println("random seed: " + seed);
         if (seed != null) {
             random = new Random(seed);
         }
-System.out.println("random set: " + (random != null));
         //checkScoreDistributionsArePrecomputed();
         GridSearch gridSearch = new GridSearch(resources, targetDb, n_cases_to_simulate, n_diseaseTerm, n_noiseTerm, imprecise_phenotype, random);
 

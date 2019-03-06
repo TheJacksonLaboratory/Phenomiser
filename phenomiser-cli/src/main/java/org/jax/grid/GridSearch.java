@@ -100,24 +100,4 @@ public class GridSearch {
         }
     }
 
-    public static void writeRscript(double[][] rankmatrix, Writer writer) throws Exception {
-        throw new UnsupportedOperationException("not supported yet. Implement this method before you call it");
-        //TODO: format output to an R script
-        //        writer.write("library(plot3D)\n");
-//        writer.write("mat <- matrix(\n");
-//
-//        List<Double> values=new ArrayList<>();
-//        for (int j = 0; j < randomtermnumber.length; j++) {
-//            for (int i = 0; i < termnumber.length; i++) {
-//                values.add(Z[i][j]);
-//            }
-//        }
-//        String valuestring=values.stream().map(String::valueOf).collect(Collectors.joining(","));
-//        writer.write("c(" + valuestring +"),\n");
-//        writer.write("nrow=5,\nncol=10,\nbyrow=TRUE)\n");
-//        writer.write("hist3D(z = mat, scale = FALSE, expand = 0.5, bty = \"g\", phi = 20,\n" +
-//                "      col = \"#0072B2\", border = \"black\", shade = 0.2, ltheta = 99,\n" +
-//                "      space = 0.3, ticktype = \"detailed\", d = 2)");
-    }
-
 }

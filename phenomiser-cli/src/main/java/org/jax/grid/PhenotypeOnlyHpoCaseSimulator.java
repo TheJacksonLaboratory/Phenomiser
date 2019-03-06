@@ -95,6 +95,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
         this.termIndices=diseaseMap.keySet().toArray(new TermId[0]);
         this.addTermImprecision = imprecise;
         this.random = random;
+        qc();
     }
 
     public void setVerbosity(boolean v) { this.verbose=v;}
@@ -236,13 +237,17 @@ public class PhenotypeOnlyHpoCaseSimulator {
         ImmutableList.Builder<TermId> termIdBuilder = new ImmutableList.Builder<>();
         Collections.shuffle(abnormalities); // randomize order of phenotypes
         // take the first n_random terms of the randomized list
-        abnormalities.stream().limit(n_terms_per_case).forEach(a-> termIdBuilder.add(a.getTermId()));
+        if (addTermImprecision) {
+            abnormalities.stream().limit(n_terms_per_case).forEach( a -> {
+                TermId randomParent = getRandomParentTerm(a.getTermId());
+                termIdBuilder.add(randomParent);
+            });
+        } else {
+            abnormalities.stream().limit(n_terms_per_case).forEach(a-> termIdBuilder.add(a.getTermId()));
+        }
         // now add n_random "noise" terms to the list of abnormalities of our case.
         for(int i=0;i<n_noise_terms;i++){
             TermId t = getRandomPhenotypeTerm();
-            if (addTermImprecision) {
-                t = getRandomParentTerm(t);
-            }
             termIdBuilder.add(t);
         }
         return termIdBuilder.build();
@@ -268,5 +273,13 @@ public class PhenotypeOnlyHpoCaseSimulator {
         return rank;
     }
 
+
+    private void qc() {
+        System.out.println("number of directed annotated hpo terms for each disease that have score distributions:");
+        diseaseMap.entrySet().forEach(e ->{
+            System.out.print(e.getKey().getValue() + "\t");
+            System.out.println(e.getValue().getPhenotypicAbnormalities().size());
+        });
+    }
 
 }
