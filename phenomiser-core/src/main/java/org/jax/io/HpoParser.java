@@ -11,14 +11,11 @@ import java.util.Map;
 
 public class HpoParser {
     private String hpoPath;
-    //private InputStream hpoStream;
     private Ontology hpoOntology;
 
     public HpoParser(String hpoPath) {
         this.hpoPath = hpoPath;
     }
-
-    //public HpoParser(InputStream hpoStream) { this.hpoStream = hpoStream; }
 
     public void init()  {
         this.hpoOntology = OntologyLoader.loadOntology(new File(hpoPath));

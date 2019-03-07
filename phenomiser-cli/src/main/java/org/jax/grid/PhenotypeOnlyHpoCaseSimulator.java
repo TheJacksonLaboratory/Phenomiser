@@ -216,6 +216,19 @@ public class PhenotypeOnlyHpoCaseSimulator {
         return (TermId)parents.toArray()[r];
     }
 
+    /** @return a non-root random parent of term tid. It could be empty. */
+    private Optional<TermId> getNonRootRandomParentTerm(TermId tid) {
+        Set<TermId> parents = new HashSet<>(getParentTerms(ontology.subOntology(PHENOTYPIC_ABNORMALITY),tid,false));
+        if (parents.contains(PHENOTYPIC_ABNORMALITY)){
+            parents.remove(PHENOTYPIC_ABNORMALITY);
+        }
+        if (parents.isEmpty()) { //no parents could be found
+            return Optional.empty();
+        }
+        int r = (int)Math.floor(parents.size()*Math.random());
+        return Optional.of((TermId) parents.toArray()[r]);
+    }
+
 
 
     public Ontology getOntology() {
@@ -239,8 +252,12 @@ public class PhenotypeOnlyHpoCaseSimulator {
         // take the first n_random terms of the randomized list
         if (addTermImprecision) {
             abnormalities.stream().limit(n_terms_per_case).forEach( a -> {
-                TermId randomParent = getRandomParentTerm(a.getTermId());
-                termIdBuilder.add(randomParent);
+                Optional<TermId> randomParent = getNonRootRandomParentTerm(a.getTermId());
+                if (randomParent.isPresent()) {
+                    termIdBuilder.add(randomParent.get());
+                } else { //cannot find non-root parent
+                    termIdBuilder.add(a.getTermId());
+                }
             });
         } else {
             abnormalities.stream().limit(n_terms_per_case).forEach(a-> termIdBuilder.add(a.getTermId()));
