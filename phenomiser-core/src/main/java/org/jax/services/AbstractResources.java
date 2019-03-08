@@ -1,5 +1,7 @@
 package org.jax.services;
 
+import org.jax.dichotomy.DichotomousPair;
+import org.jax.io.DichotomousPairParser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.base.PhenolException;
@@ -23,6 +25,8 @@ public abstract class AbstractResources {
 
     protected DiseaseParser diseaseParser;
 
+    private DichotomousPairParser dichotomousPairParser;
+
     protected Ontology hpo;
 
     protected Map<TermId, HpoDisease> diseaseMap;
@@ -45,6 +49,8 @@ public abstract class AbstractResources {
     protected Map<Integer, TermId> diseaseIndexToDisease;
 
     protected Map<Integer, ScoreDistribution> scoreDistributions;
+
+    protected Set<DichotomousPair> dichotomousPairs;
 
 
 
@@ -208,5 +214,13 @@ public abstract class AbstractResources {
 
     public void setDiseaseIndexToHpoTermsNoExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion) {
         this.diseaseIndexToHpoTermsNoExpansion = diseaseIndexToHpoTermsNoExpansion;
+    }
+
+    public Set<DichotomousPair> getDichotomousPairs() {
+        return dichotomousPairs;
+    }
+
+    public void setDichotomousPairs(Set<DichotomousPair> dichotomousPairs) {
+        this.dichotomousPairs = dichotomousPairs;
     }
 }

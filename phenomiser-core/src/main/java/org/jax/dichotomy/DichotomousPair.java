@@ -2,39 +2,31 @@ package org.jax.dichotomy;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-public class DichotomousPair {
+import java.io.Serializable;
+
+public class DichotomousPair implements Serializable {
 
     private TermId yin;
     private TermId yang;
 
     /**
      * A pair of different terms that are dichotomous features, such as hyperkalemia and hypokalemia
-     * @param a
-     * @param b
+     * @param yin
+     * @param yang
      */
-    public DichotomousPair(TermId a, TermId b) {
-        if (a.compareTo(b) == 0) {
-
+    public DichotomousPair(TermId yin, TermId yang) {
+        if (yin.compareTo(yang) == 0) {
+            throw new IllegalArgumentException("Identical termIds are passed in as a dichotomous pair");
         }
-        int compare = a.compareTo(b);
-        switch (compare){
-            case -1:
-                this.yin = a;
-                this.yang = b;
-                break;
-            case 0:
-                throw new IllegalArgumentException("Identical terms are passed as dichotomous pairs");
-            case 1:
-                this.yin = b;
-                this.yang = a;
-        }
+        this.yin = yin;
+        this.yang = yang;
     }
 
     public TermId getYin() {
         return yin;
     }
 
-    public void setYin(TermId yin) {
+    private void setYin(TermId yin) {
         this.yin = yin;
     }
 
@@ -42,13 +34,18 @@ public class DichotomousPair {
         return yang;
     }
 
-    public void setYang(TermId yang) {
+    private void setYang(TermId yang) {
         this.yang = yang;
     }
 
     @Override
     public int hashCode() {
 
+        if (this.yin.compareTo(this.yang) > 0) {
+            TermId dummy = this.yang;
+            this.yin = this.yang;
+            this.yang = dummy;
+        }
 
         return this.yin.hashCode() + 11 * this.yang.hashCode();
     }
@@ -59,7 +56,8 @@ public class DichotomousPair {
             return false;
         }
         DichotomousPair other = (DichotomousPair) obj;
-        return this.yin.equals(other.yin) && this.yang.equals(other.yang);
+        return (this.yin.equals(other.yin) && this.yang.equals(other.yang)) ||
+                (this.yin.equals(other.yang) && this.yang.equals(other.yin));
     }
 
     @Override

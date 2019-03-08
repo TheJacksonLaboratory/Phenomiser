@@ -12,7 +12,6 @@ import java.util.Set;
 
 /**
  * This is a class to improve ResnikSimilarity after taking medically dichotomous phenotypes into consideration. Data on dichotomous pairs will come from loinc2hpoAnnotation.
- * @TODO: change phenol {@link PairwiseResnikSimilarity} interface to public
  * @Author Aaron Zhang
  */
 public class DichotomyAwarePairwiseResnikSimilarity implements PairwiseSimilarity {

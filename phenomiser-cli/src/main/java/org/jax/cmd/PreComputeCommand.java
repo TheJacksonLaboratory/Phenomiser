@@ -2,6 +2,8 @@ package org.jax.cmd;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.jax.dichotomy.DichotomousPair;
+import org.jax.io.DichotomousPairParser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 @Parameters(commandDescription = "Precompute similarity score distributions")
 public class PreComputeCommand extends PhenomiserCommand {
@@ -66,7 +69,10 @@ public class PreComputeCommand extends PhenomiserCommand {
         properties.setProperty("sampleMin", Integer.toString(sampling.get(0)));
         properties.setProperty("sampleMax", Integer.toString(sampling.get(1)));
 
-        AbstractResources resources = new ComputedResources(hpoParser, diseaseParser, properties, debug);
+
+        DichotomousPairParser dichotomousPairParser = new DichotomousPairParser(getClass().getClassLoader().getResourceAsStream("dichotomousPair.csv"));
+
+        AbstractResources resources = new ComputedResources(hpoParser, diseaseParser, dichotomousPairParser, properties, debug);
         resources.init();
     }
 }

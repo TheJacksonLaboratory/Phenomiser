@@ -1,5 +1,8 @@
 package org.jax.services;
 
+import org.jax.dichotomy.DichotomousPair;
+import org.jax.dichotomy.PrecomputingDichotomyAwarePairwiseResnikSimilarity;
+import org.jax.io.DichotomousPairParser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
 import org.jax.utils.ObservableMap;
@@ -38,6 +41,8 @@ public class ComputedResources extends AbstractResources {
     private int sampleMin = 1;
     private int sampleMax = 10;
 
+    private Set<DichotomousPair> dichotomousPairs;
+
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
@@ -46,7 +51,7 @@ public class ComputedResources extends AbstractResources {
      * @param properties pass in settings to overwrite default settings
      * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
-    public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
+    private ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
         super(hpoParser, diseaseParser);
         this.properties = properties;
         try {
@@ -90,6 +95,11 @@ public class ComputedResources extends AbstractResources {
         });
     }
 
+    public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, DichotomousPairParser dichotomousPairParser, @Nullable Properties properties, @Nullable boolean debug){
+        this(hpoParser, diseaseParser, properties, debug);
+        this.dichotomousPairs = dichotomousPairParser.getDichotomousPairSet();
+    }
+
     @Override
     public void init() {
         super.defaultInit();
@@ -101,8 +111,9 @@ public class ComputedResources extends AbstractResources {
 
         //init Resnik similarity precomputation
         logger.trace("Resnik similarity precomputation started");
-        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
-                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
+//        final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
+//                new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
+        final PrecomputingDichotomyAwarePairwiseResnikSimilarity pairwiseResnikSimilarity = new PrecomputingDichotomyAwarePairwiseResnikSimilarity(hpo, icMap, this.dichotomousPairs, numThreads);
 
         resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
 
