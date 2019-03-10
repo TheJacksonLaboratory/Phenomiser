@@ -3,6 +3,7 @@ package org.jax;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import org.apache.log4j.BasicConfigurator;
 import org.jax.cmd.GridSearchCommand;
 import org.jax.cmd.PhenomiserCommand;
 import org.jax.cmd.PreComputeCommand;
@@ -24,6 +25,7 @@ public class PhenomiserApp {
 
     public static void main( String[] args ) {
 
+        BasicConfigurator.configure();
         long startTime = System.currentTimeMillis();
 
         PhenomiserApp phenomiserApp = new PhenomiserApp();

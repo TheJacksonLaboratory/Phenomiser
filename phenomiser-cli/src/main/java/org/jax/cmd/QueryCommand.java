@@ -67,7 +67,7 @@ public class QueryCommand extends PhenomiserCommand {
             System.exit(1);
         }
         List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath,queryList.size());
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
         Phenomiser.setResources(resources);
 

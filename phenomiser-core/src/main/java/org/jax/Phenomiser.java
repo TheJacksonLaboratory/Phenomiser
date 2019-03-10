@@ -55,6 +55,7 @@ public class Phenomiser {
     public static List<Item2PValueAndSimilarity<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
+            logger.error("premature death");
             return null;
         }
 
