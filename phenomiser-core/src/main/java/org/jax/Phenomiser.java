@@ -48,7 +48,7 @@ public class Phenomiser {
     }
 
     /**
-     * query with a list of terms and diseases
+     * Query with a list of terms and diseases
      * @param queryTerms a list of HPO termIds
      * @param dbs a list of disease databases
      */
@@ -74,6 +74,40 @@ public class Phenomiser {
         mtcConsumer.accept(adjusted);
 
         return adjusted;
+    }
+
+    /**
+     * Query in batch mode with multiple queries. This method optimizes resource usage to avoid repeated file io.
+     * @param queries a list of query list.
+     * @param dbs a list of disease databases
+     * @return a list of disease ranking lists
+     */
+    public static List<List<Item2PValueAndSimilarity<TermId>>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
+        throw new UnsupportedOperationException("TO implement");
+    }
+
+    /**
+     * Provide a list of query terms and a disease ID, find the rank of specified disease in the disease ranking
+     * @param queryTerms
+     * @param targetDisease
+     * @param dbs
+     * @return
+     */
+    public static int findRank(List<TermId> queryTerms, TermId targetDisease, List<DiseaseDB> dbs){
+        throw new UnsupportedOperationException("TO implement");
+
+    }
+
+    /**
+     * Provide multiple query term lists. For each query list, provide a target disease in a separate list. Return the rank of specified disease for each query list.
+     * @param queries
+     * @param targetDiseases
+     * @param dbs
+     * @return
+     */
+    public static int[] batchFindRank(List<List<TermId>> queries,
+                                      List<TermId> targetDiseases, List<DiseaseDB> dbs){
+        throw new UnsupportedOperationException("TO implement");
     }
 
 }
