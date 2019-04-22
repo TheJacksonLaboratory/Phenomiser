@@ -1,10 +1,13 @@
 package org.jax;
 
+import org.h2.mvstore.DataUtils;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.PValueCalculator;
 import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
+import org.jax.utils.Ranker;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.Item2PValue;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Reimplementation of Phenomiser with Java 8.
@@ -84,6 +88,21 @@ public class Phenomiser {
      * @return a list of disease ranking lists
      */
     public static List<List<Item2PValueAndSimilarity<TermId>>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
+
+        Map<Integer, Integer> listSizes = new HashMap<>(); // from first to last list, count how many Terms each list has
+        for (int i = 0; i < queries.size(); i++) {
+            listSizes.put(i, queries.get(i).size());
+        }
+
+        //process query lists in the order of how many terms they have
+        listSizes.values().forEach(listSize -> {
+
+
+
+
+
+        });
+
         throw new UnsupportedOperationException("TO implement");
     }
 
@@ -95,8 +114,19 @@ public class Phenomiser {
      * @return
      */
     public static int findRank(List<TermId> queryTerms, TermId targetDisease, List<DiseaseDB> dbs){
-        throw new UnsupportedOperationException("TO implement");
 
+        List<Item2PValueAndSimilarity<TermId>> result =  query(queryTerms, dbs);
+        Ranker<Item2PValueAndSimilarity<TermId>> ranker = new Ranker<>(result);
+        Map<Item2PValueAndSimilarity<TermId>, Integer> rankingMap = ranker.ranking();
+
+        int rank = -1;
+        for (Map.Entry<Item2PValueAndSimilarity<TermId>, Integer> entry : rankingMap.entrySet()) {
+            if (entry.getKey().getItem().equals(targetDisease)) {
+                rank = entry.getValue();
+            }
+        }
+
+        return rank;
     }
 
     /**
