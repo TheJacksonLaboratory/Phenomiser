@@ -61,7 +61,8 @@ public class Phenomiser {
         //a user might just want to select "OMIM", "OPHANET" or "MONDO" diseases
         //for each disease, calculate the similarity score with query terms
         SimilarityScoreCalculator similarityScoreCalculator = new SimilarityScoreCalculator(resources);
-        Map<Integer, Double> similarityScores = similarityScoreCalculator.compute(queryTerms, dbs);
+        //Map<Integer, Double> similarityScores = similarityScoreCalculator.compute(queryTerms, dbs);
+        Map<TermId, Double> similarityScores = similarityScoreCalculator.computeB(queryTerms, dbs);
 
         //estimate p values for each disease
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
