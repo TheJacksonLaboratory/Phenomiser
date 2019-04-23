@@ -1,14 +1,15 @@
 package org.jax.cmd;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.HpoParser;
+import org.jax.io.PhenopacketImporter;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
+import org.json.simple.parser.ParseException;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -25,8 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Parameters(commandDescription = "Query with a list of HPO terms and rank diseases based on similarity score")
-public class QueryCommand extends PhenomiserCommand {
+public class PhenopacketCommand extends PhenomiserCommand {
+
     private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
     final String HOME = System.getProperty("user.home");
 
@@ -39,8 +40,8 @@ public class QueryCommand extends PhenomiserCommand {
     @Parameter(names = {"-db", "--diseaseDB"},
             description = "choose disease database [OMIM,ORPHA]")
     private String diseaseDB = "OMIM";
-    @Parameter(names = {"-query", "--query-terms"}, description = "specify HPO terms to query")
-    private String query;
+    @Parameter(names = {"-pp", "--phenopacket"}, description = "specify the path to a phenopachet file")
+    private String phenopacket;
 
     @Parameter(names = {"-o", "--output"}, description = "specify output path")
     private String outPath;
@@ -65,7 +66,19 @@ public class QueryCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
+
+        List<TermId> queryList;
+        try {
+            PhenopacketImporter ppimporter = PhenopacketImporter.fromJson(phenopacket);
+            queryList = ppimporter.getHpoTerms();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         resources = new CachedResources(hpoParser, diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
         Phenomiser.setResources(resources);

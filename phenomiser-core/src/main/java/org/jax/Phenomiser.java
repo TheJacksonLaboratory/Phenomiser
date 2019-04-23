@@ -1,13 +1,12 @@
 package org.jax;
 
-import org.h2.mvstore.DataUtils;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
+import org.jax.services.CachedResources;
 import org.jax.services.PValueCalculator;
 import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.jax.utils.Ranker;
-import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
 import org.monarchinitiative.phenol.stats.Item2PValue;
@@ -81,30 +80,7 @@ public class Phenomiser {
         return adjusted;
     }
 
-    /**
-     * Query in batch mode with multiple queries. This method optimizes resource usage to avoid repeated file io.
-     * @param queries a list of query list.
-     * @param dbs a list of disease databases
-     * @return a list of disease ranking lists
-     */
-    public static List<List<Item2PValueAndSimilarity<TermId>>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
 
-        Map<Integer, Integer> listSizes = new HashMap<>(); // from first to last list, count how many Terms each list has
-        for (int i = 0; i < queries.size(); i++) {
-            listSizes.put(i, queries.get(i).size());
-        }
-
-        //process query lists in the order of how many terms they have
-        listSizes.values().forEach(listSize -> {
-
-
-
-
-
-        });
-
-        throw new UnsupportedOperationException("TO implement");
-    }
 
     /**
      * Provide a list of query terms and a disease ID, find the rank of specified disease in the disease ranking
@@ -130,6 +106,36 @@ public class Phenomiser {
     }
 
     /**
+     * Query in batch mode with multiple queries. This method optimizes resource usage to avoid repeated file io.
+     * @param queries a list of query list.
+     * @param dbs a list of disease databases
+     * @return a list of disease ranking lists
+     */
+    public static List<List<Item2PValueAndSimilarity<TermId>>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
+
+        // from first to last list, count how many Terms each list has
+        Set<Integer> termCounts = queries.stream().map(List::size).collect(Collectors.toSet());
+
+        List<List<Item2PValueAndSimilarity<TermId>>> queryResults = new ArrayList<>();
+
+        //process query lists in the order of how many terms they have
+        termCounts.forEach(termCount -> {
+            if (resources instanceof CachedResources) {
+                ((CachedResources) resources).cleanAndLoadScoreDistribution(termCount);
+            }
+
+            for (int i = 0; i < queries.size(); i++) {
+                if (queries.get(i).size() == termCount) {
+                    List<Item2PValueAndSimilarity<TermId>> queryResult = query(queries.get(i), dbs);
+                    queryResults.add(i, queryResult);
+                }
+            }
+        });
+
+        return queryResults;
+    }
+
+    /**
      * Provide multiple query term lists. For each query list, provide a target disease in a separate list. Return the rank of specified disease for each query list.
      * @param queries
      * @param targetDiseases
@@ -138,7 +144,27 @@ public class Phenomiser {
      */
     public static int[] batchFindRank(List<List<TermId>> queries,
                                       List<TermId> targetDiseases, List<DiseaseDB> dbs){
-        throw new UnsupportedOperationException("TO implement");
+
+        // from first to last list, count how many Terms each list has
+        Set<Integer> termCounts = queries.stream().map(List::size).collect(Collectors.toSet());
+
+        int[] ranks = new int[queries.size()];
+
+        //process query lists in the order of how many terms they have
+        termCounts.forEach(termCount -> {
+            if (resources instanceof CachedResources) {
+                ((CachedResources) resources).cleanAndLoadScoreDistribution(termCount);
+            }
+
+            for (int i = 0; i < queries.size(); i++) {
+                if (queries.get(i).size() == termCount) {
+                    int rank = findRank(queries.get(i), targetDiseases.get(i), dbs);
+                    ranks[i] = rank;
+                }
+            }
+        });
+
+        return ranks;
     }
 
 }

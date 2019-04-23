@@ -22,6 +22,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
+      <phenopacket.version>0.4.0</phenopacket.version>
   </properties>
 
     <developers>
@@ -78,6 +79,19 @@
       <artifactId>phenol-analysis</artifactId>
       <version>${phenol.version}</version>
     </dependency>
+
+      <dependency>
+          <groupId>org.phenopackets</groupId>
+          <artifactId>phenopacket-schema</artifactId>
+          <version>${phenopacket.version}</version>
+      </dependency>
+
+      <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+      <dependency>
+          <groupId>com.googlecode.json-simple</groupId>
+          <artifactId>json-simple</artifactId>
+          <version>1.1.1</version>
+      </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <dependency>
