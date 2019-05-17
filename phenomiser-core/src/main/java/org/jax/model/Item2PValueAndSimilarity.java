@@ -1,6 +1,5 @@
 package org.jax.model;
 
-import com.google.common.math.DoubleMath;
 import org.monarchinitiative.phenol.stats.Item2PValue;
 
 public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {

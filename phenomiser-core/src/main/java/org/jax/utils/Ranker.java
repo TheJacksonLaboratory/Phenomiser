@@ -9,7 +9,7 @@ import java.util.*;
  * @Author Aaron Zhang
  * @param <T>
  */
-public class Ranker <T extends Comparable<T>> {
+public class Ranker <T extends Comparable<? super T>> {
 
     private List<T> collection;
 
