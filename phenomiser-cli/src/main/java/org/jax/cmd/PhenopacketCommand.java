@@ -43,6 +43,9 @@ public class PhenopacketCommand extends PhenomiserCommand {
     @Parameter(names = {"-pp", "--phenopacket"}, description = "specify the path to a phenopachet file")
     private String phenopacket;
 
+    @Parameter(names = {"-batch", "--batchMode"}, description = "use if you want to run all phenopackets under specified directory")
+    private boolean batch = false;
+
     @Parameter(names = {"-o", "--output"}, description = "specify output path")
     private String outPath;
 
