@@ -24,6 +24,8 @@ java -jar phenomiser-cli.jar precompute
 --sampling 1 10
 ```
 
+To do the full precomputation, reserve sufficient memory, e.g., ``-Xmx32g``
+
 You should be able to find a **Phenomiser_data** created for you under your home directory. The folder contains precomputed data that will be used in the following steps.
 
 2. Query with HPO terms. This allows you to rank diseases based on their similarities with the query terms that you provided.
