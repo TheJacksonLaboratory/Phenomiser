@@ -9,7 +9,7 @@ You can make a query programmatically using the Phenomiser class. Alternatively,
 
 1. Precompute 
 Phenomiser need to simulate query with sets of HPO terms to compute an empirical similarity score distributions for each disease. 
-We use **-debug** mode to compute score distributions for querying with 1, 2 or 3 HPO terms for 50 random diseases. 
+We use **-debug** mode to compute score distributions for 50 randomly selected diseases. 
 You should omit this argument if you want to precompute data for all diseases. Be aware: it will take a long time complete. 
 Read below for details. 
 - Download the latest hp.obo file from http://purl.obolibrary.org/obo/hp.obo
