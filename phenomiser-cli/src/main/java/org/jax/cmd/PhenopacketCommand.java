@@ -122,8 +122,21 @@ public class PhenopacketCommand extends PhenomiserCommand {
         resources.init();
         Phenomiser.setResources(resources);
 
-
-        runOneSimulation(phenopacket);
+        File phenofile = new File(phenopacket);
+        if (phenofile.isDirectory()) {
+            // run across multiple phenopackets
+            int counter=0;
+            for (final File fileEntry : phenofile.listFiles()) {
+                if (fileEntry.isFile() && fileEntry.getAbsolutePath().endsWith(".json")) {
+                    logger.info("\tPhenopacket: \"{}\"", fileEntry.getAbsolutePath());
+                    System.out.println(++counter + ") "+ fileEntry.getName());
+                    runOneSimulation(fileEntry.getAbsolutePath());
+                }
+            }
+        } else {
+            // phenopacket is a single file
+            runOneSimulation(phenopacket);
+        }
 
 
 
