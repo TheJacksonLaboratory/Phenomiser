@@ -3,10 +3,7 @@ package org.jax;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import org.jax.cmd.GridSearchCommand;
-import org.jax.cmd.PhenomiserCommand;
-import org.jax.cmd.PreComputeCommand;
-import org.jax.cmd.QueryCommand;
+import org.jax.cmd.*;
 import org.jax.services.*;
 
 import org.slf4j.Logger;
@@ -30,11 +27,13 @@ public class PhenomiserApp {
         PreComputeCommand preComputeCommand = new PreComputeCommand();
         QueryCommand queryCommand = new QueryCommand();
         GridSearchCommand gridSearchCommand = new GridSearchCommand();
+        PhenopacketCommand phenopacket = new PhenopacketCommand();
         JCommander jc = JCommander.newBuilder()
                 .addObject(phenomiserApp)
                 .addCommand("precompute", preComputeCommand)
                 .addCommand("query", queryCommand)
                 .addCommand("grid", gridSearchCommand)
+                .addCommand("phenopacket",phenopacket)
                 .build();
         jc.setProgramName("java -jar PhenomiserApp.jar");
         try {
@@ -74,6 +73,9 @@ public class PhenomiserApp {
                 break;
             case "grid":
                 phenomiserCommand = gridSearchCommand;
+                break;
+            case "phenopacket":
+                phenomiserCommand = phenopacket;
                 break;
             default:
                 System.err.println(String.format("[ERROR] command \"%s\" not recognized",command));
