@@ -6,6 +6,7 @@ import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
@@ -84,7 +85,7 @@ public class GridSearch {
     }
 
 
-    public static void write(double[][] rankmatrix, Writer writer) throws Exception{
+    public static void write(double[][] rankmatrix, Writer writer) throws IOException {
         writer.write("\t");
         for (int i = 0; i < rankmatrix[0].length; i++) {
             writer.write(i + "\t");
@@ -98,6 +99,7 @@ public class GridSearch {
             }
             writer.write("\n");
         }
+        writer.close();
     }
 
 }

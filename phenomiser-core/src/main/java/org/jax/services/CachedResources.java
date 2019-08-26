@@ -118,7 +118,7 @@ public class CachedResources extends AbstractResources{
             logger.trace("deserialize scoreDistributions success");
         } catch (FileNotFoundException e) {
             logger.trace("deserialize scoreDistributions failed");
-            logger.error("file not found" + scoreDistributionsPath);
+            logger.warn("file not found" + scoreDistributionsPath);
         } catch (IOException e) {
             logger.trace("deserialize scoreDistributions failed");
             logger.error("io exception occurred");
