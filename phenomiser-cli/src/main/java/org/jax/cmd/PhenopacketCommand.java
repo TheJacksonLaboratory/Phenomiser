@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class PhenopacketCommand extends PhenomiserCommand {
 
     private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
-    final String HOME = System.getProperty("user.home");
+    private final String HOME = System.getProperty("user.home");
 
     @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
     private String hpoPath;
@@ -51,8 +51,10 @@ public class PhenopacketCommand extends PhenomiserCommand {
     private  Writer writer;
 
 
-
-
+    /**
+     * Simulate a case using one Phenopacket. Only use OMIM data.
+     * @param phenopacketPath
+     */
     private void runOneSimulation(String phenopacketPath) {
         List<TermId> queryList;
 
@@ -61,9 +63,15 @@ public class PhenopacketCommand extends PhenomiserCommand {
         TermId correctTid=TermId.of(correctDiagnosis);
         queryList = ppimporter.getHpoTerms();
 
-        List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
+        //List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
+        List<DiseaseDB> db = new ArrayList<>();
+        db.add(DiseaseDB.OMIM);
         List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
         int r = 0;
+        if (result==null) {
+            logger.error("result was NULL for " + phenopacketPath);
+            return;
+        }
         for (Item2PValueAndSimilarity<TermId> i2p : result) {
             r++;
             if (i2p.getItem().equals(correctTid)) {
@@ -73,9 +81,10 @@ public class PhenopacketCommand extends PhenomiserCommand {
                         writer.write(r+"\t"); // rank
                         writer.write(i2p.getItem().getValue() + "\t");
                         writer.write(resources.getDiseaseMap().get(i2p.getItem()).getName() +"\t");
-                        writer.write(Double.toString(i2p.getRawPValue()) + "\t");
-                        writer.write(Double.toString(i2p.getAdjustedPValue()) +"\t");
-                        writer.write(Double.toString(i2p.getSimilarityScore())+"\n");
+                        writer.write(i2p.getRawPValue() + "\t");
+                        writer.write(i2p.getAdjustedPValue() + "\t");
+                        writer.write(i2p.getSimilarityScore() + "\n");
+                        writer.flush();
                     } catch (IOException e){
                         e.printStackTrace();
                     }
@@ -142,7 +151,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
 
     }
 
-    public static Writer getWriter(String path) {
+    private static Writer getWriter(String path) {
         Writer writer;
         try {
             writer = new FileWriter(new File(path));
@@ -176,9 +185,9 @@ public class PhenopacketCommand extends PhenomiserCommand {
                 writer.write(r+")\t"); // rank
                 writer.write(e.getItem().getValue() + "\t");
                 writer.write(resources.getDiseaseMap().get(e.getItem()).getName() +"\t");
-                writer.write(Double.toString(e.getRawPValue()) + "\t");
-                writer.write(Double.toString(e.getAdjustedPValue()) +"\t");
-                writer.write(Double.toString(e.getSimilarityScore())+"\n");
+                writer.write(e.getRawPValue() + "\t");
+                writer.write(e.getAdjustedPValue() +"\t");
+                writer.write(e.getSimilarityScore() +"\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");
             }
