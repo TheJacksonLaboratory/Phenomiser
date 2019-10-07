@@ -8,14 +8,23 @@ You can make a query programmatically using the Phenomiser class. Alternatively,
 ##Quick start
 
 1. Precompute 
-Phenomiser need to simulate query with sets of HPO terms to compute an empirical similarity score distributions for each disease. We use **-debug** mode to compute score distributions for querying with 1, 2 or 3 HPO terms for 50 random diseases. You should omit this argument if you want to precompute data for all diseases. Be aware: it will take a long time complete. Read below for details. 
+Phenomiser need to simulate query with sets of HPO terms to compute an empirical similarity score distributions for each disease. 
+We use **-debug** mode to compute score distributions for 50 randomly selected diseases. 
+You should omit this argument if you want to precompute data for all diseases. Be aware: it will take a long time complete. 
+Read below for details. 
+- Download the latest hp.obo file from http://purl.obolibrary.org/obo/hp.obo
+- Download the latest annotation file from http://compbio.charite.de/jenkins/job/hpo.annotations.2018/lastSuccessfulBuild/artifact/misc_2018/phenotype.hpoa
+
+Use the debug flag only to do a small subset of the sampling.
 
 ```
-precompute
+java -jar phenomiser-cli.jar precompute
 -hpo ${path to}hp.obo
 -da ${path to}phenotype.hpoa
--debug
+--sampling 1 10
 ```
+
+To do the full precomputation, reserve sufficient memory, e.g., ``-Xmx32g``
 
 You should be able to find a **Phenomiser_data** created for you under your home directory. The folder contains precomputed data that will be used in the following steps.
 
@@ -38,11 +47,27 @@ grid
 -noise 1
 ```
 
+4. Phenopacket analysis
+
+Run Phenomiser analysis across a collection of Phenopackets. 
+
+```
+  $ java -jar PhenomiserApp.jar phenopacket \\
+    -hpo /home/whoever/wherever/data/hp.obo \\
+    -da /home/whoever/wherever/data/phenotype.hpoa \\
+    -cachePath /home/whoever/wherever/data/phenomiser/ \\
+    -db OMIM \\
+    --phenopacket /home/whoever/wherever/ppacket
+```
+
+This will output a file called phenomiser-results.txt with the rankings of the correct diagnoses. 
+
+
 The output is a matrix where the rows are the number of i and columns the number of j. The value is the percentage (range 0 to 1) of simulations where Phenomiser corrected ranked the disease of target number 1. 
 
-##Usuage in details
+##Usage in detail
 
-### Help infor
+### Help information
 
 Run the app with "-h" to print out a list of all arguments:
 
