@@ -5,7 +5,7 @@
   <groupId>org.jax</groupId>
   <artifactId>Phenomiser</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 
 
   <modules>
@@ -22,7 +22,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
-      <phenopacket.version>0.4.0</phenopacket.version>
+      <phenopacket.version>1.0.0-RC1</phenopacket.version>
   </properties>
 
     <developers>

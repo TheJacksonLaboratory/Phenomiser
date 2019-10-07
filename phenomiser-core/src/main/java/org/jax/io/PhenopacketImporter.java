@@ -11,7 +11,8 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.phenopackets.schema.v1.Phenopacket;
 import org.phenopackets.schema.v1.core.HtsFile;
 import org.phenopackets.schema.v1.core.OntologyClass;
-import org.phenopackets.schema.v1.core.Phenotype;
+
+import org.phenopackets.schema.v1.core.PhenotypicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,22 +49,22 @@ public class PhenopacketImporter {
      * @throws ParseException if the JSON code cannot be parsed
      * @throws IOException if the File cannot be found
      */
-    public static PhenopacketImporter fromJson(String pathToJsonPhenopacketFile) throws ParseException,IOException {
+    public static PhenopacketImporter fromJson(String pathToJsonPhenopacketFile)  {
         JSONParser parser = new JSONParser();
         logger.trace("Importing Phenopacket: " + pathToJsonPhenopacketFile);
-        Object obj = parser.parse(new FileReader(pathToJsonPhenopacketFile));
-        JSONObject jsonObject = (JSONObject) obj;
-        String phenopacketJsonString = jsonObject.toJSONString();
-        Phenopacket phenopacket;
         try {
+            Object obj = parser.parse(new FileReader(pathToJsonPhenopacketFile));
+            JSONObject jsonObject = (JSONObject) obj;
+            String phenopacketJsonString = jsonObject.toJSONString();
             Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
             JsonFormat.parser().merge(phenopacketJsonString, phenoPacketBuilder);
-            phenopacket = phenoPacketBuilder.build();
-        } catch (IOException e1) {
+            Phenopacket phenopacket = phenoPacketBuilder.build();
+            return new PhenopacketImporter(phenopacket);
+        } catch (IOException|ParseException e1) {
             e1.printStackTrace();
             throw new RuntimeException("Could not load phenopacket at " + pathToJsonPhenopacketFile);
         }
-        return new PhenopacketImporter(phenopacket);
+
     }
 
     public PhenopacketImporter(Phenopacket ppack){
@@ -94,6 +95,13 @@ public class PhenopacketImporter {
 
     public String getSamplename() {
         return samplename;
+    }
+
+    public String getDiagnosisCurie() {
+        if (this.phenoPacket.getDiseasesCount() !=1) { // should never happen with our simulations
+            throw new RuntimeException("Phenopacket did not have a single disease: "+phenoPacket);
+        }
+        return this.phenoPacket.getDiseases(0).getTerm().getId();
     }
 
     public boolean checkForObsoleteTerms(Ontology ontology) {
@@ -138,11 +146,11 @@ public class PhenopacketImporter {
      */
     private void extractProbandHpoTerms() {
         this.hpoTerms= phenoPacket
-                .getPhenotypesList()
+                .getPhenotypicFeaturesList()
                 .stream()
                 .distinct()
-                .filter(((Predicate<Phenotype>) Phenotype::getNegated).negate()) // i.e., just take non-negated phenotypes
-                .map(Phenotype::getType)
+                .filter(((Predicate<PhenotypicFeature>) PhenotypicFeature::getNegated).negate()) // i.e., just take non-negated phenotypes
+                .map(PhenotypicFeature::getType)
                 .map(OntologyClass::getId)
                 .map(TermId::of)
                 .collect(ImmutableList.toImmutableList());
@@ -153,10 +161,10 @@ public class PhenopacketImporter {
      */
     private void extractNegatedProbandHpoTerms() {
         this.negatedHpoTerms = phenoPacket
-                .getPhenotypesList()
+                .getPhenotypicFeaturesList()
                 .stream()
-                .filter(Phenotype::getNegated) // i.e., just take negated phenotypes
-                .map(Phenotype::getType)
+                .filter(PhenotypicFeature::getNegated) // i.e., just take negated phenotypes
+                .map(PhenotypicFeature::getType)
                 .map(OntologyClass::getId)
                 .map(TermId::of)
                 .collect(ImmutableList.toImmutableList());

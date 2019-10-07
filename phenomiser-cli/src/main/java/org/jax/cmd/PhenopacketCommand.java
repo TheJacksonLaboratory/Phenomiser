@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class PhenopacketCommand extends PhenomiserCommand {
 
     private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
-    final String HOME = System.getProperty("user.home");
+    private final String HOME = System.getProperty("user.home");
 
     @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
     private String hpoPath;
@@ -43,10 +43,67 @@ public class PhenopacketCommand extends PhenomiserCommand {
     @Parameter(names = {"-pp", "--phenopacket"}, description = "specify the path to a phenopachet file")
     private String phenopacket;
 
+    @Parameter(names = {"-batch", "--batchMode"}, description = "use if you want to run all phenopackets under specified directory")
+    private boolean batch = false;
+
     @Parameter(names = {"-o", "--output"}, description = "specify output path")
-    private String outPath;
+    private String outPath="phenomiser-results.txt";
 
     private AbstractResources resources;
+
+    private  Writer writer;
+
+
+    /**
+     * Simulate a case using one Phenopacket. Only use OMIM data.
+     * @param phenopacketPath
+     */
+    private void runOneSimulation(String phenopacketPath) {
+        List<TermId> queryList;
+
+        PhenopacketImporter ppimporter = PhenopacketImporter.fromJson(phenopacketPath);
+        String correctDiagnosis = ppimporter.getDiagnosisCurie();
+        TermId correctTid=TermId.of(correctDiagnosis);
+        queryList = ppimporter.getHpoTerms();
+
+        //List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
+        List<DiseaseDB> db = new ArrayList<>();
+        db.add(DiseaseDB.OMIM);
+        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
+        int r = 0;
+        if (result==null) {
+            logger.error("result was NULL for " + phenopacketPath);
+            return;
+        }
+        for (Item2PValueAndSimilarity<TermId> i2p : result) {
+            r++;
+            if (i2p.getItem().equals(correctTid)) {
+                System.out.println("Rank of correct disease ("+correctTid.getValue() + ")="+ r);
+                if (this.writer!= null) {
+                    try {
+                        writer.write(r+"\t"); // rank
+                        writer.write(i2p.getItem().getValue() + "\t");
+                        writer.write(resources.getDiseaseMap().get(i2p.getItem()).getName() +"\t");
+                        writer.write(i2p.getRawPValue() + "\t");
+                        writer.write(i2p.getAdjustedPValue() + "\t");
+                        writer.write(i2p.getSimilarityScore() + "\n");
+                        writer.flush();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        //output query result
+       // if (!result.isEmpty()) {
+         //   write_query_result(result, outPath);
+        //}
+
+    }
+
+
+
 
 
     @Override
@@ -61,39 +118,105 @@ public class PhenopacketCommand extends PhenomiserCommand {
             e.printStackTrace();
             System.exit(1);
         }
+        try {
+            this.writer = new FileWriter(new File(this.outPath));
+            writer.write("rank\tdiseaseId\tdiseaseName\tp\tadjust_p\tsimilarityScore\n");
+        } catch (IOException e){
+            e.printStackTrace();
+
+        }
 
         if (!Files.exists(Paths.get(cachePath))){
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-
-        List<TermId> queryList;
-        try {
-            PhenopacketImporter ppimporter = PhenopacketImporter.fromJson(phenopacket);
-            queryList = ppimporter.getHpoTerms();
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath, Math.min(queryList.size(), 10));
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
         resources.init();
         Phenomiser.setResources(resources);
 
-
-        List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
-        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
-
-        //output query result
-        if (!result.isEmpty()) {
-            write_query_result(result, outPath);
+        File phenofile = new File(phenopacket);
+        if (phenofile.isDirectory()) {
+            // run across multiple phenopackets
+            int counter=0;
+            for (final File fileEntry : phenofile.listFiles()) {
+                if (fileEntry.isFile() && fileEntry.getAbsolutePath().endsWith(".json")) {
+                    logger.info("\tPhenopacket: \"{}\"", fileEntry.getAbsolutePath());
+                    System.out.println(++counter + ") "+ fileEntry.getName());
+                    runOneSimulation(fileEntry.getAbsolutePath());
+                }
+            }
+        } else {
+            // phenopacket is a single file
+            runOneSimulation(phenopacket);
         }
     }
 
-    public static Writer getWriter(String path) {
+    //TODO: try this one if the above runs into OutOfMemory error, or is too slow
+    public void run2(){
+        HpoParser hpoParser = new HpoParser(hpoPath);
+        hpoParser.init();
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        try {
+            diseaseParser.init();
+        } catch (PhenolException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try {
+            this.writer = new FileWriter(new File(this.outPath));
+            writer.write("rank\tdiseaseId\tdiseaseName\tp\tadjust_p\tsimilarityScore\n");
+        } catch (IOException e){
+            e.printStackTrace();
+
+        }
+
+        if (!Files.exists(Paths.get(cachePath))){
+            System.err.print("Cannot find caching data at " + cachePath);
+            System.exit(1);
+        }
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        resources.init();
+        Phenomiser.setResources(resources);
+
+        File phenofile = new File(phenopacket);
+        //extract the phenotypes and target diagnosis for each phenopacket, and use batch mode to query
+        //batch mode runs more efficiently as it will load resources as needed and clean it after done
+        List<List<TermId>> multiPhenopacketPhenotypes = new ArrayList<>();
+        List<TermId> targetDiseases = new ArrayList<>();
+        if (phenofile.isDirectory()) {
+            // run across multiple phenopackets
+            int counter=0;
+            for (final File fileEntry : phenofile.listFiles()) {
+                if (fileEntry.isFile() && fileEntry.getAbsolutePath().endsWith(".json")) {
+                    logger.info("\tPhenopacket: \"{}\"", fileEntry.getAbsolutePath());
+                    System.out.println(++counter + ") "+ fileEntry.getName());
+                    PhenopacketImporter importer = PhenopacketImporter.fromJson(fileEntry.getAbsolutePath());
+                    List<TermId> phenotypes = importer.getHpoTerms();
+                    TermId targetDisease = TermId.of(importer.getDiagnosisCurie());
+                    //put them into a separate list
+                    multiPhenopacketPhenotypes.add(phenotypes);
+                    targetDiseases.add(targetDisease);
+                }
+            }
+        } else {
+            // phenopacket is a single file
+            PhenopacketImporter importer = PhenopacketImporter.fromJson(phenofile.getAbsolutePath());
+            List<TermId> phenotypes = importer.getHpoTerms();
+            TermId targetDisease = TermId.of(importer.getDiagnosisCurie());
+            //put them into a separate list
+            multiPhenopacketPhenotypes.add(phenotypes);
+            targetDiseases.add(targetDisease);
+        }
+
+        int[] ranks = Phenomiser.batchFindRank(multiPhenopacketPhenotypes, targetDiseases, Arrays.asList(DiseaseDB.OMIM));
+        //print out result
+        for (int i = 0; i < ranks.length; i++){
+            System.out.println(String.format("phenopacket %d: diagnosis is ranked at %d", i, ranks[i]));
+        }
+    }
+
+    private static Writer getWriter(String path) {
         Writer writer;
         try {
             writer = new FileWriter(new File(path));
@@ -110,7 +233,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
         Writer writer = getWriter(outPath);
 
         try {
-            writer.write("diseaseId\tdiseaseName\tp\tadjust_p" +
+            writer.write("rank\tdiseaseId\tdiseaseName\tp\tadjust_p" +
                     "\tsimilarityScore" +
                     "\n");
         } catch (IOException e) {
@@ -119,24 +242,21 @@ public class PhenopacketCommand extends PhenomiserCommand {
         }
         List<Item2PValueAndSimilarity<TermId>> newList = new ArrayList<>(result);
         Collections.sort(newList);
+        int r=0;
+        for (Item2PValueAndSimilarity<TermId> e : newList){
 
-        newList.stream().forEach(e -> {
             try {
-                writer.write(e.getItem().getValue());
-                writer.write("\t");
-                writer.write(resources.getDiseaseMap().get(e.getItem()).getName());
-                writer.write("\t");
-                writer.write(Double.toString(e.getRawPValue()));
-                writer.write("\t");
-                writer.write(Double.toString(e.getAdjustedPValue()));
-                writer.write("\t");
-                writer.write(Double.toString(e.getSimilarityScore()));
-                writer.write("\n");
+                r++;
+                writer.write(r+")\t"); // rank
+                writer.write(e.getItem().getValue() + "\t");
+                writer.write(resources.getDiseaseMap().get(e.getItem()).getName() +"\t");
+                writer.write(e.getRawPValue() + "\t");
+                writer.write(e.getAdjustedPValue() +"\t");
+                writer.write(e.getSimilarityScore() +"\n");
             } catch (IOException exception) {
                 logger.error("IO exception during writing out adjusted p values");
             }
-
-        });
+        }
 
         try {
             writer.close();
