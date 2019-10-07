@@ -149,9 +149,71 @@ public class PhenopacketCommand extends PhenomiserCommand {
             // phenopacket is a single file
             runOneSimulation(phenopacket);
         }
+    }
 
+    //TODO: try this one if the above runs into OutOfMemory error, or is too slow
+    public void run2(){
+        HpoParser hpoParser = new HpoParser(hpoPath);
+        hpoParser.init();
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        try {
+            diseaseParser.init();
+        } catch (PhenolException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try {
+            this.writer = new FileWriter(new File(this.outPath));
+            writer.write("rank\tdiseaseId\tdiseaseName\tp\tadjust_p\tsimilarityScore\n");
+        } catch (IOException e){
+            e.printStackTrace();
 
+        }
 
+        if (!Files.exists(Paths.get(cachePath))){
+            System.err.print("Cannot find caching data at " + cachePath);
+            System.exit(1);
+        }
+        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        resources.init();
+        Phenomiser.setResources(resources);
+
+        File phenofile = new File(phenopacket);
+        //extract the phenotypes and target diagnosis for each phenopacket, and use batch mode to query
+        //batch mode runs more efficiently as it will load resources as needed and clean it after done
+        List<List<TermId>> multiPhenopacketPhenotypes = new ArrayList<>();
+        List<TermId> targetDiseases = new ArrayList<>();
+        if (phenofile.isDirectory()) {
+            // run across multiple phenopackets
+            int counter=0;
+            for (final File fileEntry : phenofile.listFiles()) {
+                if (fileEntry.isFile() && fileEntry.getAbsolutePath().endsWith(".json")) {
+                    logger.info("\tPhenopacket: \"{}\"", fileEntry.getAbsolutePath());
+                    System.out.println(++counter + ") "+ fileEntry.getName());
+                    PhenopacketImporter importer = PhenopacketImporter.fromJson(fileEntry.getAbsolutePath());
+                    List<TermId> phenotypes = importer.getHpoTerms();
+                    TermId targetDisease = TermId.of(importer.getDiagnosisCurie());
+                    //put them into a separate list
+                    multiPhenopacketPhenotypes.add(phenotypes);
+                    targetDiseases.add(targetDisease);
+                }
+            }
+        } else {
+            // phenopacket is a single file
+            PhenopacketImporter importer = PhenopacketImporter.fromJson(phenofile.getAbsolutePath());
+            List<TermId> phenotypes = importer.getHpoTerms();
+            TermId targetDisease = TermId.of(importer.getDiagnosisCurie());
+            //put them into a separate list
+            multiPhenopacketPhenotypes.add(phenotypes);
+            targetDiseases.add(targetDisease);
+        }
+
+        int[] ranks = Phenomiser.batchFindRank(multiPhenopacketPhenotypes, targetDiseases, Arrays.asList(DiseaseDB.OMIM));
+        //print out result
+        for (int i = 0; i < ranks.length; i++){
+            System.out.println(String.format("phenopacket %d: diagnosis is ranked at %d", i, ranks[i]));
+        }
     }
 
     private static Writer getWriter(String path) {
