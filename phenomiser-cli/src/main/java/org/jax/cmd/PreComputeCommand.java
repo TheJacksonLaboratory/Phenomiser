@@ -41,15 +41,8 @@ public class PreComputeCommand extends PhenomiserCommand {
     @Override
     public void run() {
         Ontology ontology = OntologyLoader.loadOntology(new File(this.hpoPath));
-        //HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
         DiseaseParser diseaseParser = new DiseaseParser(diseasePath, ontology);
-        try {
-            diseaseParser.init();
-        } catch (PhenolException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        logger.trace("1111");
+        logger.trace("Starting precompute");
         Properties properties = new Properties();
         properties.setProperty("numThreads", Integer.toString(numThreads));
         if (cachePath != null) {

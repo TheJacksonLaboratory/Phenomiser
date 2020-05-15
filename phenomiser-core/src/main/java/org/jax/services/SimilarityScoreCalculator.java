@@ -4,8 +4,6 @@ import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class SimilarityScoreCalculator {
@@ -22,11 +20,8 @@ public class SimilarityScoreCalculator {
      * @param dbs
      * @return
      */
-    public Map<TermId, Double> computeB(List<TermId> query, List<DiseaseDB>
-            dbs) {
-
+    public Map<TermId, Double> computeB(List<TermId> query, List<DiseaseDB> dbs) {
         String filter = dbs.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
-
         Map<TermId, Double> similarityScores = new HashMap<>();
 
         resources.getDiseaseIdToHpoTermIdsNoExpansion().entrySet().stream()

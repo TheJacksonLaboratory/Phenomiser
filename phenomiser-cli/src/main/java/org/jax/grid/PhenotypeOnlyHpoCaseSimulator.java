@@ -1,11 +1,9 @@
 package org.jax.grid;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jax.Phenomiser;
-import org.jax.io.DiseaseParser;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
@@ -281,8 +279,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     public int simulateCase(HpoDisease disease) {
 
         List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValueAndSimilarity> result = Phenomiser.query(randomizedTerms,
-                this.db);
+        List<Item2PValueAndSimilarity> result = Phenomiser.query(randomizedTerms, this.db);
         //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
         //@TODO: to allow shared ranks when pval and similarity scores are
         // both identical. Item2PValueAndSimilarity has both value to
@@ -300,9 +297,9 @@ public class PhenotypeOnlyHpoCaseSimulator {
 
     private void qc() {
         System.out.println("number of directed annotated hpo terms for each disease that have score distributions:");
-        diseaseMap.entrySet().forEach(e ->{
-            System.out.print(e.getKey().getValue() + "\t");
-            System.out.println(e.getValue().getPhenotypicAbnormalities().size());
+        diseaseMap.forEach((key, value) -> {
+            System.out.print(key.getValue() + "\t");
+            System.out.println(value.getPhenotypicAbnormalities().size());
         });
     }
 

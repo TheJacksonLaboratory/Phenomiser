@@ -21,7 +21,7 @@ public class SimilarityScoreCalculatorTest {
     private static AbstractResources resources; // = new CachedResources()
     private static SimilarityScoreCalculator similarityScoreCalculator;
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
 
         final String path = System.getProperty("user.home") + File.separator + "Phenomiser_data";
         final String hpoPath = DiseaseParserTest.class.getClassLoader().getResource("hp.obo").getPath();
@@ -29,7 +29,6 @@ public class SimilarityScoreCalculatorTest {
 
         Ontology hpo = OntologyLoader.loadOntology(new File(hpoPath));
         DiseaseParser diseaseParser = new DiseaseParser(phenotypeAnnotation, hpo);
-        diseaseParser.init();
         resources = new CachedResources(hpo, diseaseParser, path);
         resources.init();
         similarityScoreCalculator = new SimilarityScoreCalculator(resources);

@@ -41,10 +41,6 @@ public class DiseaseParser {
     private Map<Integer, TermId> diseaseIndexToDisease;
 
 
-//    public DiseaseParser(String diseaseAnnotation, HpoOntology hpoOntology) {
-//        this.hpo = hpoOntology;
-//        this.diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseaseAnnotation, hpoOntology);
-//    }
 
     public DiseaseParser(HpoDiseaseAnnotationParser diseaseAnnotationParser, Ontology hpoOntology){
         this.diseaseAnnotationParser = diseaseAnnotationParser;
@@ -63,14 +59,11 @@ public class DiseaseParser {
                 logger.warn("Remove: " + e.getKey().getValue() + "\t" + e.getValue().getName());
             });
         }
+        init();
     }
 
 
-    public void init() throws PhenolException {
-
-        //remove diseases with no annotation as they mess up downstream analysis
-
-
+    private void init() {
         diseaseIdToHpoTermIdsWithExpansion = new HashMap<>();
         hpoTermIdToDiseaseIdsWithExpansion = new HashMap<>();
         diseaseIndexToDisease = new HashMap<>();

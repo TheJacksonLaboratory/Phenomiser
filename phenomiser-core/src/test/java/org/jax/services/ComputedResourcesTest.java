@@ -10,6 +10,7 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,15 +22,13 @@ public class ComputedResourcesTest {
     static AbstractResources resources;// = new ComputedResources()
 
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
         final String path = System.getProperty("user.home") + File.separator + "Phenomiser_data";
         final String hpoPath = DiseaseParserTest.class.getClassLoader().getResource("hp.obo").getPath();
         final String phenotypeAnnotation = DiseaseParserTest.class.getClassLoader().getResource("phenotype.hpoa").getPath();
 
         Ontology hpo = OntologyLoader.loadOntology(new File(hpoPath));
-        //HpoDiseaseAnnotationParser hpoDiseaseAnnotationParser = new HpoDiseaseAnnotationParser(phenotypeAnnotation, hpo);
         DiseaseParser diseaseParser = new DiseaseParser(phenotypeAnnotation, hpo);
-        diseaseParser.init();
         resources = new CachedResources(hpo, diseaseParser, path);
         resources.init();
     }
@@ -61,7 +60,7 @@ public class ComputedResourcesTest {
 
     @Test
     public void getNoAnnotationDiseases() {
-        Set<TermId> noAnnotationDiseases = resources.getDiseaseIdToHpoTermIdsWithExpansion().entrySet().stream().filter(e -> e.getValue().size() == 0).map(e -> e.getKey()).collect(Collectors.toSet());
+        Set<TermId> noAnnotationDiseases = resources.getDiseaseIdToHpoTermIdsWithExpansion().entrySet().stream().filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey).collect(Collectors.toSet());
         //System.out.println(noAnnotationDiseases.size());
         noAnnotationDiseases.forEach(t -> System.out.println(t.getValue()));
     }

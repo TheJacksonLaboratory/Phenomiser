@@ -5,7 +5,7 @@
   <groupId>org.jax</groupId>
   <artifactId>Phenomiser</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 
 
   <modules>

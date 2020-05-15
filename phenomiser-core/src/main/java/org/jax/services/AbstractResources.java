@@ -51,20 +51,6 @@ public abstract class AbstractResources {
     }
 
     public void defaultInit() {
-        logger.trace("hpo initiation started");
-        logger.trace("disease annotation initiation started");
-        if (this.getDiseaseParser().getDiseaseMap() == null) {
-            try {
-                this.getDiseaseParser().init();
-            } catch (PhenolException e) {
-                e.printStackTrace();
-                logger.trace("disease annotation initiation failed");
-            }
-        }
-
-        logger.trace("disease annotation initiation success");
-
-        logger.trace("disease map initiation started");
         diseaseMap = this.diseaseParser.getDiseaseMap();
         diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion();
         diseaseIdToHpoTermIdsNoExpansion = this.diseaseParser
