@@ -50,22 +50,14 @@ public class QueryCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        Ontology hpo = OntologyLoader.loadOntology(new File(this.hpoPath));
-        //HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpo);
-        try {
-            diseaseParser.init();
-        } catch (PhenolException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath);
 
         if (!Files.exists(Paths.get(cachePath))){
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
         List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
-        resources = new CachedResources(hpo, diseaseParser, cachePath, Math.min(queryList.size(), 10));
+        resources = new CachedResources(diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
         Phenomiser.setResources(resources);
 

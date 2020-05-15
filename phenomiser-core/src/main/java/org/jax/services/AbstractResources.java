@@ -2,7 +2,7 @@ package org.jax.services;
 
 import org.jax.io.DiseaseParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.base.PhenolException;
+
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public abstract class AbstractResources {
-
     private static Logger logger = LoggerFactory.getLogger(AbstractResources.class);
 
     protected DiseaseParser diseaseParser;
@@ -45,20 +44,20 @@ public abstract class AbstractResources {
 
 
 
-    public AbstractResources(Ontology ontology, DiseaseParser diseaseParser) {
-        this.hpo = ontology;
+    public AbstractResources(DiseaseParser diseaseParser) {
+        this.hpo = diseaseParser.getHpo();
         this.diseaseParser = diseaseParser;
     }
 
     public void defaultInit() {
         diseaseMap = this.diseaseParser.getDiseaseMap();
-        diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion();
+        diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoIdsPropagated();
         diseaseIdToHpoTermIdsNoExpansion = this.diseaseParser
-                .getDiseaseIdToHpoTermIdsNoExpansion();
-        hpoTermIdToDiseaseIdsWithExpansion = this.diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion();
+                .getDiseaseIdToDirectHpoTermIds();
+        hpoTermIdToDiseaseIdsWithExpansion = this.diseaseParser.getHpoIdToDiseaseIdsPropagated();
         hpoTermIdToDiseaseIdsNoExpansion = this.diseaseParser
-                .getHpoTermIdToDiseaseIdsNoExpansion();
-        diseaseIndexToDisease = this.diseaseParser.getDiseaseIndexToDisease();
+                .getHpoTermIdToDiseaseIdsDirect();
+        diseaseIndexToDisease = this.diseaseParser.getIndexToDisease();
         diseaseIndexToHpoTermsWithExpansion = this.diseaseParser.getDiseaseIndexToHpoTermsWithExpansion();
         diseaseIndexToHpoTermsNoExpansion = this.diseaseParser
                 .getDiseaseIndexToHpoTermsNoExpansion();

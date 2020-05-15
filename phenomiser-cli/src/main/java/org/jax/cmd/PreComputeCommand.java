@@ -6,6 +6,7 @@ import org.jax.io.DiseaseParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.ComputedResources;
 import org.monarchinitiative.phenol.base.PhenolException;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
@@ -40,25 +41,20 @@ public class PreComputeCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        Ontology ontology = OntologyLoader.loadOntology(new File(this.hpoPath));
-        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath);
         logger.trace("Starting precompute");
         Properties properties = new Properties();
         properties.setProperty("numThreads", Integer.toString(numThreads));
         if (cachePath != null) {
             properties.setProperty("cachingPath", cachePath);
         }
-
         if (sampling.get(0) > sampling.get(1)) {
-            System.exit(1);
+            // TODO what is this?
+            throw new PhenolRuntimeException("sampling.get(0) > sampling.get(1)");
         }
-
-
-//        properties.setProperty("diseaseDB", diseaseDB);
         properties.setProperty("sampleMin", Integer.toString(sampling.get(0)));
         properties.setProperty("sampleMax", Integer.toString(sampling.get(1)));
-
-        AbstractResources resources = new ComputedResources(ontology, diseaseParser, properties, debug);
+        AbstractResources resources = new ComputedResources(diseaseParser, properties, debug);
         resources.init();
     }
 }

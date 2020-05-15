@@ -35,7 +35,7 @@ public class GridSearchCommand extends PhenomiserCommand {
     @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file")
     private String diseasePath;
     @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
-    private String cachePath = HOME + File.separator + "Phenomiser_data";;
+    private String cachePath = HOME + File.separator + "Phenomiser_data";
     @Parameter(names = {"-db", "--diseaseDB"},
             description = "choose disease database [OMIM,ORPHA]")
     private String diseaseDB = "OMIM";
@@ -57,25 +57,14 @@ public class GridSearchCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-
         checkSignal();
-
-        Ontology hpo = OntologyLoader.loadOntology(new File(this.hpoPath));
-       // HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpo);
-        try {
-            diseaseParser.init();
-        } catch (PhenolException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath);
 
         if (!Files.exists(Paths.get(cachePath))){
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpo, diseaseParser, cachePath,
-                1);
+        resources = new CachedResources(diseaseParser, cachePath, 1);
         resources.init();
         Phenomiser.setResources(resources);
 

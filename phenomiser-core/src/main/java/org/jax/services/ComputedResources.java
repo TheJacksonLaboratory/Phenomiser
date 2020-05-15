@@ -2,6 +2,7 @@ package org.jax.services;
 
 import org.jax.io.DiseaseParser;
 import org.jax.utils.ObservableMap;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -27,13 +28,13 @@ public class ComputedResources extends AbstractResources {
 
     private Properties properties;
 
-    private int numThreads = 4; //retrieve from properties
-
-    private boolean cache = true; //cache computed score by default. overwrite from properties
+    private final int numThreads; //retrieve from properties
+    /** cache computed score by default. Value will be extracted from properties. */
+    private final boolean cache;
 
     private String cachingPath = System.getProperty("user.home") + File.separator + "Phenomiser_data";
 
-    private boolean debug = false;
+    private final boolean debug;
 
     private int sampleMin = 1;
     private int sampleMax = 10;
@@ -41,13 +42,12 @@ public class ComputedResources extends AbstractResources {
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
-     * @param ontology reference to HPO ontology
      * @param diseaseParser
      * @param properties pass in settings to overwrite default settings
      * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
-    public ComputedResources(Ontology ontology, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
-        super(ontology, diseaseParser);
+    public ComputedResources(DiseaseParser diseaseParser, @Nullable Properties properties, boolean debug) {
+        super(diseaseParser);
         this.properties = properties;
         try {
             this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
@@ -56,11 +56,10 @@ public class ComputedResources extends AbstractResources {
             this.sampleMin = Integer.parseInt(this.properties.getProperty("sampleMin", "1"));
             this.sampleMax = Integer.parseInt(this.properties.getProperty("sampleMax", "10"));
             if (this.sampleMin > this.sampleMax) {
-                System.err.print("sampling min > sampling max");
-                System.exit(1);
+                throw new PhenolRuntimeException("sampling min > sampling max");
             }
         } catch (Exception e) {
-            logger.error("not all properties are applied.");
+            throw new PhenolRuntimeException("Error encountered while setting properties.");
         }
         this.debug = debug;
 
@@ -116,21 +115,21 @@ public class ComputedResources extends AbstractResources {
         samplingOption.setMaxNumTerms(sampleMax);
 
 
-        SimilarityScoreSampling sampleing;//
+        SimilarityScoreSampling scoreSampling;//
         if (this.debug) {
-            sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
+            scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
             Map<Integer, List<TermId>> subset =
                     diseaseIndexToHpoTermsNoExpansion.entrySet().stream()
                     .limit(50).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-            scoreDistributions.putAll(sampleing.performSampling(subset));
+            scoreDistributions.putAll(scoreSampling.performSampling(subset));
         } else {
             for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {
                 ScoreSamplingOptions newoption = new ScoreSamplingOptions();
                 newoption.setNumThreads(numThreads);
                 newoption.setMinNumTerms(i);
                 newoption.setMaxNumTerms(i);
-                sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
-                scoreDistributions.putAll(sampleing.performSampling
+                scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
+                scoreDistributions.putAll(scoreSampling.performSampling
                         (diseaseIndexToHpoTermsNoExpansion));
             }
         }

@@ -26,20 +26,19 @@ public class CachedResources extends AbstractResources{
     /**
      * Use this constructor if we know we are analyzing a query with a specific number of query terms.
      * Then there is no need to load all of the cached score distribution files.
-     * @param ontology reference to HPO
      * @param diseaseParser
      * @param cachePath
      * @param n_terms
      */
-    public CachedResources(Ontology ontology, DiseaseParser diseaseParser,
+    public CachedResources(DiseaseParser diseaseParser,
                            String cachePath, Integer n_terms) {
-        super(ontology, diseaseParser);
+        super(diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = n_terms;
     }
 
-    public CachedResources(Ontology ontology, DiseaseParser diseaseParser, String cachePath) {
-        super(ontology, diseaseParser);
+    public CachedResources(DiseaseParser diseaseParser, String cachePath) {
+        super(diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = null;
     }
