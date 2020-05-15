@@ -5,12 +5,12 @@ import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.grid.GridSearch;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,10 +60,9 @@ public class GridSearchCommand extends PhenomiserCommand {
 
         checkSignal();
 
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology hpo = OntologyLoader.loadOntology(new File(this.hpoPath));
+       // HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpo);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
@@ -75,7 +74,7 @@ public class GridSearchCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath,
+        resources = new CachedResources(hpo, diseaseParser, cachePath,
                 1);
         resources.init();
         Phenomiser.setResources(resources);

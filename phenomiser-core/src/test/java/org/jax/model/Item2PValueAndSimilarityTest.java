@@ -12,22 +12,22 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class Item2PValueAndSimilarityTest {
-    private List<Item2PValueAndSimilarity<TermId>> items;
+    private List<Item2PValueAndSimilarity> items;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         items = new ArrayList<>();
-        Item2PValueAndSimilarity<TermId> item1 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:1"), 0.0, 3.05);
-        Item2PValueAndSimilarity<TermId> item2 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:2"), 0.0, 4.05);
-        Item2PValueAndSimilarity<TermId> item3 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:3"), 0.1, 4.05);
-        Item2PValueAndSimilarity<TermId> item4 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:4"), 0.15, 6.05);
+        Item2PValueAndSimilarity item1 = new Item2PValueAndSimilarity(TermId.of("OMIM:1"), 0.0, 3.05);
+        Item2PValueAndSimilarity item2 = new Item2PValueAndSimilarity(TermId.of("OMIM:2"), 0.0, 4.05);
+        Item2PValueAndSimilarity item3 = new Item2PValueAndSimilarity(TermId.of("OMIM:3"), 0.1, 4.05);
+        Item2PValueAndSimilarity item4 = new Item2PValueAndSimilarity(TermId.of("OMIM:4"), 0.15, 6.05);
 
         items.addAll(Arrays.asList(item1, item2, item3, item4));
     }
 
     @Test
-    public void testSort() throws Exception{
+    public void testSort() {
         assertNotNull(items);
         assertFalse(items.isEmpty());
         Collections.shuffle(items);

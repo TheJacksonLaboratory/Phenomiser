@@ -3,7 +3,6 @@ package org.jax.cmd;
 import com.beust.jcommander.Parameter;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.io.PhenopacketImporter;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
@@ -11,7 +10,8 @@ import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 import org.json.simple.parser.ParseException;
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +51,9 @@ public class PhenopacketCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology hpo = OntologyLoader.loadOntology(new File(this.hpoPath));
+       // HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpo);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
@@ -79,13 +78,13 @@ public class PhenopacketCommand extends PhenomiserCommand {
             return;
         }
 
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath, Math.min(queryList.size(), 10));
+        resources = new CachedResources(hpo, diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
         Phenomiser.setResources(resources);
 
 
         List<DiseaseDB> db = Arrays.stream(diseaseDB.split(",")).map(DiseaseDB::valueOf).collect(Collectors.toList());
-        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
+        List<Item2PValueAndSimilarity> result = Phenomiser.query(queryList, db);
 
         //output query result
         if (!result.isEmpty()) {
@@ -104,7 +103,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
         return writer;
     }
 
-    public void write_query_result(List<Item2PValueAndSimilarity<TermId>> result, @Nullable String
+    public void write_query_result(List<Item2PValueAndSimilarity> result, @Nullable String
             outPath) {
 
         Writer writer = getWriter(outPath);
@@ -117,10 +116,10 @@ public class PhenopacketCommand extends PhenomiserCommand {
             logger.error("io exception during writing header. writing output aborted.");
             return;
         }
-        List<Item2PValueAndSimilarity<TermId>> newList = new ArrayList<>(result);
+        List<Item2PValueAndSimilarity> newList = new ArrayList<>(result);
         Collections.sort(newList);
 
-        newList.stream().forEach(e -> {
+        newList.forEach(e -> {
             try {
                 writer.write(e.getItem().getValue());
                 writer.write("\t");

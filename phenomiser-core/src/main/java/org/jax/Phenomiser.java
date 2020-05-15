@@ -8,9 +8,9 @@ import org.jax.services.SimilarityScoreCalculator;
 import org.jax.utils.DiseaseDB;
 import org.jax.utils.Ranker;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
-import org.monarchinitiative.phenol.stats.Item2PValue;
-import org.monarchinitiative.phenol.stats.MultipleTestingCorrection;
+import org.monarchinitiative.phenol.stats.PValue;
+import org.monarchinitiative.phenol.stats.mtc.BenjaminiHochberg;
+import org.monarchinitiative.phenol.stats.mtc.MultipleTestingCorrection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +30,9 @@ public class Phenomiser {
     private static AbstractResources resources;
     //default MTC to Benjamini Hochberg
     //use the setter to change it
-    private static MultipleTestingCorrection<TermId> mtc = new BenjaminiHochberg<>();
+    private static MultipleTestingCorrection mtc = new BenjaminiHochberg();
 
-    private static Consumer<List<? extends Item2PValue<TermId>>> mtcConsumer = l -> mtc.adjustPvals(l);
+    private static Consumer<List<? extends PValue>> mtcConsumer = l -> mtc.adjustPvals(l);
 
     public static void setResources(AbstractResources resources) {
         Phenomiser.resources = resources;
@@ -42,11 +42,11 @@ public class Phenomiser {
      * A setter to change the default multiple test correction method
      * @param mtcoption
      */
-    public static void setMTCclass(MultipleTestingCorrection<TermId> mtcoption) {
+    public static void setMTCclass(MultipleTestingCorrection mtcoption) {
         mtc = mtcoption;
     }
 
-    public static void setMtcMethod(Consumer<List<? extends Item2PValue<TermId>>> userDefinedMtc) {
+    public static void setMtcMethod(Consumer<List<? extends PValue>> userDefinedMtc) {
         mtcConsumer = userDefinedMtc;
     }
 
@@ -55,7 +55,7 @@ public class Phenomiser {
      * @param queryTerms a list of HPO termIds
      * @param dbs a list of disease databases
      */
-    public static List<Item2PValueAndSimilarity<TermId>> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
+    public static List<Item2PValueAndSimilarity> query(List<TermId> queryTerms, List<DiseaseDB> dbs) {
 
         if (queryTerms == null || dbs == null || queryTerms.isEmpty() || dbs.isEmpty()) {
             return null;
@@ -71,10 +71,10 @@ public class Phenomiser {
         PValueCalculator pValueCalculator = new PValueCalculator(queryTerms.size(), similarityScores, resources);
 
         //Calculate p value
-        Map<TermId, Item2PValueAndSimilarity<TermId>> pvalues = pValueCalculator.calculatePValues();
+        Map<TermId, Item2PValueAndSimilarity> pvalues = pValueCalculator.calculatePValues();
 
         //multi test correction with default Benjamini Hochberg method, unless the option is overwritten by user
-        List<Item2PValueAndSimilarity<TermId>> adjusted = new ArrayList<>(pvalues.values());
+        List<Item2PValueAndSimilarity> adjusted = new ArrayList<>(pvalues.values());
         mtcConsumer.accept(adjusted);
 
         return adjusted;
@@ -91,12 +91,12 @@ public class Phenomiser {
      */
     public static int findRank(List<TermId> queryTerms, TermId targetDisease, List<DiseaseDB> dbs){
 
-        List<Item2PValueAndSimilarity<TermId>> result =  query(queryTerms, dbs);
-        Ranker<Item2PValueAndSimilarity<TermId>> ranker = new Ranker<>(result);
-        Map<Item2PValueAndSimilarity<TermId>, Integer> rankingMap = ranker.ranking();
+        List<Item2PValueAndSimilarity> result =  query(queryTerms, dbs);
+        Ranker<Item2PValueAndSimilarity> ranker = new Ranker<>(result);
+        Map<Item2PValueAndSimilarity, Integer> rankingMap = ranker.ranking();
 
         int rank = -1;
-        for (Map.Entry<Item2PValueAndSimilarity<TermId>, Integer> entry : rankingMap.entrySet()) {
+        for (Map.Entry<Item2PValueAndSimilarity, Integer> entry : rankingMap.entrySet()) {
             if (entry.getKey().getItem().equals(targetDisease)) {
                 rank = entry.getValue();
             }
@@ -111,12 +111,12 @@ public class Phenomiser {
      * @param dbs a list of disease databases
      * @return a list of disease ranking lists
      */
-    public static List<List<Item2PValueAndSimilarity<TermId>>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
+    public static List<List<Item2PValueAndSimilarity>> batchQuery(List<List<TermId>> queries, List<DiseaseDB> dbs) {
 
         // from first to last list, count how many Terms each list has
         Set<Integer> termCounts = queries.stream().map(List::size).collect(Collectors.toSet());
 
-        List<List<Item2PValueAndSimilarity<TermId>>> queryResults = new ArrayList<>();
+        List<List<Item2PValueAndSimilarity>> queryResults = new ArrayList<>();
 
         //process query lists in the order of how many terms they have
         termCounts.forEach(termCount -> {
@@ -126,7 +126,7 @@ public class Phenomiser {
 
             for (int i = 0; i < queries.size(); i++) {
                 if (queries.get(i).size() == termCount) {
-                    List<Item2PValueAndSimilarity<TermId>> queryResult = query(queries.get(i), dbs);
+                    List<Item2PValueAndSimilarity> queryResult = query(queries.get(i), dbs);
                     queryResults.add(i, queryResult);
                 }
             }

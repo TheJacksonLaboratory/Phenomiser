@@ -1,8 +1,9 @@
 package org.jax.io;
 import com.google.common.collect.Sets;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class DiseaseParser {
 
     private static final Logger logger = LoggerFactory.getLogger(DiseaseParser.class);
-    private Ontology hpo;
+    private final Ontology hpo;
 
     private HpoDiseaseAnnotationParser diseaseAnnotationParser;
 
@@ -50,9 +51,9 @@ public class DiseaseParser {
         this.hpo = hpoOntology;
     }
 
-    public void init() throws PhenolException {
-        diseaseMap = diseaseAnnotationParser.parse();
-        //remove diseases with no annotation as they mess up downstream analysis
+    public DiseaseParser(String phenotypeHpoaPath, Ontology ontology) {
+        this.hpo = ontology;
+        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath, this.hpo);
         if(diseaseMap.values().stream().anyMatch(d -> d.getPhenotypicAbnormalities().isEmpty())) {
             logger.warn("Diseases with no annotations are found and to be removed...");
             Set<Map.Entry<TermId, HpoDisease>> noAnnotationDiseases = diseaseMap.entrySet().stream()
@@ -62,6 +63,13 @@ public class DiseaseParser {
                 logger.warn("Remove: " + e.getKey().getValue() + "\t" + e.getValue().getName());
             });
         }
+    }
+
+
+    public void init() throws PhenolException {
+
+        //remove diseases with no annotation as they mess up downstream analysis
+
 
         diseaseIdToHpoTermIdsWithExpansion = new HashMap<>();
         hpoTermIdToDiseaseIdsWithExpansion = new HashMap<>();
@@ -106,7 +114,7 @@ public class DiseaseParser {
                 .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> new ArrayList<>(e.getValue())));
 
         diseaseIndexToDisease = diseaseIdToHpoTermIdsWithExpansion.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().hashCode(), e -> e.getKey()));
+                .collect(Collectors.toMap(e -> e.getKey().hashCode(), Map.Entry::getKey));
 
         diseaseIndexToHpoTermsNoExpansion = diseaseIdToHpoTermIdsNoExpansion
                 .entrySet().stream().collect(Collectors.toMap(e -> e.getKey()

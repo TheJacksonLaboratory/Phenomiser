@@ -1,9 +1,8 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -19,11 +18,9 @@ public abstract class AbstractResources {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractResources.class);
 
-    protected HpoParser hpoParser;
-
     protected DiseaseParser diseaseParser;
 
-    protected Ontology hpo;
+    protected final Ontology hpo;
 
     protected Map<TermId, HpoDisease> diseaseMap;
 
@@ -48,18 +45,13 @@ public abstract class AbstractResources {
 
 
 
-    public AbstractResources(HpoParser hpoParser, DiseaseParser diseaseParser) {
-        this.hpoParser = hpoParser;
+    public AbstractResources(Ontology ontology, DiseaseParser diseaseParser) {
+        this.hpo = ontology;
         this.diseaseParser = diseaseParser;
     }
 
     public void defaultInit() {
         logger.trace("hpo initiation started");
-        hpo = this.getHpoParser().getHpo();
-        logger.trace("hpo initiation success");
-
-
-
         logger.trace("disease annotation initiation started");
         if (this.getDiseaseParser().getDiseaseMap() == null) {
             try {
@@ -90,14 +82,6 @@ public abstract class AbstractResources {
 
     public abstract void init();
 
-    public HpoParser getHpoParser() {
-        return hpoParser;
-    }
-
-    public void setHpoParser(HpoParser hpoParser) {
-        this.hpoParser = hpoParser;
-    }
-
     public DiseaseParser getDiseaseParser() {
         return diseaseParser;
     }
@@ -108,10 +92,6 @@ public abstract class AbstractResources {
 
     public Ontology getHpo() {
         return hpo;
-    }
-
-    public void setHpo(Ontology hpo) {
-        this.hpo = hpo;
     }
 
     public Map<TermId, HpoDisease> getDiseaseMap() {

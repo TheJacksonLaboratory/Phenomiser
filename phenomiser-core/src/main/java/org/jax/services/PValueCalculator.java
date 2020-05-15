@@ -3,15 +3,12 @@ package org.jax.services;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
-import org.monarchinitiative.phenol.stats.Item2PValue;
-import org.monarchinitiative.phenol.stats.MultipleTestingCorrection;
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
+
 import java.util.Map;
-import java.util.function.Consumer;
+
 
 /**
  *
@@ -34,9 +31,9 @@ public class PValueCalculator  {
         this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
-    public Map<TermId, Item2PValueAndSimilarity<TermId>> calculatePValues() {
+    public Map<TermId, Item2PValueAndSimilarity> calculatePValues() {
 
-        Map<TermId, Item2PValueAndSimilarity<TermId>> p_values = new
+        Map<TermId, Item2PValueAndSimilarity> p_values = new
                 HashMap<>();
         similarityScores.forEach((diseaseId, similarityScore) -> {
             if (scoreDistributions.containsKey(queryTermCount) &&
@@ -50,8 +47,7 @@ public class PValueCalculator  {
                             .getObjectScoreDistribution(diseaseId.hashCode()));
                 }
 
-                p_values.put(diseaseId, new Item2PValueAndSimilarity<>
-                        (diseaseId, p, similarityScore));
+                p_values.put(diseaseId, new Item2PValueAndSimilarity(diseaseId, p, similarityScore));
             }
         });
 

@@ -1,25 +1,6 @@
 package org.jax.services;
 
-import org.jax.utils.DiseaseDB;
-import org.jax.io.DiseaseParser;
-import org.jax.io.DiseaseParserTest;
-import org.jax.io.HpoParser;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
-
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
 
 //@RunWith(MockitoJUnitRunner.class)
 //public class PValueCalculatorTest {

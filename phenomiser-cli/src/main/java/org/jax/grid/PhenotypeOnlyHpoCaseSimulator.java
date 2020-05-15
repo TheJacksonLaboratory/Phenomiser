@@ -1,6 +1,7 @@
 package org.jax.grid;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jax.Phenomiser;
@@ -8,11 +9,12 @@ import org.jax.io.DiseaseParser;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
-import org.monarchinitiative.phenol.formats.hpo.HpoAnnotation;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAnnotation;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.Item2PValue;
+import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
+
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -34,7 +36,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     /** A list of all HPO term ids in the Phenotypic abnormality subontology. */
     private final ImmutableList<TermId> phenotypeterms;
     /** Key: diseaseID, e.g., OMIM:600321; value: Corresponding HPO disease object. */
-    private final Map<TermId,HpoDisease> diseaseMap;
+    private final Map<TermId, HpoDisease> diseaseMap;
     /** Number of HPO terms to use for each simulated case. */
     private final int n_terms_per_case;
     /** Number of "noise" (unrelated) HPO terms to use for each simulated case. */
@@ -76,10 +78,17 @@ public class PhenotypeOnlyHpoCaseSimulator {
         String filter = db.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
         //filter diseaseMap to diseases with scoreDistributions
         //System.out.println("count of diseases having scoreDistributions: " + resources.getScoreDistributions().size());
-        int intScoreDistribution = Math.min(this.n_terms_per_case + this
-                .n_noise_terms, 10);
-        Set<TermId> diseasesHavingScoreDistributions = resources.getScoreDistributions().get(intScoreDistribution).getObjectIds()
-                .stream().map(resources.getDiseaseIndexToDisease()::get).collect(Collectors.toSet());
+        int intScoreDistribution = Math.min(this.n_terms_per_case + this.n_noise_terms, 10);
+        ScoreDistribution sdist = resources.getScoreDistributions().get(intScoreDistribution);
+       // Collection<String> v = sdist.getObjectIds();
+
+        Set<TermId> diseasesHavingScoreDistributions = resources.getDiseaseMap().keySet();
+//                resources.getScoreDistributions().
+//                        get(intScoreDistribution).getObjectIds().stream().map( d -> d.ge)
+//                        getObjectIds().
+//                        stream().
+//                        map(resources.getDiseaseIndexToDisease()::get).
+//                        collect(Collectors.toSet());
         //diseasesHavingScoreDistributions.forEach(System.out::println);
         this.diseaseMap=resources.getDiseaseMap()
                 .entrySet().stream()
@@ -219,9 +228,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     /** @return a non-root random parent of term tid. It could be empty. */
     private Optional<TermId> getNonRootRandomParentTerm(TermId tid) {
         Set<TermId> parents = new HashSet<>(getParentTerms(ontology.subOntology(PHENOTYPIC_ABNORMALITY),tid,false));
-        if (parents.contains(PHENOTYPIC_ABNORMALITY)){
-            parents.remove(PHENOTYPIC_ABNORMALITY);
-        }
+        parents.remove(PHENOTYPIC_ABNORMALITY);
         if (parents.isEmpty()) { //no parents could be found
             return Optional.empty();
         }
@@ -274,7 +281,7 @@ public class PhenotypeOnlyHpoCaseSimulator {
     public int simulateCase(HpoDisease disease) {
 
         List<TermId> randomizedTerms = getRandomTermsFromDisease(disease);
-        List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(randomizedTerms,
+        List<Item2PValueAndSimilarity> result = Phenomiser.query(randomizedTerms,
                 this.db);
         //result.stream().forEach(r -> System.out.println(r.getItem().getValue()));
         //@TODO: to allow shared ranks when pval and similarity scores are

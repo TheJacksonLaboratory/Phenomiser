@@ -1,8 +1,8 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
@@ -26,20 +26,20 @@ public class CachedResources extends AbstractResources{
     /**
      * Use this constructor if we know we are analyzing a query with a specific number of query terms.
      * Then there is no need to load all of the cached score distribution files.
-     * @param hpoParser
+     * @param ontology reference to HPO
      * @param diseaseParser
      * @param cachePath
      * @param n_terms
      */
-    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser,
+    public CachedResources(Ontology ontology, DiseaseParser diseaseParser,
                            String cachePath, Integer n_terms) {
-        super(hpoParser, diseaseParser);
+        super(ontology, diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = n_terms;
     }
 
-    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath) {
-        super(hpoParser, diseaseParser);
+    public CachedResources(Ontology ontology, DiseaseParser diseaseParser, String cachePath) {
+        super(ontology, diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = null;
     }

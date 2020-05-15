@@ -5,8 +5,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
@@ -24,7 +25,7 @@ public class DiseaseParserTest {
     private DiseaseParser diseaseParser;
 
     @Mock
-     HpoDiseaseAnnotationParser hpodiseaseAnnotationParser;
+    HpoDiseaseAnnotationParser hpodiseaseAnnotationParser;
 
      Map<TermId, HpoDisease> diseaseMap = new HashMap<>();
 
@@ -68,39 +69,39 @@ public class DiseaseParserTest {
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
     }
 
     @Test
-    public void getDiseaseMap() throws Exception {
+    public void getDiseaseMap() {
         assertNotNull(diseaseParser.getDiseaseMap());
         assertTrue(! diseaseParser.getDiseaseMap().isEmpty());
         assertEquals(diseaseParser.getDiseaseMap().size(), 2);
     }
 
     @Test
-    public void getDiseaseIdToHpoTermIds() throws Exception {
+    public void getDiseaseIdToHpoTermIds() {
         assertNotNull(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion());
         assertTrue(! diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().size(), 2);
     }
 
     @Test
-    public void getHpoTermIdToDiseaseIds() throws Exception {
+    public void getHpoTermIdToDiseaseIds() {
         assertNotNull(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion());
         assertTrue(! diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().size(), 2);
     }
 
     @Test
-    public void getDiseaseIndexToDisease() throws Exception {
+    public void getDiseaseIndexToDisease() {
         assertNotNull(diseaseParser.getDiseaseIndexToDisease());
         assertTrue(! diseaseParser.getDiseaseIndexToDisease().isEmpty());
         assertEquals(diseaseParser.getDiseaseIndexToDisease().size(), 2);
     }
 
     @Test
-    public void getDiseaseIndexToHpoTerm() throws Exception {
+    public void getDiseaseIndexToHpoTerm() {
         assertNotNull(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion());
         assertTrue(! diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().size(), 2);

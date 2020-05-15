@@ -1,9 +1,9 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.utils.ObservableMap;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreSamplingOptions;
@@ -41,13 +41,13 @@ public class ComputedResources extends AbstractResources {
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
-     * @param hpoParser
+     * @param ontology reference to HPO ontology
      * @param diseaseParser
      * @param properties pass in settings to overwrite default settings
      * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
-    public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
-        super(hpoParser, diseaseParser);
+    public ComputedResources(Ontology ontology, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
+        super(ontology, diseaseParser);
         this.properties = properties;
         try {
             this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
