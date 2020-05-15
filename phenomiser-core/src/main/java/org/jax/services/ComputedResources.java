@@ -4,7 +4,6 @@ import org.jax.io.DiseaseParser;
 import org.jax.utils.ObservableMap;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreSamplingOptions;
@@ -91,8 +90,6 @@ public class ComputedResources extends AbstractResources {
 
     @Override
     public void init() {
-        super.defaultInit();
-
         //init icMap
         logger.trace("information content map initiation started");
         icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIdsWithExpansion);
@@ -118,9 +115,14 @@ public class ComputedResources extends AbstractResources {
         SimilarityScoreSampling scoreSampling;//
         if (this.debug) {
             scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
-            Map<Integer, List<TermId>> subset =
-                    diseaseIndexToHpoTermsNoExpansion.entrySet().stream()
-                    .limit(50).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+            // The following reduces the disease map to a smaller number of examples
+
+            List<TermId> keysToRetain =  diseaseIdToHpoTermIdsNoExpansion.keySet().stream()
+                    .limit(50).collect(Collectors.toList());
+            Map<TermId, Collection<TermId>> subset = new HashMap<>();
+            for (TermId t : keysToRetain) {
+                subset.put(t, diseaseIdToHpoTermIdsNoExpansion.get(t));
+            }
             scoreDistributions.putAll(scoreSampling.performSampling(subset));
         } else {
             for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {
@@ -130,7 +132,7 @@ public class ComputedResources extends AbstractResources {
                 newoption.setMaxNumTerms(i);
                 scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
                 scoreDistributions.putAll(scoreSampling.performSampling
-                        (diseaseIndexToHpoTermsNoExpansion));
+                        (diseaseIdToHpoTermIdsNoExpansion));
             }
         }
 

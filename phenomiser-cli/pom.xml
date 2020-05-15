@@ -13,7 +13,7 @@
     <parent>
         <artifactId>Phenomiser</artifactId>
         <groupId>org.jax</groupId>
-        <version>0.0.3</version>
+        <version>0.1.0</version>
     </parent>
 
     <description>A command line application of Phenomiser</description>

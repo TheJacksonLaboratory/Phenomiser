@@ -2,7 +2,6 @@ package org.jax.services;
 
 import org.jax.io.DiseaseParser;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
@@ -69,8 +68,6 @@ public class CachedResources extends AbstractResources{
 
     @Override
     public void init() {
-        super.defaultInit();
-
         String icMapPath = cachingPath + File.separator + "icMap.binary";
         String resnikSimilarityPath = cachingPath + File.separator + "resnikSimilarity.binary";
         String scoreDistributionsPath = cachingPath + File.separator + "scoreDistributions.binary";

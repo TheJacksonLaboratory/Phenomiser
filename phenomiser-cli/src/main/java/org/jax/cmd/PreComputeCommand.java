@@ -5,14 +5,10 @@ import com.beust.jcommander.Parameters;
 import org.jax.io.DiseaseParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.ComputedResources;
-import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenol.io.OntologyLoader;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;

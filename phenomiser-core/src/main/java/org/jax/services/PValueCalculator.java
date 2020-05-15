@@ -15,11 +15,11 @@ import java.util.Map;
  */
 public class PValueCalculator  {
 
-    private Map<Integer, ScoreDistribution> scoreDistributions;
+    private final Map<Integer, ScoreDistribution> scoreDistributions;
 
-    private Map<TermId, Double> similarityScores;
+    private final Map<TermId, Double> similarityScores;
 
-    private Map<Integer, TermId> diseaseIndexToDisease;
+    //private Map<Integer, TermId> diseaseIndexToDisease;
 
     private int queryTermCount;
 
@@ -28,7 +28,7 @@ public class PValueCalculator  {
         this.queryTermCount = Math.min(queryTermCount, 10);
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
-        this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
+        //this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
     public Map<TermId, Item2PValueAndSimilarity> calculatePValues() {
@@ -38,13 +38,13 @@ public class PValueCalculator  {
         similarityScores.forEach((diseaseId, similarityScore) -> {
             if (scoreDistributions.containsKey(queryTermCount) &&
                     scoreDistributions.get(queryTermCount)
-                            .getObjectScoreDistribution(diseaseId.hashCode()) != null) {
+                            .getObjectScoreDistribution(diseaseId) != null) {
                 double p = scoreDistributions.get(queryTermCount)
-                        .getObjectScoreDistribution(diseaseId.hashCode())
+                        .getObjectScoreDistribution(diseaseId)
                         .estimatePValue(similarityScore);
-                if(diseaseIndexToDisease.get(diseaseId.hashCode()).getValue().equals("OMIM:612642")) {
+                if(diseaseId.getValue().equals("OMIM:612642")) {
                     System.err.println("SCORE=" + scoreDistributions.get(queryTermCount)
-                            .getObjectScoreDistribution(diseaseId.hashCode()));
+                            .getObjectScoreDistribution(diseaseId));
                 }
 
                 p_values.put(diseaseId, new Item2PValueAndSimilarity(diseaseId, p, similarityScore));

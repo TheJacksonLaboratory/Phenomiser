@@ -8,9 +8,6 @@ import org.jax.io.DiseaseParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
-import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.OntologyLoader;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
