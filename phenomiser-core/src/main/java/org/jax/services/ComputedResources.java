@@ -111,10 +111,9 @@ public class ComputedResources extends AbstractResources {
         samplingOption.setMinNumTerms(sampleMin);
         samplingOption.setMaxNumTerms(sampleMax);
 
-
-        SimilarityScoreSampling scoreSampling;//
+        SimilarityScoreSampling scoreSampling;
         if (this.debug) {
-            scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
+
             // The following reduces the disease map to a smaller number of examples
 
             List<TermId> keysToRetain =  diseaseIdToHpoTermIdsNoExpansion.keySet().stream()
@@ -123,16 +122,16 @@ public class ComputedResources extends AbstractResources {
             for (TermId t : keysToRetain) {
                 subset.put(t, diseaseIdToHpoTermIdsNoExpansion.get(t));
             }
-            scoreDistributions.putAll(scoreSampling.performSampling(subset));
+            scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption,subset);
+            scoreDistributions.putAll(scoreSampling.performSampling());
         } else {
             for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {
                 ScoreSamplingOptions newoption = new ScoreSamplingOptions();
                 newoption.setNumThreads(numThreads);
                 newoption.setMinNumTerms(i);
                 newoption.setMaxNumTerms(i);
-                scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption);
-                scoreDistributions.putAll(scoreSampling.performSampling
-                        (diseaseIdToHpoTermIdsNoExpansion));
+                scoreSampling = new SimilarityScoreSampling(hpo, resnikSimilarity, newoption,diseaseIdToHpoTermIdsNoExpansion);
+                scoreDistributions.putAll(scoreSampling.performSampling());
             }
         }
 

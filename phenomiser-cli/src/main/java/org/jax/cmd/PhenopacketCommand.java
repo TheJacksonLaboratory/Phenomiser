@@ -48,7 +48,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath);
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath, diseaseDB);
 
         if (!Files.exists(Paths.get(cachePath))){
             System.err.print("Cannot find caching data at " + cachePath);

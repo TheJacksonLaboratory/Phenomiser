@@ -1,4 +1,5 @@
 package org.jax.io;
+import com.google.common.collect.ImmutableList;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
 
@@ -39,11 +40,16 @@ public class DiseaseParser {
     private final Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion;
 
 
-
-
-    public DiseaseParser(String phenotypeHpoaPath, String hpOboPath) {
+    /**
+     * Set up the HPO ontology object and the disease resources
+     * @param phenotypeHpoaPath Path to the phenotype.hpo file
+     * @param hpOboPath Path to hp.obo
+     * @param database Must be OMIM, ORPHA, or DECIPHER -- limit calculations to one of these databases
+     */
+    public DiseaseParser(String phenotypeHpoaPath, String hpOboPath, String database) {
         this.hpo = OntologyLoader.loadOntology(new File(hpOboPath));
-        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath, this.hpo);
+        List<String> dbList = ImmutableList.of(database);
+        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath, this.hpo, dbList);
 
         if(diseaseMap.values().stream().anyMatch(d -> d.getPhenotypicAbnormalities().isEmpty())) {
             logger.warn("Diseases with no annotations are found and to be removed...");
