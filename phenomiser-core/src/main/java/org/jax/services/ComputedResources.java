@@ -1,9 +1,9 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.utils.ObservableMap;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreSamplingOptions;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class ComputedResources extends AbstractResources {
 
-    private static Logger logger = LoggerFactory.getLogger(ComputedResources.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(ComputedResources.class);
 
     private Properties properties;
 
@@ -41,13 +41,13 @@ public class ComputedResources extends AbstractResources {
 
     /**
      * note: the init() method must be called before injecting hpoParser and diseaseParser
-     * @param hpoParser
+     * @param ontology HPO
      * @param diseaseParser
      * @param properties pass in settings to overwrite default settings
      * @param debug if true, only precompute the similarity score distributions between 3 HPO terms and 100 diseases.
      */
-    public ComputedResources(HpoParser hpoParser, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
-        super(hpoParser, diseaseParser);
+    public ComputedResources(Ontology ontology, DiseaseParser diseaseParser, @Nullable Properties properties, @Nullable boolean debug) {
+        super(ontology, diseaseParser);
         this.properties = properties;
         try {
             this.numThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
@@ -60,7 +60,7 @@ public class ComputedResources extends AbstractResources {
                 System.exit(1);
             }
         } catch (Exception e) {
-            logger.error("not all properties are applied.");
+            LOGGER.error("not all properties are applied.");
         }
         this.debug = debug;
 
@@ -74,17 +74,17 @@ public class ComputedResources extends AbstractResources {
                     createIfNotExists(cachingPath);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    logger.error("caching failed: folder cannot be created.");
+                    LOGGER.error("caching failed: folder cannot be created.");
                     return;
                 }
                 String name = String.format("%d_term.scoreDistribution.binary", numHPO);
                 try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + name))) {
                     out.writeObject(scoreDistribution);
-                    logger.trace("caching score distributions success");
+                    LOGGER.trace("caching score distributions success");
                 } catch (IOException e) {
                     e.printStackTrace();
-                    logger.error("IO exception");
-                    logger.error("caching score distributions failed");
+                    LOGGER.error("IO exception");
+                    LOGGER.error("caching score distributions failed");
                 }
             }
         });
@@ -95,21 +95,21 @@ public class ComputedResources extends AbstractResources {
         super.defaultInit();
 
         //init icMap
-        logger.trace("information content map initiation started");
+        LOGGER.trace("information content map initiation started");
         icMap = new InformationContentComputation(hpo).computeInformationContent(hpoTermIdToDiseaseIdsWithExpansion);
-        logger.trace("information content map initiation success");
+        LOGGER.trace("information content map initiation success");
 
         //init Resnik similarity precomputation
-        logger.trace("Resnik similarity precomputation started");
+        LOGGER.trace("Resnik similarity precomputation started");
         final PrecomputingPairwiseResnikSimilarity pairwiseResnikSimilarity =
                 new PrecomputingPairwiseResnikSimilarity(hpo, icMap, numThreads);
 
         resnikSimilarity = new ResnikSimilarity(pairwiseResnikSimilarity, false);
 
-        logger.trace("Resnik similarity precomputation success");
+        LOGGER.trace("Resnik similarity precomputation success");
 
         // score distribution
-        logger.trace("score distribution computation started");
+        LOGGER.trace("score distribution computation started");
         ScoreSamplingOptions samplingOption = new ScoreSamplingOptions();
         samplingOption.setNumThreads(numThreads);
         samplingOption.setMinNumTerms(sampleMin);
@@ -135,40 +135,40 @@ public class ComputedResources extends AbstractResources {
             }
         }
 
-        logger.trace("score distribution computation success");
+        LOGGER.trace("score distribution computation success");
 
         if (cache) {
-            logger.trace("caching started");
+            LOGGER.trace("caching started");
             try {
                 createIfNotExists(cachingPath);
             } catch (Exception e) {
-                logger.error("caching failed: folder cannot be created.");
+                LOGGER.error("caching failed: folder cannot be created.");
                 return;
             }
-            logger.info("writing to: " + cachingPath);
+            LOGGER.info("writing to: {}", cachingPath);
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "icMap.binary"))) {
                 out.writeObject(icMap);
-                logger.trace("caching information content success");
+                LOGGER.trace("caching information content success");
             } catch (IOException e) {
-                logger.error("IO exception");
-                logger.error("caching icMap failed");
+                LOGGER.error("IO exception");
+                LOGGER.error("caching icMap failed");
             }
 
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "resnikSimilarity.binary"))) {
                 out.writeObject(resnikSimilarity);
-                logger.trace("caching resnikSimilarity success");
+                LOGGER.trace("caching resnikSimilarity success");
             } catch (IOException e) {
-                logger.error("IO exception");
-                logger.error("caching resnikSimilarity failed");
+                LOGGER.error("IO exception");
+                LOGGER.error("caching resnikSimilarity failed");
             }
 
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(cachingPath + File.separator + "scoreDistributions.binary"))) {
                 out.writeObject(scoreDistributions);
-                logger.trace("caching score distributions success");
+                LOGGER.trace("caching score distributions success");
             } catch (IOException e) {
-                logger.error("IO exception");
+                LOGGER.error("IO exception");
                 e.printStackTrace();
-                logger.error("caching score distributions failed");
+                LOGGER.error("caching score distributions failed");
             }
         }
     }

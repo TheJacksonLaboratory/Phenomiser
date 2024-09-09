@@ -10,19 +10,14 @@ import java.io.File;
 import java.util.Map;
 
 public class HpoParser {
-    private String hpoPath;
-    private Ontology hpoOntology;
+    private final Ontology hpoOntology;
 
     public HpoParser(String hpoPath) {
-        this.hpoPath = hpoPath;
-    }
-
-    public void init()  {
         this.hpoOntology = OntologyLoader.loadOntology(new File(hpoPath));
     }
 
-    public Ontology getHpo() {
 
+    public Ontology getHpo() {
         return this.hpoOntology;
     }
 

@@ -23,7 +23,7 @@ public abstract class AbstractResources {
 
     protected DiseaseParser diseaseParser;
 
-    protected Ontology hpo;
+    protected final Ontology hpo;
 
     protected Map<TermId, HpoDisease> diseaseMap;
 
@@ -48,17 +48,14 @@ public abstract class AbstractResources {
 
 
 
-    public AbstractResources(HpoParser hpoParser, DiseaseParser diseaseParser) {
-        this.hpoParser = hpoParser;
+    public AbstractResources(Ontology ontology, DiseaseParser diseaseParser) {
+        this.hpo = ontology;
         this.diseaseParser = diseaseParser;
     }
 
     public void defaultInit() {
         logger.trace("hpo initiation started");
-        hpo = this.getHpoParser().getHpo();
         logger.trace("hpo initiation success");
-
-
 
         logger.trace("disease annotation initiation started");
         if (this.getDiseaseParser().getDiseaseMap() == null) {
@@ -90,9 +87,6 @@ public abstract class AbstractResources {
 
     public abstract void init();
 
-    public HpoParser getHpoParser() {
-        return hpoParser;
-    }
 
     public void setHpoParser(HpoParser hpoParser) {
         this.hpoParser = hpoParser;
@@ -108,10 +102,6 @@ public abstract class AbstractResources {
 
     public Ontology getHpo() {
         return hpo;
-    }
-
-    public void setHpo(Ontology hpo) {
-        this.hpo = hpo;
     }
 
     public Map<TermId, HpoDisease> getDiseaseMap() {

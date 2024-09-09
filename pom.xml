@@ -1,29 +1,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jax</groupId>
-  <artifactId>Phenomiser</artifactId>
-  <packaging>pom</packaging>
-  <version>0.0.4</version>
+    <groupId>org.jax</groupId>
+    <artifactId>Phenomiser</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.5</version>
 
 
-  <modules>
-    <module>phenomiser-core</module>
-    <module>phenomiser-cli</module>
-  </modules>
+    <modules>
+        <module>phenomiser-core</module>
+        <module>phenomiser-cli</module>
+    </modules>
 
-  <name>Phenomiser</name>
-  <url>https://github.com/TheJacksonLaboratory/Phenomiser</url>
+    <name>Phenomiser</name>
+    <url>https://github.com/TheJacksonLaboratory/Phenomiser</url>
 
-  <properties>
-      <jdk.version>1.8</jdk.version>
-      <phenol.version>1.3.3</phenol.version>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
-      <phenopacket.version>1.0.0-RC1</phenopacket.version>
-  </properties>
+    <properties>
+        <jdk.version>21</jdk.version>
+        <phenol.version>1.3.3</phenol.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>${jdk.version}</maven.compiler.source>
+        <maven.compiler.target>${jdk.version}</maven.compiler.target>
+        <phenopacket.version>1.0.0-RC1</phenopacket.version>
+    </properties>
 
     <developers>
         <developer>
@@ -43,81 +43,81 @@
         </developer>
     </developers>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.monarchinitiative.phenol</groupId>
-      <artifactId>phenol-core</artifactId>
-      <version>${phenol.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-core</artifactId>
+            <version>${phenol.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>org.monarchinitiative.phenol</groupId>
-      <artifactId>phenol-io</artifactId>
-      <version>${phenol.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-          <exclusion>
-              <groupId>com.fasterxml.jackson.core</groupId>
-              <artifactId>jackson-core</artifactId>
-          </exclusion>
-      </exclusions>
-    </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-io</artifactId>
+            <version>${phenol.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>org.monarchinitiative.phenol</groupId>
-      <artifactId>phenol-analysis</artifactId>
-      <version>${phenol.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-analysis</artifactId>
+            <version>${phenol.version}</version>
+        </dependency>
 
-      <dependency>
-          <groupId>org.phenopackets</groupId>
-          <artifactId>phenopacket-schema</artifactId>
-          <version>${phenopacket.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.phenopackets</groupId>
+            <artifactId>phenopacket-schema</artifactId>
+            <version>${phenopacket.version}</version>
+        </dependency>
 
-      <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
-      <dependency>
-          <groupId>com.googlecode.json-simple</groupId>
-          <artifactId>json-simple</artifactId>
-          <version>1.1.1</version>
-      </dependency>
+        <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>2.10.0</version>
-      <scope>test</scope>
-    </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.10.0</version>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
-    </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+        </dependency>
 
-  </dependencies>
+    </dependencies>
 
     <build>
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
@@ -171,19 +171,39 @@
                     <version>3.1.1</version>
                 </plugin>
                 <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <generateBackupPoms>false</generateBackupPoms>
-                </configuration>
-            </plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <generateBackupPoms>false</generateBackupPoms>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.0,)</version> <!-- Specify the minimum Maven version you need -->
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

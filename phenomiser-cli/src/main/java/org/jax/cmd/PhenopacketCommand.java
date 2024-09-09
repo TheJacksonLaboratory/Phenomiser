@@ -3,14 +3,15 @@ package org.jax.cmd;
 import com.beust.jcommander.Parameter;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.io.PhenopacketImporter;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.base.PhenolException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
         List<Item2PValueAndSimilarity<TermId>> result = Phenomiser.query(queryList, db);
         int r = 0;
         if (result==null) {
-            logger.error("result was NULL for " + phenopacketPath);
+            logger.error("result was NULL for {}", phenopacketPath);
             return;
         }
         for (Item2PValueAndSimilarity<TermId> i2p : result) {
@@ -106,10 +107,9 @@ public class PhenopacketCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpoPath));
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, ontology);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
@@ -128,7 +128,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        resources = new CachedResources(ontology, diseaseParser, cachePath);
         resources.init();
         Phenomiser.setResources(resources);
 
@@ -151,14 +151,14 @@ public class PhenopacketCommand extends PhenomiserCommand {
 
     //TODO: try this one if the above runs into OutOfMemory error, or is too slow
     public void run2(){
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpoPath));
+
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser,ontology);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             System.exit(1);
         }
         try {
@@ -173,7 +173,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath);
+        resources = new CachedResources(ontology, diseaseParser, cachePath);
         resources.init();
         Phenomiser.setResources(resources);
 
@@ -210,7 +210,7 @@ public class PhenopacketCommand extends PhenomiserCommand {
         int[] ranks = Phenomiser.batchFindRank(multiPhenopacketPhenotypes, targetDiseases, Arrays.asList(DiseaseDB.OMIM));
         //print out result
         for (int i = 0; i < ranks.length; i++){
-            System.out.println(String.format("phenopacket %d: diagnosis is ranked at %d", i, ranks[i]));
+            System.out.printf("phenopacket %d: diagnosis is ranked at %d%n", i, ranks[i]);
         }
     }
 

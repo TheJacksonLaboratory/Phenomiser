@@ -13,7 +13,7 @@
     <parent>
         <artifactId>Phenomiser</artifactId>
         <groupId>org.jax</groupId>
-        <version>0.0.4</version>
+        <version>0.0.5</version>
     </parent>
 
     <description>A command line application of Phenomiser</description>
@@ -30,10 +30,9 @@
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
-            <version>1.72</version>
+            <version>1.82</version>
         </dependency>
     </dependencies>
-
 
 
     <build>

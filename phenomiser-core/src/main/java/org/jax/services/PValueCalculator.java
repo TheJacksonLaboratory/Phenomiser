@@ -12,15 +12,17 @@ import java.util.Map;
  */
 public class PValueCalculator  {
 
-    private Map<Integer, ScoreDistribution> scoreDistributions;
+    private final Map<Integer, ScoreDistribution> scoreDistributions;
 
-    private Map<TermId, Double> similarityScores;
+    private final Map<TermId, Double> similarityScores;
 
-    private Map<Integer, TermId> diseaseIndexToDisease;
+    private final Map<Integer, TermId> diseaseIndexToDisease;
 
-    private int queryTermCount;
+    private final int queryTermCount;
 
-    public PValueCalculator(int queryTermCount, Map<TermId, Double> similarityScores, AbstractResources resources) {
+    public PValueCalculator(int queryTermCount,
+                            Map<TermId, Double> similarityScores,
+                            AbstractResources resources) {
         //Above 10, score distributions are identical to 10
         this.queryTermCount = Math.min(queryTermCount, 10);
         this.similarityScores = similarityScores;
@@ -30,8 +32,7 @@ public class PValueCalculator  {
 
     public Map<TermId, Item2PValueAndSimilarity<TermId>> calculatePValues() {
 
-        Map<TermId, Item2PValueAndSimilarity<TermId>> p_values = new
-                HashMap<>();
+        Map<TermId, Item2PValueAndSimilarity<TermId>> p_values = new HashMap<>();
         similarityScores.forEach((diseaseId, similarityScore) -> {
             if (scoreDistributions.containsKey(queryTermCount) &&
                     scoreDistributions.get(queryTermCount)

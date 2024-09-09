@@ -6,16 +6,17 @@ import com.beust.jcommander.ParameterException;
 import org.jax.cmd.*;
 import org.jax.services.*;
 
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class PhenomiserApp {
 
-    private static Logger logger = LoggerFactory.getLogger(PhenomiserApp.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PhenomiserApp.class);
 
     @Parameter(names = {"-h", "--help"}, help = true, arity = 0,description = "display this help message")
-    private boolean helpInforRequested;
+    private boolean helpRequested;
 
     private static AbstractResources resources;
 
@@ -45,14 +46,14 @@ public class PhenomiserApp {
                     System.exit(0);
                 }
             }
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             jc.usage();
             System.exit(1);
         }
 
         String command = jc.getParsedCommand();
 
-        if (phenomiserApp.helpInforRequested) {
+        if (phenomiserApp.helpRequested) {
             jc.usage();
             System.exit(0);
         }
@@ -62,33 +63,23 @@ public class PhenomiserApp {
             System.exit(1);
         }
 
-        PhenomiserCommand phenomiserCommand=null;
-
-        switch (command) {
-            case "precompute":
-                phenomiserCommand = preComputeCommand;
-                break;
-            case "query":
-                phenomiserCommand = queryCommand;
-                break;
-            case "grid":
-                phenomiserCommand = gridSearchCommand;
-                break;
-            case "phenopacket":
-                phenomiserCommand = phenopacket;
-                break;
-            default:
-                System.err.println(String.format("[ERROR] command \"%s\" not recognized",command));
+        PhenomiserCommand phenomiserCommand = switch(command) {
+            case "precompute" -> preComputeCommand;
+            case "query" -> queryCommand;
+            case "grid" ->  gridSearchCommand;
+            case "phenopacket" -> phenopacket;
+            default -> {
                 jc.usage();
-                System.exit(1);
-
-        }
+                throw new PhenolRuntimeException(String.format("[ERROR] command \"%s\" not recognized.\n",
+                        command));
+            }
+        };
 
         phenomiserCommand.run();
 
         long stopTime = System.currentTimeMillis();
-        System.out.println("Phenomiser: Elapsed time was " + (stopTime - startTime)*(1.0)/1000 + " seconds.");
-
+        System.out.printf("Phenomiser: Elapsed time was %f seconds.\n",
+                (stopTime - startTime)*(1.0)/1000);
     }
 
 }

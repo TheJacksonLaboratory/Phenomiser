@@ -4,13 +4,14 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.base.PhenolException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Parameters(commandDescription = "Query with a list of HPO terms and rank diseases based on similarity score")
 public class QueryCommand extends PhenomiserCommand {
-    private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryCommand.class);
     final String HOME = System.getProperty("user.home");
 
     @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
@@ -50,14 +51,13 @@ public class QueryCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpoPath));
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, ontology);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(),e);
             System.exit(1);
         }
 
@@ -66,7 +66,7 @@ public class QueryCommand extends PhenomiserCommand {
             System.exit(1);
         }
         List<TermId> queryList = Arrays.stream(query.split(",")).map(TermId::of).collect(Collectors.toList());
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath, Math.min(queryList.size(), 10));
+        resources = new CachedResources(ontology, diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
         Phenomiser.setResources(resources);
 
@@ -85,7 +85,7 @@ public class QueryCommand extends PhenomiserCommand {
         try {
             writer = new FileWriter(new File(path));
         } catch (Exception e) {
-            logger.info("out path not found. writing to console: ");
+            LOGGER.info("out path not found. writing to console: ");
             writer = new OutputStreamWriter(System.out);
         }
         return writer;
@@ -101,7 +101,7 @@ public class QueryCommand extends PhenomiserCommand {
                     "\tsimilarityScore" +
                     "\n");
         } catch (IOException e) {
-            logger.error("io exception during writing header. writing output aborted.");
+            LOGGER.error("io exception during writing header. writing output aborted.");
             return;
         }
         List<Item2PValueAndSimilarity<TermId>> newList = new ArrayList<>(result);
@@ -120,7 +120,7 @@ public class QueryCommand extends PhenomiserCommand {
                 writer.write(Double.toString(e.getSimilarityScore()));
                 writer.write("\n");
             } catch (IOException exception) {
-                logger.error("IO exception during writing out adjusted p values");
+                LOGGER.error("IO exception during writing out adjusted p values");
             }
 
         });
@@ -128,7 +128,7 @@ public class QueryCommand extends PhenomiserCommand {
         try {
             writer.close();
         } catch (IOException e) {
-            logger.error("IO exception during closing writer");
+            LOGGER.error("IO exception during closing writer");
         }
     }
 }

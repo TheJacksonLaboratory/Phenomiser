@@ -3,14 +3,16 @@ package org.jax.cmd;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.ComputedResources;
 import org.monarchinitiative.phenol.base.PhenolException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -39,11 +41,9 @@ public class PreComputeCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpoPath));
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, ontology);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
@@ -66,7 +66,7 @@ public class PreComputeCommand extends PhenomiserCommand {
         properties.setProperty("sampleMin", Integer.toString(sampling.get(0)));
         properties.setProperty("sampleMax", Integer.toString(sampling.get(1)));
 
-        AbstractResources resources = new ComputedResources(hpoParser, diseaseParser, properties, debug);
+        AbstractResources resources = new ComputedResources(ontology, diseaseParser, properties, debug);
         resources.init();
     }
 }

@@ -5,12 +5,13 @@ import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.grid.GridSearch;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.base.PhenolException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Parameters(commandDescription = "Grid search for simulation of phenotype-only cases")
 public class GridSearchCommand extends PhenomiserCommand {
-    private static Logger logger = LoggerFactory.getLogger(GridSearchCommand.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(GridSearchCommand.class);
     final String HOME = System.getProperty("user.home");
     @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
     private String hpoPath;
@@ -60,14 +61,13 @@ public class GridSearchCommand extends PhenomiserCommand {
 
         checkSignal();
 
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpoPath));
+        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, ontology);
+        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, ontology);
         try {
             diseaseParser.init();
         } catch (PhenolException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             System.exit(1);
         }
 
@@ -75,7 +75,7 @@ public class GridSearchCommand extends PhenomiserCommand {
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath,
+        resources = new CachedResources(ontology, diseaseParser, cachePath,
                 1);
         resources.init();
         Phenomiser.setResources(resources);
@@ -96,7 +96,7 @@ public class GridSearchCommand extends PhenomiserCommand {
         try {
             GridSearch.write(m, writer);
         } catch (Exception e) {
-            logger.error("Rank matrix is successfully created but cannot be written out due to an IOException");
+            LOGGER.error("Rank matrix is successfully created but cannot be written out due to an IOException");
         }
 
         try {
@@ -112,7 +112,7 @@ public class GridSearchCommand extends PhenomiserCommand {
         try {
             writer = new FileWriter(new File(path));
         } catch (Exception e) {
-            logger.info("out path not found. writing to console: ");
+            LOGGER.info("out path not found. writing to console: ");
             writer = new OutputStreamWriter(System.out);
         }
         return writer;
