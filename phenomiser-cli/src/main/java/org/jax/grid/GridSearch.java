@@ -1,6 +1,5 @@
 package org.jax.grid;
 
-import org.jax.Phenomiser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jax.Phenomiser;
-import org.jax.io.DiseaseParser;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.utils.DiseaseDB;
@@ -12,7 +11,6 @@ import org.monarchinitiative.phenol.formats.hpo.HpoAnnotation;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.stats.Item2PValue;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;

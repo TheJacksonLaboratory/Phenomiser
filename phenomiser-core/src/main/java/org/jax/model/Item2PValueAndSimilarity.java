@@ -7,10 +7,10 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
     private double similarityScore;
 
     /**
-     * This constructor takes an Item for which a pvalue was calculated. It assigned both {@link #p_raw} (the
-     * raw pavel) and {@link #p_adjusted} to this value (i.e., by default there is no multiple testing
+     * This constructor takes an Item for which a pvalue was calculated. It assigned both p_raw (the
+     * raw pavel) and p_adjusted to this value (i.e., by default there is no multiple testing
      * correction. The class is designed to be used with other classes such as Bonferroni TODO (check Bonferroni)
-     * to adjust the raw pvalues that are stored in {@link #p_adjusted}.
+     * to adjust the raw pvalues that are stored in p_adjusted.
      *
      * @param item
      * @param p

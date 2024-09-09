@@ -68,41 +68,41 @@ public class DiseaseParserTest {
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
     }
 
     @Test
-    public void getDiseaseMap() throws Exception {
+    public void getDiseaseMap() {
         assertNotNull(diseaseParser.getDiseaseMap());
-        assertTrue(! diseaseParser.getDiseaseMap().isEmpty());
+        assertFalse(diseaseParser.getDiseaseMap().isEmpty());
         assertEquals(diseaseParser.getDiseaseMap().size(), 2);
     }
 
     @Test
-    public void getDiseaseIdToHpoTermIds() throws Exception {
+    public void getDiseaseIdToHpoTermIds() {
         assertNotNull(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion());
-        assertTrue(! diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().isEmpty());
+        assertFalse(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion().size(), 2);
     }
 
     @Test
-    public void getHpoTermIdToDiseaseIds() throws Exception {
+    public void getHpoTermIdToDiseaseIds() {
         assertNotNull(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion());
-        assertTrue(! diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().isEmpty());
+        assertFalse(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion().size(), 2);
     }
 
     @Test
-    public void getDiseaseIndexToDisease() throws Exception {
+    public void getDiseaseIndexToDisease() {
         assertNotNull(diseaseParser.getDiseaseIndexToDisease());
-        assertTrue(! diseaseParser.getDiseaseIndexToDisease().isEmpty());
+        assertFalse(diseaseParser.getDiseaseIndexToDisease().isEmpty());
         assertEquals(diseaseParser.getDiseaseIndexToDisease().size(), 2);
     }
 
     @Test
-    public void getDiseaseIndexToHpoTerm() throws Exception {
+    public void getDiseaseIndexToHpoTerm() {
         assertNotNull(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion());
-        assertTrue(! diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().isEmpty());
+        assertFalse(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().isEmpty());
         assertEquals(diseaseParser.getDiseaseIndexToHpoTermsWithExpansion().size(), 2);
     }
 

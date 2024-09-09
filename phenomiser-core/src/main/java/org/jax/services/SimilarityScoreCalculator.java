@@ -4,8 +4,6 @@ import org.jax.utils.DiseaseDB;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class SimilarityScoreCalculator {
