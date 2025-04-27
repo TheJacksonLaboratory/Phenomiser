@@ -1,6 +1,5 @@
 package org.jax.cmd;
 
-import com.beust.jcommander.Parameter;
 import org.jax.Phenomiser;
 import org.jax.io.DiseaseParser;
 import org.jax.io.PhenopacketImporter;
@@ -15,6 +14,7 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -25,28 +25,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@CommandLine.Command(name = "phenopacket", aliases = {"P"},
+        mixinStandardHelpOptions = true,
+        description = "Query with a Phenopacket and rank diseases based on similarity score")
 public class PhenopacketCommand extends PhenomiserCommand {
 
     private static Logger logger = LoggerFactory.getLogger(QueryCommand.class);
     private final String HOME = System.getProperty("user.home");
 
-    @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
-    private String hpoPath;
-    @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file")
-    private String diseasePath;
-    @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
+
     private String cachePath = HOME + File.separator + "Phenomiser_data";
-    @Parameter(names = {"-db", "--diseaseDB"},
-            description = "choose disease database [OMIM,ORPHA]")
-    private String diseaseDB = "OMIM";
-    @Parameter(names = {"-pp", "--phenopacket"}, description = "specify the path to a phenopachet file")
+
+    @CommandLine.Option(names={"--phenopacket"},
+            required = true,
+            description = "path to a phenopacket file")
     private String phenopacket;
 
-    @Parameter(names = {"-batch", "--batchMode"}, description = "use if you want to run all phenopackets under specified directory")
     private boolean batch = false;
 
-    @Parameter(names = {"-o", "--output"}, description = "specify output path")
-    private String outPath="phenomiser-results.txt";
 
     private AbstractResources resources;
 

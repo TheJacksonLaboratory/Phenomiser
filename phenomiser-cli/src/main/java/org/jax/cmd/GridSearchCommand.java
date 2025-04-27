@@ -1,7 +1,5 @@
 package org.jax.cmd;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.grid.GridSearch;
 import org.jax.io.DiseaseParser;
@@ -14,6 +12,7 @@ import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 
 
 import java.io.*;
@@ -27,32 +26,36 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  * @author <a href="mailto:aaron.zhang@jax.org">Aaron Zhang</a>
  */
-@Parameters(commandDescription = "Grid search for simulation of phenotype-only cases")
+
+@CommandLine.Command(name = "grid", aliases = {"G"},
+        mixinStandardHelpOptions = true,
+        description = "Grid search for simulation of phenotype-only cases")
 public class GridSearchCommand extends PhenomiserCommand {
     private static Logger LOGGER = LoggerFactory.getLogger(GridSearchCommand.class);
     final String HOME = System.getProperty("user.home");
-    @Parameter(names = {"-hpo", "--hpo_path"}, description = "specify the path to hp.obo")
-    private String hpoPath;
-    @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file")
-    private String diseasePath;
-    @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
     private String cachePath = HOME + File.separator + "Phenomiser_data";;
-    @Parameter(names = {"-db", "--diseaseDB"},
-            description = "choose disease database [OMIM,ORPHA]")
-    private String diseaseDB = "OMIM";
 
-    @Parameter(names={"-c","--n_cases"}, description="Number of cases to simulate")
+    @CommandLine.Option(names={"-c","--n_cases"},
+            description = "Number of cases to simulate")
     private int n_cases_to_simulate = 100;
-    @Parameter(names = { "-signal", "--n-diseaseTerm"}, description = "Number of disease terms")
+
+    @CommandLine.Option(names={"--n-diseaseTerm"},
+            description = "Number of disease terms")
     private int n_diseaseTerm = 10;
-    @Parameter(names = {"-noise", "--noise"}, description = "Number of noise terms")
+
+
+    @CommandLine.Option(names={"--noise"},
+            description = "Number of noise terms")
     private int n_noiseTerm = 4;
-    @Parameter(names={"-i","--imprecision"}, description="Use imprecision?")
+
+
+    @CommandLine.Option(names={"--imprecision"},
+            description = "Use imprecision?")
     private boolean imprecise_phenotype = false;
-    @Parameter(names = {"-o", "--output"}, description = "Output path")
-    private String outPath;
-    @Parameter(names = {"-seed", "--set.seed"}, description = "Set random number generator seed for simulation")
-    private Integer seed = null;
+
+    @CommandLine.Option(names={"--seed"},
+            description = "Set random number generator seed for simulation")
+    private Integer seed = 42;
 
     private AbstractResources resources;
 

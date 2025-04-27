@@ -5,7 +5,7 @@
     <groupId>org.jax</groupId>
     <artifactId>Phenomiser</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.5</version>
+    <version>0.1.1</version>
 
 
     <modules>
@@ -42,6 +42,16 @@
             <organization>The Jackson Laboratories for Genomic Medicine</organization>
         </developer>
     </developers>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>4.7.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

@@ -1,8 +1,6 @@
 package org.jax;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
+import picocli.CommandLine;
 import org.jax.cmd.*;
 import org.jax.services.*;
 
@@ -10,76 +8,41 @@ import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
 
-public class PhenomiserApp {
+@CommandLine.Command(name = "Phenomiser", mixinStandardHelpOptions = true, version = "0.0.3",
+        description = "Phenomizer implementation")
+public class PhenomiserApp implements Callable<Integer> {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PhenomiserApp.class);
 
-    @Parameter(names = {"-h", "--help"}, help = true, arity = 0,description = "display this help message")
-    private boolean helpRequested;
 
-    private static AbstractResources resources;
-
-    public static void main( String[] args ) {
-
-        long startTime = System.currentTimeMillis();
-
-        PhenomiserApp phenomiserApp = new PhenomiserApp();
-        PreComputeCommand preComputeCommand = new PreComputeCommand();
-        QueryCommand queryCommand = new QueryCommand();
-        GridSearchCommand gridSearchCommand = new GridSearchCommand();
-        PhenopacketCommand phenopacket = new PhenopacketCommand();
-        JCommander jc = JCommander.newBuilder()
-                .addObject(phenomiserApp)
-                .addCommand("precompute", preComputeCommand)
-                .addCommand("query", queryCommand)
-                .addCommand("grid", gridSearchCommand)
-                .addCommand("phenopacket",phenopacket)
-                .build();
-        jc.setProgramName("java -jar PhenomiserApp.jar");
-        try {
-            jc.parse(args);
-        } catch (ParameterException e) {
-            for (String arg : args) {
-                if (arg.contains("h")) {
-                    jc.usage();
-                    System.exit(0);
-                }
-            }
-            LOGGER.error(e.getMessage());
-            jc.usage();
-            System.exit(1);
+    public static void main(String[] args){
+        LOGGER.info("Starting CSV to Phenopackets");
+        if (args.length == 0) {
+            // if the user doesn't pass any command or option, add -h to show help
+            args = new String[]{"-h"};
         }
-
-        String command = jc.getParsedCommand();
-
-        if (phenomiserApp.helpRequested) {
-            jc.usage();
-            System.exit(0);
-        }
-
-        if (command == null) {
-            jc.usage();
-            System.exit(1);
-        }
-
-        PhenomiserCommand phenomiserCommand = switch(command) {
-            case "precompute" -> preComputeCommand;
-            case "query" -> queryCommand;
-            case "grid" ->  gridSearchCommand;
-            case "phenopacket" -> phenopacket;
-            default -> {
-                jc.usage();
-                throw new PhenolRuntimeException(String.format("[ERROR] command \"%s\" not recognized.\n",
-                        command));
-            }
-        };
-
-        phenomiserCommand.run();
-
-        long stopTime = System.currentTimeMillis();
-        System.out.printf("Phenomiser: Elapsed time was %f seconds.\n",
-                (stopTime - startTime)*(1.0)/1000);
+        CommandLine cline = new CommandLine(new PhenomiserApp())
+                .addSubcommand("precompute", new PreComputeCommand())
+                .addSubcommand("query", new QueryCommand())
+                .addSubcommand("grid", new GridSearchCommand())
+                .addSubcommand("phenopacket", new PhenopacketCommand())
+                ;
+        cline.setToggleBooleanFlags(false);
+        int exitCode = cline.execute(args);
+        LOGGER.info("Finished with CSV to Phenopackets");
+        System.exit(exitCode);
     }
+
+
+    @Override
+    public Integer call() {
+        // work done in subcommands
+        return 0;
+    }
+
+
+
 
 }

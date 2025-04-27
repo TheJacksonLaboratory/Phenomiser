@@ -13,7 +13,7 @@
     <parent>
         <artifactId>Phenomiser</artifactId>
         <groupId>org.jax</groupId>
-        <version>0.0.5</version>
+        <version>0.1.1</version>
     </parent>
 
     <description>A command line application of Phenomiser</description>
@@ -28,9 +28,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.beust</groupId>
-            <artifactId>jcommander</artifactId>
-            <version>1.82</version>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
         </dependency>
     </dependencies>
 
