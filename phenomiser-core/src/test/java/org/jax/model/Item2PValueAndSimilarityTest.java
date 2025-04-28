@@ -18,10 +18,10 @@ public class Item2PValueAndSimilarityTest {
     public void setUp() throws Exception {
 
         items = new ArrayList<>();
-        Item2PValueAndSimilarity<TermId> item1 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:1"), 0.0, 3.05);
-        Item2PValueAndSimilarity<TermId> item2 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:2"), 0.0, 4.05);
-        Item2PValueAndSimilarity<TermId> item3 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:3"), 0.1, 4.05);
-        Item2PValueAndSimilarity<TermId> item4 = new Item2PValueAndSimilarity<TermId>(TermId.of("OMIM:4"), 0.15, 6.05);
+        Item2PValueAndSimilarity<TermId> item1 = new Item2PValueAndSimilarity<>(TermId.of("OMIM:1"), 0.0, 3.05);
+        Item2PValueAndSimilarity<TermId> item2 = new Item2PValueAndSimilarity<>(TermId.of("OMIM:2"), 0.0, 4.05);
+        Item2PValueAndSimilarity<TermId> item3 = new Item2PValueAndSimilarity<>(TermId.of("OMIM:3"), 0.1, 4.05);
+        Item2PValueAndSimilarity<TermId> item4 = new Item2PValueAndSimilarity<>(TermId.of("OMIM:4"), 0.15, 6.05);
 
         items.addAll(Arrays.asList(item1, item2, item3, item4));
     }

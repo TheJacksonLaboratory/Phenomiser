@@ -24,9 +24,10 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
         this.similarityScore = similarityScore;
     }
 
+    /*
     public Item2PValueAndSimilarity(Item2PValue<T> item2PValue) {
         super(item2PValue.getItem(), item2PValue.getRawPValue());
-    }
+    }*/
 
     public double getSimilarityScore() {
         return similarityScore;
@@ -38,7 +39,7 @@ public class Item2PValueAndSimilarity<T> extends Item2PValue<T> {
 
     @Override
     public int compareTo(Item2PValue o) {
-        Item2PValueAndSimilarity other = (Item2PValueAndSimilarity) o;
+        Item2PValueAndSimilarity<T> other = (Item2PValueAndSimilarity<T>) o;
         final double DELTA = 0.0001;
 
         if (Double.compare(this.getRawPValue(), other.getRawPValue()) == 0) {

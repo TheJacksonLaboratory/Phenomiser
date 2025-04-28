@@ -2,9 +2,7 @@ package org.jax;
 
 import picocli.CommandLine;
 import org.jax.cmd.*;
-import org.jax.services.*;
 
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

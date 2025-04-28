@@ -26,9 +26,9 @@ public class Ranker <T extends Comparable<? super T>> {
         int ranking = 1;
         T previous = null;
         T current = null;
-        for (int i = 0; i < this.collection.size(); i++){
-            current = this.collection.get(i);
-            if (previous != null && current.compareTo(previous) > 0){
+        for (T t : this.collection) {
+            current = t;
+            if (previous != null && current.compareTo(previous) > 0) {
                 ranking++;
             }
             result.put(current, ranking);

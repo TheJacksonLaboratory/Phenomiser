@@ -1,6 +1,5 @@
 package org.jax.io;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.JsonFormat;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,11 +7,10 @@ import org.json.simple.parser.ParseException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.phenopackets.schema.v1.Phenopacket;
-import org.phenopackets.schema.v1.core.HtsFile;
-import org.phenopackets.schema.v1.core.OntologyClass;
 
-import org.phenopackets.schema.v1.core.PhenotypicFeature;
+import org.phenopackets.schema.v2.Phenopacket;
+import org.phenopackets.schema.v2.core.OntologyClass;
+import org.phenopackets.schema.v2.core.PhenotypicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,17 +25,13 @@ import java.util.function.Predicate;
  * @author Peter Robinson
  */
 public class PhenopacketImporter {
-    private static final Logger logger = LoggerFactory.getLogger(PhenopacketImporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhenopacketImporter.class);
     /** The Phenopacket that represents the individual being sequenced in the current run. */
     private final Phenopacket phenoPacket;
     /** A list of non-negated HPO terms observed in the subject of this Phenopacket. */
-    private ImmutableList<TermId> hpoTerms;
+    private List<TermId> hpoTerms;
     /** A list of negated HPO terms observed in the subject of this Phenopacket. */
-    private ImmutableList<TermId> negatedHpoTerms;
-    /** Path to the VCF file with variants identified in the subject of this Phenopacket. */
-    private String vcfPath;
-    /** Genome assembly of the VCF file in {@link #vcfPath}. */
-    private String genomeAssembly;
+    private List<TermId> negatedHpoTerms;
     /** Name of the proband of the Phenopacket (corresponds to the {@code id} element of the phenopacket). */
     private final String samplename;
 
@@ -51,17 +45,22 @@ public class PhenopacketImporter {
      */
     public static PhenopacketImporter fromJson(String pathToJsonPhenopacketFile)  {
         JSONParser parser = new JSONParser();
-        logger.trace("Importing Phenopacket: " + pathToJsonPhenopacketFile);
+        LOGGER.trace("Importing Phenopacket: " + pathToJsonPhenopacketFile);
         try {
             Object obj = parser.parse(new FileReader(pathToJsonPhenopacketFile));
             JSONObject jsonObject = (JSONObject) obj;
             String phenopacketJsonString = jsonObject.toJSONString();
+            Phenopacket.Builder builder = Phenopacket.newBuilder();
+            JsonFormat.Parser jfparser = JsonFormat.parser();
+            jfparser.merge(phenopacketJsonString, builder);
+            Phenopacket phenopacket = builder.build();
+            /*
             Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
             JsonFormat.parser().merge(phenopacketJsonString, phenoPacketBuilder);
-            Phenopacket phenopacket = phenoPacketBuilder.build();
+            Phenopacket phenopacket = phenoPacketBuilder.build();*/
             return new PhenopacketImporter(phenopacket);
         } catch (IOException|ParseException e1) {
-            e1.printStackTrace();
+            LOGGER.error(e1.getMessage());
             throw new RuntimeException("Could not load phenopacket at " + pathToJsonPhenopacketFile);
         }
 
@@ -72,10 +71,8 @@ public class PhenopacketImporter {
         this.samplename = this.phenoPacket.getSubject().getId();
         extractProbandHpoTerms();
         extractNegatedProbandHpoTerms();
-        extractVcfData();
-    }
 
-    public boolean hasVcf() { return  this.vcfPath !=null; }
+    }
 
     public List<TermId> getHpoTerms() {
         return hpoTerms;
@@ -85,15 +82,7 @@ public class PhenopacketImporter {
         return negatedHpoTerms;
     }
 
-    public String getVcfPath() {
-        return vcfPath;
-    }
-
-    public String getGenomeAssembly() {
-        return genomeAssembly;
-    }
-
-    public String getSamplename() {
+   public String getSamplename() {
         return samplename;
     }
 
@@ -109,27 +98,27 @@ public class PhenopacketImporter {
         for (TermId tid : hpoTerms) {
             if (ontology.getObsoleteTermIds().contains(tid)) {
                 clean=false;
-                logger.error("Use of obsolete term id: {}",tid);
+                LOGGER.error("Use of obsolete term id: {}",tid);
                 Term term = ontology.getTermMap().get(tid);
                 if (term==null) {
-                    logger.error("Could not find TermObject.");
+                    LOGGER.error("Could not find TermObject.");
                     continue;
                 }
-                logger.error("The corresponding term label is {}",term.getName());
-                logger.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
+                LOGGER.error("The corresponding term label is {}",term.getName());
+                LOGGER.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
             }
         }
         for (TermId tid : negatedHpoTerms) {
             if (ontology.getObsoleteTermIds().contains(tid)) {
                 clean=false;
-                logger.error("Use of obsolete term id: {}",tid);
+                LOGGER.error("Use of obsolete term id: {}",tid);
                 Term term = ontology.getTermMap().get(tid);
                 if (term==null) {
-                    logger.error("Could not find TermObject.");
+                    LOGGER.error("Could not find TermObject.");
                     continue;
                 }
-                logger.error("The corresponding term label is {}",term.getName());
-                logger.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
+                LOGGER.error("The corresponding term label is {}",term.getName());
+                LOGGER.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
             }
         }
 
@@ -149,42 +138,26 @@ public class PhenopacketImporter {
                 .getPhenotypicFeaturesList()
                 .stream()
                 .distinct()
-                .filter(((Predicate<PhenotypicFeature>) PhenotypicFeature::getNegated).negate()) // i.e., just take non-negated phenotypes
+                .filter(((Predicate<PhenotypicFeature>) PhenotypicFeature::getExcluded).negate()) // i.e., just take non-negated phenotypes
                 .map(PhenotypicFeature::getType)
                 .map(OntologyClass::getId)
                 .map(TermId::of)
-                .collect(ImmutableList.toImmutableList());
+                .toList();
     }
 
     /**
-     * This function gets a list of all negated HPO terms associated with the proband.
+     *  Extract a list of all negated HPO terms associated with the proband.
      */
     private void extractNegatedProbandHpoTerms() {
         this.negatedHpoTerms = phenoPacket
                 .getPhenotypicFeaturesList()
                 .stream()
-                .filter(PhenotypicFeature::getNegated) // i.e., just take negated phenotypes
+                .filter(PhenotypicFeature::getExcluded) // i.e., just take negated phenotypes
                 .map(PhenotypicFeature::getType)
                 .map(OntologyClass::getId)
                 .map(TermId::of)
-                .collect(ImmutableList.toImmutableList());
+                .toList();
     }
 
-    /** This method extracts the VCF file and the corresponding GenomeBuild. We assume that
-     * the phenopacket contains a single VCF file and that this file is for a single person. */
-    private void extractVcfData() {
-        List<HtsFile> htsFileList = phenoPacket.getHtsFilesList();
-        if (htsFileList.size() > 1 ) {
-            logger.error("Warning: multiple HTsFiles associated with this phenopacket");
-            logger.error("Warning: we will return the path to the first VCF file we find");
-        } else if (htsFileList.isEmpty()) {
-            return;
-        }
-        for (HtsFile htsFile : htsFileList) {
-            if (htsFile.getHtsFormat().equals(HtsFile.HtsFormat.VCF)) {
-                this.vcfPath=htsFile.getFile().getPath();
-                this.genomeAssembly=htsFile.getGenomeAssembly();
-            }
-        }
-    }
+
 }

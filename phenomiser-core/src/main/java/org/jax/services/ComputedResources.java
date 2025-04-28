@@ -121,7 +121,7 @@ public class ComputedResources extends AbstractResources {
             sampleing = new SimilarityScoreSampling(hpo, resnikSimilarity, samplingOption);
             Map<Integer, List<TermId>> subset =
                     diseaseIndexToHpoTermsNoExpansion.entrySet().stream()
-                    .limit(50).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .limit(50).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             scoreDistributions.putAll(sampleing.performSampling(subset));
         } else {
             for (int i = samplingOption.getMinNumTerms(); i <= samplingOption.getMaxNumTerms(); i++) {

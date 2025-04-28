@@ -291,9 +291,9 @@ public class PhenotypeOnlyHpoCaseSimulator {
 
     private void qc() {
         System.out.println("number of directed annotated hpo terms for each disease that have score distributions:");
-        diseaseMap.entrySet().forEach(e ->{
-            System.out.print(e.getKey().getValue() + "\t");
-            System.out.println(e.getValue().getPhenotypicAbnormalities().size());
+        diseaseMap.forEach((key, value) -> {
+            System.out.print(key.getValue() + "\t");
+            System.out.println(value.getPhenotypicAbnormalities().size());
         });
     }
 

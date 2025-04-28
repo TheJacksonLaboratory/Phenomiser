@@ -1,7 +1,6 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
 
@@ -18,8 +17,6 @@ import java.util.*;
 public abstract class AbstractResources {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractResources.class);
-
-    protected HpoParser hpoParser;
 
     protected DiseaseParser diseaseParser;
 
@@ -86,11 +83,6 @@ public abstract class AbstractResources {
     }
 
     public abstract void init();
-
-
-    public void setHpoParser(HpoParser hpoParser) {
-        this.hpoParser = hpoParser;
-    }
 
     public DiseaseParser getDiseaseParser() {
         return diseaseParser;
