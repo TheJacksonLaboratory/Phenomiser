@@ -16,20 +16,18 @@ public class PhenomiserApp implements Callable<Integer> {
 
 
     public static void main(String[] args){
-        LOGGER.info("Starting CSV to Phenopackets");
+        LOGGER.info("Starting Phenomiser");
         if (args.length == 0) {
             // if the user doesn't pass any command or option, add -h to show help
             args = new String[]{"-h"};
         }
         CommandLine cline = new CommandLine(new PhenomiserApp())
-                .addSubcommand("precompute", new PreComputeCommand())
-                .addSubcommand("query", new QueryCommand())
-                .addSubcommand("grid", new GridSearchCommand())
+                .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("phenopacket", new PhenopacketCommand())
                 ;
         cline.setToggleBooleanFlags(false);
         int exitCode = cline.execute(args);
-        LOGGER.info("Finished with CSV to Phenopackets");
+        LOGGER.trace("Finished Phenomiser");
         System.exit(exitCode);
     }
 

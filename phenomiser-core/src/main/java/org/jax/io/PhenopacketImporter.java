@@ -14,6 +14,7 @@ import org.phenopackets.schema.v2.core.PhenotypicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -36,32 +37,33 @@ public class PhenopacketImporter {
     private final String samplename;
 
 
+    public Phenopacket getPhenoPacket() {
+        return phenoPacket;
+    }
+
     /**
      * Factory method to obtain a PhenopacketImporter object starting from a phenopacket in Json format
-     * @param pathToJsonPhenopacketFile -- path to the phenopacket
+     * @param jsonPhenopacketFile -- path to the phenopacket
      * @return {@link PhenopacketImporter} object corresponding to the PhenoPacket
      * @throws ParseException if the JSON code cannot be parsed
      * @throws IOException if the File cannot be found
      */
-    public static PhenopacketImporter fromJson(String pathToJsonPhenopacketFile)  {
+    public static PhenopacketImporter fromJson(File jsonPhenopacketFile)  {
         JSONParser parser = new JSONParser();
-        LOGGER.trace("Importing Phenopacket: " + pathToJsonPhenopacketFile);
+        LOGGER.trace("Importing Phenopacket JSON file at: " + jsonPhenopacketFile.getAbsolutePath());
         try {
-            Object obj = parser.parse(new FileReader(pathToJsonPhenopacketFile));
+            Object obj = parser.parse(new FileReader(jsonPhenopacketFile));
             JSONObject jsonObject = (JSONObject) obj;
             String phenopacketJsonString = jsonObject.toJSONString();
             Phenopacket.Builder builder = Phenopacket.newBuilder();
             JsonFormat.Parser jfparser = JsonFormat.parser();
             jfparser.merge(phenopacketJsonString, builder);
             Phenopacket phenopacket = builder.build();
-            /*
-            Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
-            JsonFormat.parser().merge(phenopacketJsonString, phenoPacketBuilder);
-            Phenopacket phenopacket = phenoPacketBuilder.build();*/
+            LOGGER.trace("Imported Phenopacket; id={}: ", phenopacket.getId());
             return new PhenopacketImporter(phenopacket);
         } catch (IOException|ParseException e1) {
             LOGGER.error(e1.getMessage());
-            throw new RuntimeException("Could not load phenopacket at " + pathToJsonPhenopacketFile);
+            throw new RuntimeException("Could not load phenopacket at " + jsonPhenopacketFile.getName());
         }
 
     }

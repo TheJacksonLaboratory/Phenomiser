@@ -1,5 +1,4 @@
-*hp.obo
-*.hpoa
+data/*.*
 *target
 .idea/
 *logs

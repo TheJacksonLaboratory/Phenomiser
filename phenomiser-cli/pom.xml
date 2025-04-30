@@ -13,7 +13,7 @@
     <parent>
         <artifactId>Phenomiser</artifactId>
         <groupId>org.jax</groupId>
-        <version>0.1.3</version>
+        <version>0.2.2</version>
     </parent>
 
     <description>A command line application of Phenomiser</description>
@@ -30,6 +30,11 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.biodownload</groupId>
+            <artifactId>biodownload</artifactId>
+            <version>1.1.2</version>
         </dependency>
     </dependencies>
 
