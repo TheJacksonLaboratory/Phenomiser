@@ -29,25 +29,11 @@ public class ScoreBasedPhenomiser implements Phenomiser {
     }
 
     /**
-     * This is preferred over above method
-     * <p>
-     * <p>
-     * Map<TermId, Double> computeB(List<TermId> query, List<DiseaseDB>  dbs) {
-     * <p>
-     * String filter = dbs.stream().map(DiseaseDB::name).reduce((a, b) -> a + "|" + b).get();
-     * <p>
-     * Map<TermId, Double> similarityScores = new HashMap<>();
-     * <p>
-     * resources.getDiseaseIdToHpoTermIdsNoExpansion().entrySet().stream()
-     * .filter(e -> e.getKey().getPrefix().matches(filter))
-     * .forEach(e -> similarityScores.put(e.getKey(),
-     * resources.getResnikSimilarity().computeScore(query, e.getValue())));
-     * <p>
-     * return similarityScores;
-     * }
+     * Extract the observed terms from the GA4GH phenopacket, ignoring the excluded terms,
+     * which are not relevant for the Phenomiser algorithm
+     *  @param disease The HPO Disease model currently being analyzed
+     *  @return List of observed HPO Term identifiers
      */
-
-
     private Collection<TermId> getObservedDiseaseTerms(HpoDisease disease) {
         return StreamSupport.stream(disease.presentAnnotations().spliterator(), false)
                 .map(HpoDiseaseAnnotation::id)
@@ -77,8 +63,9 @@ public class ScoreBasedPhenomiser implements Phenomiser {
             double score = resnikSimilarity.computeScoreSymmetric(observedPhenotypicFeatures, termsObservedInDisease);
             PhenomizerScore pscore = new PhenomizerScore(termId, disease.diseaseName(), score);
             similarityScores.add(pscore);
+            System.out.println("Adding score: " + pscore);
         }
-        similarityScores.sort(null);
+        similarityScores.sort(Comparator.reverseOrder());
         return similarityScores;
     }
 }

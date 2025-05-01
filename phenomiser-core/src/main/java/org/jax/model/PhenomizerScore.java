@@ -3,7 +3,6 @@ package org.jax.model;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 
 public record PhenomizerScore(

@@ -7,6 +7,8 @@ import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.similarity.HpoResnikSimilarity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,6 +20,8 @@ import java.util.Set;
 import static org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase.OMIM;
 
 public class PhenomiserResources {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhenomiserResources.class);
+
 
 
     private final Ontology hpo;
@@ -34,8 +38,9 @@ public class PhenomiserResources {
         Ontology ontology = OntologyLoader.loadOntology(hpoJsonPath.toFile());
         Set<DiseaseDatabase> diseaseDbSet = Set.of(OMIM);
         HpoDiseases omimDiseases = loadOmimDiseases(ontology, phenotypeHpoaPath);
-        Map<TermId, HpoDisease> termIdHpoDiseaseMap =
-                HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath, ontology, diseaseDbSet);
+        Map<TermId, HpoDisease> termIdHpoDiseaseMap = omimDiseases.diseaseById();
+        LOGGER.info("Loaded {} HPO diseases", termIdHpoDiseaseMap.size());
+
         // Compute list of annotations and mapping from OMIM ID to term IDs.
         MicaCalculator calculator = new MicaCalculator(ontology, false);
         MicaData micaData = calculator.calculateMica(omimDiseases);

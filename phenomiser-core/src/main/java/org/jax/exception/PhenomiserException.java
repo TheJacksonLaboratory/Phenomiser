@@ -1,4 +1,4 @@
-package org.jax.Exception;
+package org.jax.exception;
 
 public class PhenomiserException extends Exception {
 

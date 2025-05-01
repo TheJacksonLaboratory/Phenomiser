@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
-import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -46,7 +45,7 @@ public class PhenopacketCommand extends BaseCommand  implements Callable<Integer
         System.out.printf("[INFO] Got Phenomizer scores for %d diseases, showing the first %d.\n", query.size(), limit);
         for (Iterator<PhenomizerScore> it = query.stream().limit(10).iterator(); it.hasNext(); ) {
             PhenomizerScore score = it.next();
-            System.out.println(score);
+            System.out.println(i + ") " + score);
             if (++i == limit) break;
         }
         return 0;

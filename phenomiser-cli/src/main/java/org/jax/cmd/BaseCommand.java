@@ -1,7 +1,6 @@
 package org.jax.cmd;
 
 import org.jax.io.PhenopacketImporter;
-import org.jax.prioritizer.Phenomiser;
 import org.jax.services.PhenomiserResources;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.phenopackets.schema.v2.Phenopacket;

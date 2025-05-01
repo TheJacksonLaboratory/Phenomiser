@@ -95,38 +95,6 @@ public class PhenopacketImporter {
         return this.phenoPacket.getDiseases(0).getTerm().getId();
     }
 
-    public boolean checkForObsoleteTerms(Ontology ontology) {
-        boolean clean=true;
-        for (TermId tid : hpoTerms) {
-            if (ontology.getObsoleteTermIds().contains(tid)) {
-                clean=false;
-                LOGGER.error("Use of obsolete term id: {}",tid);
-                Term term = ontology.getTermMap().get(tid);
-                if (term==null) {
-                    LOGGER.error("Could not find TermObject.");
-                    continue;
-                }
-                LOGGER.error("The corresponding term label is {}",term.getName());
-                LOGGER.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
-            }
-        }
-        for (TermId tid : negatedHpoTerms) {
-            if (ontology.getObsoleteTermIds().contains(tid)) {
-                clean=false;
-                LOGGER.error("Use of obsolete term id: {}",tid);
-                Term term = ontology.getTermMap().get(tid);
-                if (term==null) {
-                    LOGGER.error("Could not find TermObject.");
-                    continue;
-                }
-                LOGGER.error("The corresponding term label is {}",term.getName());
-                LOGGER.error("We recommend replacing the term id with the current id: {}", term.getId().getValue());
-            }
-        }
-
-        return clean;
-    }
-
 
 
     /**
